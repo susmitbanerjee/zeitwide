@@ -1,0 +1,25 @@
+{
+  "id": "EU-T2",
+  "name": "T2 (TARGET RTGS)",
+  "kind": "rail",
+  "timezone": "Europe/Berlin",
+  "weekend": [
+    "saturday",
+    "sunday"
+  ],
+  "operator_sources": [
+    "ecb-public-holidays"
+  ],
+  "provenance": [
+    {
+      "url": "https://www.ecb.europa.eu/ecb/contacts/working-hours/html/index.en.html",
+      "retrieved": "2026-10-28",
+      "states": "ECB public holidays, with TARGET closing days marked."
+    },
+    {
+      "url": "https://www.bundesbank.de/en/tasks/payment-systems/target/holiday-calendar-764518",
+      "retrieved": "2026-10-28",
+      "states": "TARGET holidays, which apply to all TARGET component systems, as listed by the Deutsche Bundesbank."
+    }
+  ]
+}

@@ -1,0 +1,992 @@
+[
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2025-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2025-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2025-01-01",
+  "is_open": true,
+  "reason": "New Year's Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2026-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2026-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2026-01-01",
+  "is_open": true,
+  "reason": "New Year's Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2027-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2027-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2027-01-01",
+  "is_open": true,
+  "reason": "New Year's Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2028-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2028-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2028-01-01",
+  "is_open": true,
+  "reason": "New Year's Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2029-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2029-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2029-01-01",
+  "is_open": true,
+  "reason": "New Year's Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2025-01-20",
+  "is_open": false,
+  "reason": "Birthday of Martin Luther King, Jr."
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2025-01-20",
+  "is_open": false,
+  "reason": "Birthday of Martin Luther King, Jr."
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2025-01-20",
+  "is_open": true,
+  "reason": "Birthday of Martin Luther King, Jr.: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2026-01-19",
+  "is_open": false,
+  "reason": "Birthday of Martin Luther King, Jr."
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2026-01-19",
+  "is_open": false,
+  "reason": "Birthday of Martin Luther King, Jr."
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2026-01-19",
+  "is_open": true,
+  "reason": "Birthday of Martin Luther King, Jr.: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2027-01-18",
+  "is_open": false,
+  "reason": "Birthday of Martin Luther King, Jr."
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2027-01-18",
+  "is_open": false,
+  "reason": "Birthday of Martin Luther King, Jr."
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2027-01-18",
+  "is_open": true,
+  "reason": "Birthday of Martin Luther King, Jr.: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2028-01-17",
+  "is_open": false,
+  "reason": "Birthday of Martin Luther King, Jr."
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2028-01-17",
+  "is_open": false,
+  "reason": "Birthday of Martin Luther King, Jr."
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2028-01-17",
+  "is_open": true,
+  "reason": "Birthday of Martin Luther King, Jr.: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2029-01-15",
+  "is_open": false,
+  "reason": "Birthday of Martin Luther King, Jr."
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2029-01-15",
+  "is_open": false,
+  "reason": "Birthday of Martin Luther King, Jr."
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2029-01-15",
+  "is_open": true,
+  "reason": "Birthday of Martin Luther King, Jr.: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2025-02-17",
+  "is_open": false,
+  "reason": "Washington's Birthday"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2025-02-17",
+  "is_open": false,
+  "reason": "Washington's Birthday"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2025-02-17",
+  "is_open": true,
+  "reason": "Washington's Birthday: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2026-02-16",
+  "is_open": false,
+  "reason": "Washington's Birthday"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2026-02-16",
+  "is_open": false,
+  "reason": "Washington's Birthday"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2026-02-16",
+  "is_open": true,
+  "reason": "Washington's Birthday: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2027-02-15",
+  "is_open": false,
+  "reason": "Washington's Birthday"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2027-02-15",
+  "is_open": false,
+  "reason": "Washington's Birthday"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2027-02-15",
+  "is_open": true,
+  "reason": "Washington's Birthday: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2028-02-21",
+  "is_open": false,
+  "reason": "Washington's Birthday"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2028-02-21",
+  "is_open": false,
+  "reason": "Washington's Birthday"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2028-02-21",
+  "is_open": true,
+  "reason": "Washington's Birthday: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2029-02-19",
+  "is_open": false,
+  "reason": "Washington's Birthday"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2029-02-19",
+  "is_open": false,
+  "reason": "Washington's Birthday"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2029-02-19",
+  "is_open": true,
+  "reason": "Washington's Birthday: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2025-05-26",
+  "is_open": false,
+  "reason": "Memorial Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2025-05-26",
+  "is_open": false,
+  "reason": "Memorial Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2025-05-26",
+  "is_open": true,
+  "reason": "Memorial Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2026-05-25",
+  "is_open": false,
+  "reason": "Memorial Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2026-05-25",
+  "is_open": false,
+  "reason": "Memorial Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2026-05-25",
+  "is_open": true,
+  "reason": "Memorial Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2027-05-31",
+  "is_open": false,
+  "reason": "Memorial Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2027-05-31",
+  "is_open": false,
+  "reason": "Memorial Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2027-05-31",
+  "is_open": true,
+  "reason": "Memorial Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2028-05-29",
+  "is_open": false,
+  "reason": "Memorial Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2028-05-29",
+  "is_open": false,
+  "reason": "Memorial Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2028-05-29",
+  "is_open": true,
+  "reason": "Memorial Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2029-05-28",
+  "is_open": false,
+  "reason": "Memorial Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2029-05-28",
+  "is_open": false,
+  "reason": "Memorial Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2029-05-28",
+  "is_open": true,
+  "reason": "Memorial Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2025-06-19",
+  "is_open": false,
+  "reason": "Juneteenth National Independence Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2025-06-19",
+  "is_open": false,
+  "reason": "Juneteenth National Independence Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2025-06-19",
+  "is_open": true,
+  "reason": "Juneteenth National Independence Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2026-06-19",
+  "is_open": false,
+  "reason": "Juneteenth National Independence Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2026-06-19",
+  "is_open": false,
+  "reason": "Juneteenth National Independence Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2026-06-19",
+  "is_open": true,
+  "reason": "Juneteenth National Independence Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2027-06-19",
+  "is_open": false,
+  "reason": "Juneteenth National Independence Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2027-06-19",
+  "is_open": false,
+  "reason": "Juneteenth National Independence Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2027-06-19",
+  "is_open": true,
+  "reason": "Juneteenth National Independence Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2028-06-19",
+  "is_open": false,
+  "reason": "Juneteenth National Independence Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2028-06-19",
+  "is_open": false,
+  "reason": "Juneteenth National Independence Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2028-06-19",
+  "is_open": true,
+  "reason": "Juneteenth National Independence Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2029-06-19",
+  "is_open": false,
+  "reason": "Juneteenth National Independence Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2029-06-19",
+  "is_open": false,
+  "reason": "Juneteenth National Independence Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2029-06-19",
+  "is_open": true,
+  "reason": "Juneteenth National Independence Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2025-07-04",
+  "is_open": false,
+  "reason": "Independence Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2025-07-04",
+  "is_open": false,
+  "reason": "Independence Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2025-07-04",
+  "is_open": true,
+  "reason": "Independence Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2026-07-04",
+  "is_open": false,
+  "reason": "Independence Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2026-07-04",
+  "is_open": false,
+  "reason": "Independence Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2026-07-04",
+  "is_open": true,
+  "reason": "Independence Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2027-07-05",
+  "is_open": false,
+  "reason": "Independence Day (observed)"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2027-07-05",
+  "is_open": false,
+  "reason": "Independence Day (observed)"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2027-07-04",
+  "is_open": true,
+  "reason": "Independence Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2028-07-04",
+  "is_open": false,
+  "reason": "Independence Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2028-07-04",
+  "is_open": false,
+  "reason": "Independence Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2028-07-04",
+  "is_open": true,
+  "reason": "Independence Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2029-07-04",
+  "is_open": false,
+  "reason": "Independence Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2029-07-04",
+  "is_open": false,
+  "reason": "Independence Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2029-07-04",
+  "is_open": true,
+  "reason": "Independence Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2025-09-01",
+  "is_open": false,
+  "reason": "Labor Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2025-09-01",
+  "is_open": false,
+  "reason": "Labor Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2025-09-01",
+  "is_open": true,
+  "reason": "Labor Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2026-09-07",
+  "is_open": false,
+  "reason": "Labor Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2026-09-07",
+  "is_open": false,
+  "reason": "Labor Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2026-09-07",
+  "is_open": true,
+  "reason": "Labor Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2027-09-06",
+  "is_open": false,
+  "reason": "Labor Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2027-09-06",
+  "is_open": false,
+  "reason": "Labor Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2027-09-06",
+  "is_open": true,
+  "reason": "Labor Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2028-09-04",
+  "is_open": false,
+  "reason": "Labor Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2028-09-04",
+  "is_open": false,
+  "reason": "Labor Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2028-09-04",
+  "is_open": true,
+  "reason": "Labor Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2029-09-03",
+  "is_open": false,
+  "reason": "Labor Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2029-09-03",
+  "is_open": false,
+  "reason": "Labor Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2029-09-03",
+  "is_open": true,
+  "reason": "Labor Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2025-10-13",
+  "is_open": false,
+  "reason": "Columbus Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2025-10-13",
+  "is_open": false,
+  "reason": "Columbus Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2025-10-13",
+  "is_open": true,
+  "reason": "Columbus Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2026-10-12",
+  "is_open": false,
+  "reason": "Columbus Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2026-10-12",
+  "is_open": false,
+  "reason": "Columbus Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2026-10-12",
+  "is_open": true,
+  "reason": "Columbus Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2027-10-11",
+  "is_open": false,
+  "reason": "Columbus Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2027-10-11",
+  "is_open": false,
+  "reason": "Columbus Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2027-10-11",
+  "is_open": true,
+  "reason": "Columbus Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2028-10-09",
+  "is_open": false,
+  "reason": "Columbus Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2028-10-09",
+  "is_open": false,
+  "reason": "Columbus Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2028-10-09",
+  "is_open": true,
+  "reason": "Columbus Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2029-10-08",
+  "is_open": false,
+  "reason": "Columbus Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2029-10-08",
+  "is_open": false,
+  "reason": "Columbus Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2029-10-08",
+  "is_open": true,
+  "reason": "Columbus Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2025-11-11",
+  "is_open": false,
+  "reason": "Veterans Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2025-11-11",
+  "is_open": false,
+  "reason": "Veterans Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2025-11-11",
+  "is_open": true,
+  "reason": "Veterans Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2026-11-11",
+  "is_open": false,
+  "reason": "Veterans Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2026-11-11",
+  "is_open": false,
+  "reason": "Veterans Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2026-11-11",
+  "is_open": true,
+  "reason": "Veterans Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2027-11-11",
+  "is_open": false,
+  "reason": "Veterans Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2027-11-11",
+  "is_open": false,
+  "reason": "Veterans Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2027-11-11",
+  "is_open": true,
+  "reason": "Veterans Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2028-11-11",
+  "is_open": false,
+  "reason": "Veterans Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2028-11-11",
+  "is_open": false,
+  "reason": "Veterans Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2028-11-11",
+  "is_open": true,
+  "reason": "Veterans Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2029-11-12",
+  "is_open": false,
+  "reason": "Veterans Day (observed)"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2029-11-12",
+  "is_open": false,
+  "reason": "Veterans Day (observed)"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2029-11-11",
+  "is_open": true,
+  "reason": "Veterans Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2025-11-27",
+  "is_open": false,
+  "reason": "Thanksgiving Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2025-11-27",
+  "is_open": false,
+  "reason": "Thanksgiving Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2025-11-27",
+  "is_open": true,
+  "reason": "Thanksgiving Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2026-11-26",
+  "is_open": false,
+  "reason": "Thanksgiving Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2026-11-26",
+  "is_open": false,
+  "reason": "Thanksgiving Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2026-11-26",
+  "is_open": true,
+  "reason": "Thanksgiving Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2027-11-25",
+  "is_open": false,
+  "reason": "Thanksgiving Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2027-11-25",
+  "is_open": false,
+  "reason": "Thanksgiving Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2027-11-25",
+  "is_open": true,
+  "reason": "Thanksgiving Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2028-11-23",
+  "is_open": false,
+  "reason": "Thanksgiving Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2028-11-23",
+  "is_open": false,
+  "reason": "Thanksgiving Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2028-11-23",
+  "is_open": true,
+  "reason": "Thanksgiving Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2029-11-22",
+  "is_open": false,
+  "reason": "Thanksgiving Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2029-11-22",
+  "is_open": false,
+  "reason": "Thanksgiving Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2029-11-22",
+  "is_open": true,
+  "reason": "Thanksgiving Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2025-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2025-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2025-12-25",
+  "is_open": true,
+  "reason": "Christmas Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2026-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2026-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2026-12-25",
+  "is_open": true,
+  "reason": "Christmas Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2027-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2027-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2027-12-25",
+  "is_open": true,
+  "reason": "Christmas Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2028-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2028-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2028-12-25",
+  "is_open": true,
+  "reason": "Christmas Day: FedNow Service operates every day"
+ },
+ {
+  "calendar_id": "US-FEDWIRE",
+  "entry_date": "2029-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "US-FEDACH",
+  "entry_date": "2029-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "US-FEDNOW",
+  "entry_date": "2029-12-25",
+  "is_open": true,
+  "reason": "Christmas Day: FedNow Service operates every day"
+ }
+]

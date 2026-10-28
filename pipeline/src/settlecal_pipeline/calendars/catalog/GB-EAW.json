@@ -1,0 +1,20 @@
+{
+  "id": "GB-EAW",
+  "name": "England and Wales bank holidays",
+  "kind": "public",
+  "timezone": "Europe/London",
+  "weekend": [
+    "saturday",
+    "sunday"
+  ],
+  "operator_sources": [
+    "govuk-bank-holidays"
+  ],
+  "provenance": [
+    {
+      "url": "https://www.gov.uk/bank-holidays.json",
+      "retrieved": "2026-10-28",
+      "states": "England and Wales bank holidays, including substitute days."
+    }
+  ]
+}

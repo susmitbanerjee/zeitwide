@@ -1,0 +1,22 @@
+{
+  "id": "gb-chaps-add-over-christmas-2026",
+  "description": "One CHAPS business day after Christmas Eve 2026 skips Christmas, the weekend and the Boxing Day substitute.",
+  "dataset_release": "2026.10.28.1",
+  "input": {
+    "operation": "add_business_days",
+    "calendars": [
+      "GB-CHAPS"
+    ],
+    "date": "2026-12-24",
+    "days": 1
+  },
+  "expected": {
+    "date": "2026-12-29",
+    "skipped": [
+      "2026-12-25",
+      "2026-12-26",
+      "2026-12-27",
+      "2026-12-28"
+    ]
+  }
+}

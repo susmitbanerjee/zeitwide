@@ -1,0 +1,15 @@
+{
+  "id": "us-fednow-open-on-sunday",
+  "description": "FedNow operates on Sundays.",
+  "dataset_release": "2026.10.28.1",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "US-FEDNOW"
+    ],
+    "date": "2026-11-01"
+  },
+  "expected": {
+    "is_business_day": true
+  }
+}

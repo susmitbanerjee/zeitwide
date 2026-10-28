@@ -1,0 +1,19 @@
+{
+  "id": "us-fedach-add-over-thanksgiving",
+  "description": "One FedACH business day after the Wednesday before Thanksgiving 2026 is the Friday.",
+  "dataset_release": "2026.10.28.1",
+  "input": {
+    "operation": "add_business_days",
+    "calendars": [
+      "US-FEDACH"
+    ],
+    "date": "2026-11-25",
+    "days": 1
+  },
+  "expected": {
+    "date": "2026-11-27",
+    "skipped": [
+      "2026-11-26"
+    ]
+  }
+}

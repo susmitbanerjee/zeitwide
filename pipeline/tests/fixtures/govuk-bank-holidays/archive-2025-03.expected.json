@@ -1,0 +1,902 @@
+[
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2019-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2019-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2019-04-19",
+  "is_open": false,
+  "reason": "Good Friday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2019-04-19",
+  "is_open": false,
+  "reason": "Good Friday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2019-04-22",
+  "is_open": false,
+  "reason": "Easter Monday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2019-04-22",
+  "is_open": false,
+  "reason": "Easter Monday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2019-05-06",
+  "is_open": false,
+  "reason": "Early May bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2019-05-06",
+  "is_open": false,
+  "reason": "Early May bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2019-05-27",
+  "is_open": false,
+  "reason": "Spring bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2019-05-27",
+  "is_open": false,
+  "reason": "Spring bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2019-08-26",
+  "is_open": false,
+  "reason": "Summer bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2019-08-26",
+  "is_open": false,
+  "reason": "Summer bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2019-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2019-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2019-12-26",
+  "is_open": false,
+  "reason": "Boxing Day"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2019-12-26",
+  "is_open": false,
+  "reason": "Boxing Day"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2020-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2020-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2020-04-10",
+  "is_open": false,
+  "reason": "Good Friday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2020-04-10",
+  "is_open": false,
+  "reason": "Good Friday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2020-04-13",
+  "is_open": false,
+  "reason": "Easter Monday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2020-04-13",
+  "is_open": false,
+  "reason": "Easter Monday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2020-05-08",
+  "is_open": false,
+  "reason": "Early May bank holiday (VE day)"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2020-05-08",
+  "is_open": false,
+  "reason": "Early May bank holiday (VE day)"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2020-05-25",
+  "is_open": false,
+  "reason": "Spring bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2020-05-25",
+  "is_open": false,
+  "reason": "Spring bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2020-08-31",
+  "is_open": false,
+  "reason": "Summer bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2020-08-31",
+  "is_open": false,
+  "reason": "Summer bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2020-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2020-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2020-12-28",
+  "is_open": false,
+  "reason": "Boxing Day (Substitute day)"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2020-12-28",
+  "is_open": false,
+  "reason": "Boxing Day (Substitute day)"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2021-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2021-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2021-04-02",
+  "is_open": false,
+  "reason": "Good Friday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2021-04-02",
+  "is_open": false,
+  "reason": "Good Friday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2021-04-05",
+  "is_open": false,
+  "reason": "Easter Monday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2021-04-05",
+  "is_open": false,
+  "reason": "Easter Monday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2021-05-03",
+  "is_open": false,
+  "reason": "Early May bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2021-05-03",
+  "is_open": false,
+  "reason": "Early May bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2021-05-31",
+  "is_open": false,
+  "reason": "Spring bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2021-05-31",
+  "is_open": false,
+  "reason": "Spring bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2021-08-30",
+  "is_open": false,
+  "reason": "Summer bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2021-08-30",
+  "is_open": false,
+  "reason": "Summer bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2021-12-27",
+  "is_open": false,
+  "reason": "Christmas Day (Substitute day)"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2021-12-27",
+  "is_open": false,
+  "reason": "Christmas Day (Substitute day)"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2021-12-28",
+  "is_open": false,
+  "reason": "Boxing Day (Substitute day)"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2021-12-28",
+  "is_open": false,
+  "reason": "Boxing Day (Substitute day)"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2022-01-03",
+  "is_open": false,
+  "reason": "New Year's Day (Substitute day)"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2022-01-03",
+  "is_open": false,
+  "reason": "New Year's Day (Substitute day)"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2022-04-15",
+  "is_open": false,
+  "reason": "Good Friday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2022-04-15",
+  "is_open": false,
+  "reason": "Good Friday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2022-04-18",
+  "is_open": false,
+  "reason": "Easter Monday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2022-04-18",
+  "is_open": false,
+  "reason": "Easter Monday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2022-05-02",
+  "is_open": false,
+  "reason": "Early May bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2022-05-02",
+  "is_open": false,
+  "reason": "Early May bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2022-06-02",
+  "is_open": false,
+  "reason": "Spring bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2022-06-02",
+  "is_open": false,
+  "reason": "Spring bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2022-06-03",
+  "is_open": false,
+  "reason": "Platinum Jubilee bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2022-06-03",
+  "is_open": false,
+  "reason": "Platinum Jubilee bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2022-08-29",
+  "is_open": false,
+  "reason": "Summer bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2022-08-29",
+  "is_open": false,
+  "reason": "Summer bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2022-09-19",
+  "is_open": false,
+  "reason": "Bank Holiday for the State Funeral of Queen Elizabeth II"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2022-09-19",
+  "is_open": false,
+  "reason": "Bank Holiday for the State Funeral of Queen Elizabeth II"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2022-12-26",
+  "is_open": false,
+  "reason": "Boxing Day"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2022-12-26",
+  "is_open": false,
+  "reason": "Boxing Day"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2022-12-27",
+  "is_open": false,
+  "reason": "Christmas Day (Substitute day)"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2022-12-27",
+  "is_open": false,
+  "reason": "Christmas Day (Substitute day)"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2023-01-02",
+  "is_open": false,
+  "reason": "New Year's Day (Substitute day)"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2023-01-02",
+  "is_open": false,
+  "reason": "New Year's Day (Substitute day)"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2023-04-07",
+  "is_open": false,
+  "reason": "Good Friday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2023-04-07",
+  "is_open": false,
+  "reason": "Good Friday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2023-04-10",
+  "is_open": false,
+  "reason": "Easter Monday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2023-04-10",
+  "is_open": false,
+  "reason": "Easter Monday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2023-05-01",
+  "is_open": false,
+  "reason": "Early May bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2023-05-01",
+  "is_open": false,
+  "reason": "Early May bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2023-05-08",
+  "is_open": false,
+  "reason": "Bank holiday for the coronation of King Charles III"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2023-05-08",
+  "is_open": false,
+  "reason": "Bank holiday for the coronation of King Charles III"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2023-05-29",
+  "is_open": false,
+  "reason": "Spring bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2023-05-29",
+  "is_open": false,
+  "reason": "Spring bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2023-08-28",
+  "is_open": false,
+  "reason": "Summer bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2023-08-28",
+  "is_open": false,
+  "reason": "Summer bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2023-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2023-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2023-12-26",
+  "is_open": false,
+  "reason": "Boxing Day"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2023-12-26",
+  "is_open": false,
+  "reason": "Boxing Day"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2024-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2024-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2024-03-29",
+  "is_open": false,
+  "reason": "Good Friday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2024-03-29",
+  "is_open": false,
+  "reason": "Good Friday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2024-04-01",
+  "is_open": false,
+  "reason": "Easter Monday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2024-04-01",
+  "is_open": false,
+  "reason": "Easter Monday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2024-05-06",
+  "is_open": false,
+  "reason": "Early May bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2024-05-06",
+  "is_open": false,
+  "reason": "Early May bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2024-05-27",
+  "is_open": false,
+  "reason": "Spring bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2024-05-27",
+  "is_open": false,
+  "reason": "Spring bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2024-08-26",
+  "is_open": false,
+  "reason": "Summer bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2024-08-26",
+  "is_open": false,
+  "reason": "Summer bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2024-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2024-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2024-12-26",
+  "is_open": false,
+  "reason": "Boxing Day"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2024-12-26",
+  "is_open": false,
+  "reason": "Boxing Day"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2025-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2025-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2025-04-18",
+  "is_open": false,
+  "reason": "Good Friday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2025-04-18",
+  "is_open": false,
+  "reason": "Good Friday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2025-04-21",
+  "is_open": false,
+  "reason": "Easter Monday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2025-04-21",
+  "is_open": false,
+  "reason": "Easter Monday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2025-05-05",
+  "is_open": false,
+  "reason": "Early May bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2025-05-05",
+  "is_open": false,
+  "reason": "Early May bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2025-05-26",
+  "is_open": false,
+  "reason": "Spring bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2025-05-26",
+  "is_open": false,
+  "reason": "Spring bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2025-08-25",
+  "is_open": false,
+  "reason": "Summer bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2025-08-25",
+  "is_open": false,
+  "reason": "Summer bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2025-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2025-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2025-12-26",
+  "is_open": false,
+  "reason": "Boxing Day"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2025-12-26",
+  "is_open": false,
+  "reason": "Boxing Day"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2026-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2026-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2026-04-03",
+  "is_open": false,
+  "reason": "Good Friday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2026-04-03",
+  "is_open": false,
+  "reason": "Good Friday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2026-04-06",
+  "is_open": false,
+  "reason": "Easter Monday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2026-04-06",
+  "is_open": false,
+  "reason": "Easter Monday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2026-05-04",
+  "is_open": false,
+  "reason": "Early May bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2026-05-04",
+  "is_open": false,
+  "reason": "Early May bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2026-05-25",
+  "is_open": false,
+  "reason": "Spring bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2026-05-25",
+  "is_open": false,
+  "reason": "Spring bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2026-08-31",
+  "is_open": false,
+  "reason": "Summer bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2026-08-31",
+  "is_open": false,
+  "reason": "Summer bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2026-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2026-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2026-12-28",
+  "is_open": false,
+  "reason": "Boxing Day (Substitute day)"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2026-12-28",
+  "is_open": false,
+  "reason": "Boxing Day (Substitute day)"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2027-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2027-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2027-03-26",
+  "is_open": false,
+  "reason": "Good Friday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2027-03-26",
+  "is_open": false,
+  "reason": "Good Friday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2027-03-29",
+  "is_open": false,
+  "reason": "Easter Monday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2027-03-29",
+  "is_open": false,
+  "reason": "Easter Monday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2027-05-03",
+  "is_open": false,
+  "reason": "Early May bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2027-05-03",
+  "is_open": false,
+  "reason": "Early May bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2027-05-31",
+  "is_open": false,
+  "reason": "Spring bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2027-05-31",
+  "is_open": false,
+  "reason": "Spring bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2027-08-30",
+  "is_open": false,
+  "reason": "Summer bank holiday"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2027-08-30",
+  "is_open": false,
+  "reason": "Summer bank holiday"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2027-12-27",
+  "is_open": false,
+  "reason": "Christmas Day (Substitute day)"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2027-12-27",
+  "is_open": false,
+  "reason": "Christmas Day (Substitute day)"
+ },
+ {
+  "calendar_id": "GB-EAW",
+  "entry_date": "2027-12-28",
+  "is_open": false,
+  "reason": "Boxing Day (Substitute day)"
+ },
+ {
+  "calendar_id": "GB-CHAPS",
+  "entry_date": "2027-12-28",
+  "is_open": false,
+  "reason": "Boxing Day (Substitute day)"
+ }
+]

@@ -1,0 +1,19 @@
+{
+  "id": "de-add-over-ascension-2027",
+  "description": "One German business day after Wednesday 5 May 2027 skips Ascension Day.",
+  "dataset_release": "2026.10.28.1",
+  "input": {
+    "operation": "add_business_days",
+    "calendars": [
+      "DE"
+    ],
+    "date": "2027-05-05",
+    "days": 1
+  },
+  "expected": {
+    "date": "2027-05-07",
+    "skipped": [
+      "2027-05-06"
+    ]
+  }
+}

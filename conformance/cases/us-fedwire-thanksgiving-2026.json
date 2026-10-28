@@ -1,0 +1,15 @@
+{
+  "id": "us-fedwire-thanksgiving-2026",
+  "description": "Fedwire is closed on Thanksgiving Day 2026.",
+  "dataset_release": "2026.10.28.1",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "US-FEDWIRE"
+    ],
+    "date": "2026-11-26"
+  },
+  "expected": {
+    "is_business_day": false
+  }
+}

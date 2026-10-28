@@ -1,0 +1,15 @@
+{
+  "id": "eu-t2-good-friday-closed",
+  "description": "Good Friday 2026 is a TARGET closing day.",
+  "dataset_release": "2026.10.28.1",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "EU-T2"
+    ],
+    "date": "2026-04-03"
+  },
+  "expected": {
+    "is_business_day": false
+  }
+}

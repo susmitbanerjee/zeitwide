@@ -1,0 +1,21 @@
+{
+  "id": "us-fedach-add-over-weekend-and-columbus-day",
+  "description": "One FedACH business day after Friday 9 October 2026 skips the weekend and Columbus Day.",
+  "dataset_release": "2026.10.28.1",
+  "input": {
+    "operation": "add_business_days",
+    "calendars": [
+      "US-FEDACH"
+    ],
+    "date": "2026-10-09",
+    "days": 1
+  },
+  "expected": {
+    "date": "2026-10-13",
+    "skipped": [
+      "2026-10-10",
+      "2026-10-11",
+      "2026-10-12"
+    ]
+  }
+}

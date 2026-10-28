@@ -1,0 +1,36 @@
+# Install once with `make setup` (or `pre-commit install`). `make check` runs these on every file.
+repos:
+  # Uses the installed gitleaks binary (8.30+): `brew install gitleaks`,
+  # `winget install Gitleaks.Gitleaks`, or a release from github.com/gitleaks/gitleaks.
+  # The upstream hook compiles gitleaks with Go, which Windows Application Control blocks.
+  - repo: local
+    hooks:
+      - id: gitleaks
+        name: gitleaks (staged changes)
+        entry: gitleaks git --pre-commit --staged --redact --verbose
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-json
+      - id: check-toml
+      - id: check-yaml
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+        exclude: '\.(bat|cmd)$'
+      - id: trailing-whitespace
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.1
+    hooks:
+      - id: ruff-check
+      - id: ruff-format

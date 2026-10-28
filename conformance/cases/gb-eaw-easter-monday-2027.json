@@ -1,0 +1,15 @@
+{
+  "id": "gb-eaw-easter-monday-2027",
+  "description": "Easter Monday 2027 (29 March) is a bank holiday.",
+  "dataset_release": "2026.10.28.1",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "GB-EAW"
+    ],
+    "date": "2027-03-29"
+  },
+  "expected": {
+    "is_business_day": false
+  }
+}

@@ -1,0 +1,17 @@
+# Not secret: IDs and public URLs only. Secret values go in Secret Manager.
+project_id           = "GCP_PROJECT_ID"
+billing_account      = "000000-000000-000000"
+github_repository    = "OWNER/settlecal"
+github_repository_id = "0"
+web_origin           = "https://settlecal-dev.web.app"
+dataset_repository   = "OWNER/settlecal-dataset"
+bot_contact_url      = "https://github.com/OWNER/settlecal#crawler"
+
+# Allow deploys to dev from any branch's workflow by listing more refs here.
+github_deploy_refs = ["refs/heads/main"]
+
+# Set once custom domains are mapped (README, step 11).
+# api_base_url  = "https://api.dev.example.com"
+# auth_base_url = "https://auth.dev.example.com"
+
+# otlp_endpoint = "https://otlp-gateway-prod-us-central-0.grafana.net/otlp"

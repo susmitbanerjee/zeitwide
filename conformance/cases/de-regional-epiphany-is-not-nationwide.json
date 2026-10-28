@@ -1,0 +1,15 @@
+{
+  "id": "de-regional-epiphany-is-not-nationwide",
+  "description": "Epiphany (6 January 2027) is a holiday in only three states, so not in DE.",
+  "dataset_release": "2026.10.28.1",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "DE"
+    ],
+    "date": "2027-01-06"
+  },
+  "expected": {
+    "is_business_day": true
+  }
+}

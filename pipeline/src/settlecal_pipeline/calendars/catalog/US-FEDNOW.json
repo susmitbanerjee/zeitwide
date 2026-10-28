@@ -1,0 +1,32 @@
+{
+  "id": "US-FEDNOW",
+  "name": "FedNow Service",
+  "kind": "rail",
+  "timezone": "America/New_York",
+  "weekend": [],
+  "closes_on_holidays": false,
+  "operating_hours": {
+    "always_open": true,
+    "note": "A 24-hour business day each day of the week, including weekends and holidays."
+  },
+  "operator_sources": [
+    "frbservices-holiday-schedules"
+  ],
+  "provenance": [
+    {
+      "url": "https://www.federalreserve.gov/paymentsystems/fednow_about.htm",
+      "retrieved": "2026-10-28",
+      "states": "Uninterrupted 24x7x365 processing; a 24-hour business day each day of the week, including weekends and holidays."
+    },
+    {
+      "url": "https://www.frbservices.org/about/holiday-schedules/",
+      "retrieved": "2026-10-28",
+      "states": "Federal Reserve Banks' holiday schedule and the Saturday and Sunday observance rules."
+    },
+    {
+      "url": "https://www.federalreserve.gov/aboutthefed/k8.htm",
+      "retrieved": "2026-10-28",
+      "states": "K.8, holidays observed by the Federal Reserve System, with the same observance rules."
+    }
+  ]
+}

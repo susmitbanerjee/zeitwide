@@ -1,0 +1,20 @@
+{
+  "id": "DE",
+  "name": "Germany: nationwide public holidays",
+  "kind": "public",
+  "timezone": "Europe/Berlin",
+  "weekend": [
+    "saturday",
+    "sunday"
+  ],
+  "operator_sources": [
+    "bundesbank-holidays"
+  ],
+  "provenance": [
+    {
+      "url": "https://www.bundesbank.de/en/tasks/payment-systems/target/holiday-calendar-764518",
+      "retrieved": "2026-10-28",
+      "states": "Public holidays throughout the Federal Republic of Germany, as listed by the Deutsche Bundesbank; holidays in only some states are not part of this calendar. A holiday on a weekend is not moved."
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "id": "US-FEDWIRE",
+  "name": "Fedwire Funds Service",
+  "kind": "rail",
+  "timezone": "America/New_York",
+  "weekend": [
+    "saturday",
+    "sunday"
+  ],
+  "observance": {
+    "saturday": "none",
+    "sunday": "following_monday",
+    "note": "Federal Reserve Banks are open the Friday before a Saturday holiday and closed the Monday after a Sunday holiday."
+  },
+  "operating_hours": {
+    "opens": "21:00",
+    "opens_previous_day": true,
+    "closes": "19:00",
+    "cutoffs": [
+      {
+        "name": "Tax payments",
+        "deadline": "17:00"
+      },
+      {
+        "name": "Special account transfers",
+        "deadline": "17:00"
+      },
+      {
+        "name": "Customer transfers",
+        "deadline": "18:45"
+      },
+      {
+        "name": "Bank transfers and other value messages",
+        "deadline": "19:00"
+      },
+      {
+        "name": "Other nonvalue messages",
+        "deadline": "19:15"
+      }
+    ],
+    "note": "The funds-transfer business day opens at 9:00 p.m. ET on the preceding calendar day, even when that day is a holiday. The Reserve Banks may extend cutoffs."
+  },
+  "operator_sources": [
+    "frbservices-holiday-schedules"
+  ],
+  "provenance": [
+    {
+      "url": "https://www.frbservices.org/about/holiday-schedules/",
+      "retrieved": "2026-10-28",
+      "states": "Federal Reserve Banks' holiday schedule and the Saturday and Sunday observance rules."
+    },
+    {
+      "url": "https://www.federalreserve.gov/aboutthefed/k8.htm",
+      "retrieved": "2026-10-28",
+      "states": "K.8, holidays observed by the Federal Reserve System, with the same observance rules."
+    },
+    {
+      "url": "https://www.frbservices.org/resources/financial-services/wires/fedwire-funds-service-national-settlement-service-operating-hours/",
+      "retrieved": "2026-10-28",
+      "states": "Fedwire Funds Service operating hours and cutoff times; Saturdays, Sundays and the holiday schedule are non-business days."
+    }
+  ]
+}

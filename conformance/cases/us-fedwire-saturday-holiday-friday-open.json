@@ -1,0 +1,15 @@
+{
+  "id": "us-fedwire-saturday-holiday-friday-open",
+  "description": "Independence Day 2026 is a Saturday; the Reserve Banks stay open on Friday 3 July.",
+  "dataset_release": "2026.10.28.1",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "US-FEDWIRE"
+    ],
+    "date": "2026-07-03"
+  },
+  "expected": {
+    "is_business_day": true
+  }
+}

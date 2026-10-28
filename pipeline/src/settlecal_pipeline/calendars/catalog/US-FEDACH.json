@@ -1,0 +1,94 @@
+{
+  "id": "US-FEDACH",
+  "name": "FedACH Services",
+  "kind": "rail",
+  "timezone": "America/New_York",
+  "weekend": [
+    "saturday",
+    "sunday"
+  ],
+  "observance": {
+    "saturday": "none",
+    "sunday": "following_monday",
+    "note": "Federal Reserve Banks are open the Friday before a Saturday holiday and closed the Monday after a Sunday holiday."
+  },
+  "operating_hours": {
+    "cutoffs": [
+      {
+        "name": "Same-day forward items, window 1",
+        "deadline": "10:30",
+        "settles_at": "13:00",
+        "settles_on": "same_day"
+      },
+      {
+        "name": "Same-day forward items, window 2",
+        "deadline": "14:45",
+        "settles_at": "17:00",
+        "settles_on": "same_day"
+      },
+      {
+        "name": "Same-day forward items, window 3",
+        "deadline": "16:45",
+        "settles_at": "18:00",
+        "settles_on": "same_day"
+      },
+      {
+        "name": "Future-dated forward items, 10:30 a.m. deadline",
+        "deadline": "10:30",
+        "settles_at": "08:30",
+        "settles_on": "next_business_day"
+      },
+      {
+        "name": "Future-dated forward items, 2:45 p.m. deadline",
+        "deadline": "14:45",
+        "settles_at": "08:30",
+        "settles_on": "next_business_day"
+      },
+      {
+        "name": "Future-dated forward items, 4:45 p.m. deadline",
+        "deadline": "16:45",
+        "settles_at": "08:30",
+        "settles_on": "next_business_day"
+      },
+      {
+        "name": "Future-dated forward items, 8:00 p.m. deadline",
+        "deadline": "20:00",
+        "settles_at": "08:30",
+        "settles_on": "next_business_day"
+      },
+      {
+        "name": "Future-dated forward items, 10:45 p.m. deadline",
+        "deadline": "22:45",
+        "settles_at": "08:30",
+        "settles_on": "next_business_day"
+      },
+      {
+        "name": "Future-dated forward items, 2:15 a.m. deadline",
+        "deadline": "02:15",
+        "settles_at": "08:30",
+        "settles_on": "next_business_day"
+      }
+    ],
+    "note": "FedACH Processing Schedule effective September 12, 2022: transmission deadlines and settlement times. Processing pauses around each holiday as shown on the holiday schedule."
+  },
+  "operator_sources": [
+    "frbservices-holiday-schedules"
+  ],
+  "provenance": [
+    {
+      "url": "https://www.frbservices.org/about/holiday-schedules/",
+      "retrieved": "2026-10-28",
+      "states": "Federal Reserve Banks' holiday schedule and the Saturday and Sunday observance rules."
+    },
+    {
+      "url": "https://www.federalreserve.gov/aboutthefed/k8.htm",
+      "retrieved": "2026-10-28",
+      "states": "K.8, holidays observed by the Federal Reserve System, with the same observance rules."
+    },
+    {
+      "url": "https://www.frbservices.org/resources/resource-centers/same-day-ach-resource-center/fedach-processing-schedule/",
+      "retrieved": "2026-10-28",
+      "states": "FedACH transmission deadlines, target distribution and settlement times."
+    }
+  ]
+}

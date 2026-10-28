@@ -1,0 +1,7 @@
+[
+  {"calendar_id": "US-FEDWIRE", "entry_date": "2026-01-01", "is_open": false, "reason": "New Year's Day"},
+  {"calendar_id": "US-FEDWIRE", "entry_date": "2026-06-19", "is_open": false, "reason": "Juneteenth National Independence Day"},
+  {"calendar_id": "US-FEDWIRE", "entry_date": "2026-11-11", "is_open": true, "reason": "Veterans Day"},
+  {"calendar_id": "US-FEDWIRE", "entry_date": "2026-11-26", "is_open": false, "reason": "Thanksgiving Day"},
+  {"calendar_id": "US-FEDWIRE", "entry_date": "2026-12-25", "is_open": false, "reason": "Christmas Day"}
+]

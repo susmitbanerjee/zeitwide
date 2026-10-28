@@ -1,0 +1,17 @@
+{
+  "id": "fedwire-and-t2-good-friday-all-open",
+  "description": "On Good Friday 2026 T2 is closed and Fedwire open, so not both are open.",
+  "dataset_release": "2026.10.28.1",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "US-FEDWIRE",
+      "EU-T2"
+    ],
+    "date": "2026-04-03",
+    "combine": "all_open"
+  },
+  "expected": {
+    "is_business_day": false
+  }
+}

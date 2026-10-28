@@ -1,0 +1,46 @@
+{
+  "id": "GB-CHAPS",
+  "name": "CHAPS",
+  "kind": "rail",
+  "timezone": "Europe/London",
+  "weekend": [
+    "saturday",
+    "sunday"
+  ],
+  "operating_hours": {
+    "opens": "06:00",
+    "closes": "18:00",
+    "cutoffs": [
+      {
+        "name": "Participants open to receive",
+        "deadline": "08:00"
+      },
+      {
+        "name": "Participants able to send",
+        "deadline": "10:00"
+      },
+      {
+        "name": "Customer payments",
+        "deadline": "17:40"
+      },
+      {
+        "name": "Bank-to-bank payments",
+        "deadline": "18:00"
+      }
+    ],
+    "note": "Open Monday to Friday, excluding bank and public holidays in England and Wales."
+  },
+  "operator_sources": [],
+  "provenance": [
+    {
+      "url": "https://www.bankofengland.co.uk/payments/chaps",
+      "retrieved": "2026-10-28",
+      "states": "CHAPS is open 6am to 6pm, Monday to Friday, excluding bank or public holidays in England and Wales; customer payments by 5.40pm."
+    },
+    {
+      "url": "https://www.gov.uk/bank-holidays.json",
+      "retrieved": "2026-10-28",
+      "states": "England and Wales bank holidays, including substitute days."
+    }
+  ]
+}

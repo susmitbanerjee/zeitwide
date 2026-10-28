@@ -1,0 +1,92 @@
+[
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2026-01-01",
+  "is_open": false,
+  "reason": "New Year's Day (TARGET holiday)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2026-04-03",
+  "is_open": false,
+  "reason": "Good Friday (TARGET holiday)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2026-04-06",
+  "is_open": false,
+  "reason": "Easter Monday (TARGET holiday)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2026-05-01",
+  "is_open": false,
+  "reason": "Labour Day (TARGET holiday)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2026-12-25",
+  "is_open": false,
+  "reason": "Christmas Day (TARGET holiday)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2026-12-26",
+  "is_open": false,
+  "reason": "Boxing Day (TARGET holiday)"
+ },
+ {
+  "calendar_id": "DE",
+  "entry_date": "2026-01-01",
+  "is_open": false,
+  "reason": "New Year's Day"
+ },
+ {
+  "calendar_id": "DE",
+  "entry_date": "2026-04-03",
+  "is_open": false,
+  "reason": "Good Friday"
+ },
+ {
+  "calendar_id": "DE",
+  "entry_date": "2026-04-06",
+  "is_open": false,
+  "reason": "Easter Monday"
+ },
+ {
+  "calendar_id": "DE",
+  "entry_date": "2026-05-01",
+  "is_open": false,
+  "reason": "Labour Day"
+ },
+ {
+  "calendar_id": "DE",
+  "entry_date": "2026-05-14",
+  "is_open": false,
+  "reason": "Ascension Day"
+ },
+ {
+  "calendar_id": "DE",
+  "entry_date": "2026-05-25",
+  "is_open": false,
+  "reason": "Whit Monday"
+ },
+ {
+  "calendar_id": "DE",
+  "entry_date": "2026-10-03",
+  "is_open": false,
+  "reason": "Day of German Unity"
+ },
+ {
+  "calendar_id": "DE",
+  "entry_date": "2026-12-25",
+  "is_open": false,
+  "reason": "Christmas Day"
+ },
+ {
+  "calendar_id": "DE",
+  "entry_date": "2026-12-26",
+  "is_open": false,
+  "reason": "Boxing Day"
+ }
+]

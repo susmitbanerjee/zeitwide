@@ -1,0 +1,11 @@
+title = "SettleCal gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Lockfiles carry integrity hashes, not secrets"
+paths = [
+  '''(^|/)uv\.lock$''',
+  '''(^|/)package-lock\.json$''',
+]

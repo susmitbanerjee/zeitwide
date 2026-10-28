@@ -1,0 +1,15 @@
+{
+  "id": "eu-t2-ascension-open",
+  "description": "Ascension Day is an ECB holiday, but T2 is open.",
+  "dataset_release": "2026.10.28.1",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "EU-T2"
+    ],
+    "date": "2026-05-14"
+  },
+  "expected": {
+    "is_business_day": true
+  }
+}

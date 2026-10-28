@@ -1,0 +1,10 @@
+{
+  "extraKnownMarketplaces": {
+    "settlecal": {
+      "source": { "source": "directory", "path": "./" }
+    }
+  },
+  "enabledPlugins": {
+    "settlecal-dev@settlecal": true
+  }
+}

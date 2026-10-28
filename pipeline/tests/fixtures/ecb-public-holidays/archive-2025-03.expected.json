@@ -1,0 +1,218 @@
+[
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2025-01-01",
+  "is_open": false,
+  "reason": "New Year's Day (TARGET closing day)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2025-04-18",
+  "is_open": false,
+  "reason": "Good Friday (TARGET closing day)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2025-04-21",
+  "is_open": false,
+  "reason": "Easter Monday (TARGET closing day)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2025-05-01",
+  "is_open": false,
+  "reason": "Labour Day (TARGET closing day)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2025-05-09",
+  "is_open": true,
+  "reason": "Anniversary of Robert Schuman's Declaration: ECB holiday, T2 open"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2025-05-29",
+  "is_open": true,
+  "reason": "Ascension Day: ECB holiday, T2 open"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2025-06-09",
+  "is_open": true,
+  "reason": "Whit Monday: ECB holiday, T2 open"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2025-06-19",
+  "is_open": true,
+  "reason": "Corpus Christi: ECB holiday, T2 open"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2025-10-03",
+  "is_open": true,
+  "reason": "Day of German Unity: ECB holiday, T2 open"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2025-12-24",
+  "is_open": true,
+  "reason": "Christmas Eve: ECB holiday, T2 open"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2025-12-25",
+  "is_open": false,
+  "reason": "Christmas Day (TARGET closing day)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2025-12-26",
+  "is_open": false,
+  "reason": "Christmas Holiday (TARGET closing day)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2025-12-31",
+  "is_open": true,
+  "reason": "New Year's Eve: ECB holiday, T2 open"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2026-01-01",
+  "is_open": false,
+  "reason": "New Year's Day (TARGET closing day)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2026-04-03",
+  "is_open": false,
+  "reason": "Good Friday (TARGET closing day)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2026-04-06",
+  "is_open": false,
+  "reason": "Easter Monday (TARGET closing day)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2026-05-01",
+  "is_open": false,
+  "reason": "Labour Day (TARGET closing day)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2026-05-14",
+  "is_open": true,
+  "reason": "Ascension Day: ECB holiday, T2 open"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2026-05-25",
+  "is_open": true,
+  "reason": "Whit Monday: ECB holiday, T2 open"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2026-06-04",
+  "is_open": true,
+  "reason": "Corpus Christi: ECB holiday, T2 open"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2026-12-24",
+  "is_open": true,
+  "reason": "Christmas Eve: ECB holiday, T2 open"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2026-12-25",
+  "is_open": false,
+  "reason": "Christmas Day (TARGET closing day)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2026-12-26",
+  "is_open": false,
+  "reason": "Christmas Holiday (TARGET closing day)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2026-12-31",
+  "is_open": true,
+  "reason": "New Year's Eve: ECB holiday, T2 open"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2027-01-01",
+  "is_open": false,
+  "reason": "New Year's Day (TARGET closing day)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2027-03-26",
+  "is_open": false,
+  "reason": "Good Friday (TARGET closing day)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2027-03-29",
+  "is_open": false,
+  "reason": "Easter Monday (TARGET closing day)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2027-05-01",
+  "is_open": false,
+  "reason": "Labour Day (TARGET closing day)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2027-05-06",
+  "is_open": true,
+  "reason": "Ascension Day: ECB holiday, T2 open"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2027-05-17",
+  "is_open": true,
+  "reason": "Whit Monday: ECB holiday, T2 open"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2027-05-27",
+  "is_open": true,
+  "reason": "Corpus Christi: ECB holiday, T2 open"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2027-11-01",
+  "is_open": true,
+  "reason": "All Saints' Day: ECB holiday, T2 open"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2027-12-24",
+  "is_open": true,
+  "reason": "Christmas Eve: ECB holiday, T2 open"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2027-12-25",
+  "is_open": false,
+  "reason": "Christmas Day (TARGET closing day)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2027-12-26",
+  "is_open": false,
+  "reason": "Christmas Holiday (TARGET closing day)"
+ },
+ {
+  "calendar_id": "EU-T2",
+  "entry_date": "2027-12-31",
+  "is_open": true,
+  "reason": "New Year's Eve: ECB holiday, T2 open"
+ }
+]

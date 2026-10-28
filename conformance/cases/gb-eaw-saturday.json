@@ -1,0 +1,15 @@
+{
+  "id": "gb-eaw-saturday",
+  "description": "Saturdays are not business days in England and Wales.",
+  "dataset_release": "2026.10.28.1",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "GB-EAW"
+    ],
+    "date": "2026-10-31"
+  },
+  "expected": {
+    "is_business_day": false
+  }
+}

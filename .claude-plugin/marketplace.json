@@ -1,0 +1,15 @@
+{
+  "name": "settlecal",
+  "description": "Claude Code plugins for developing SettleCal",
+  "owner": {
+    "name": "Susmit Banerjee",
+    "email": "susmit@swarmbase.net"
+  },
+  "plugins": [
+    {
+      "name": "settlecal-dev",
+      "source": "./plugins/settlecal-dev",
+      "description": "SettleCal coding standards packaged as skills"
+    }
+  ]
+}

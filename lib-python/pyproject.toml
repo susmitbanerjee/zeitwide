@@ -1,0 +1,65 @@
+[project]
+name = "settlecal"
+version = "0.1.0"
+description = "Open SettleCal library: business-day answers from the bundled SettleCal dataset, plus a local MCP server."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = []
+
+[build-system]
+requires = ["uv_build>=0.9,<0.14"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+  "hypothesis>=6.170.12",
+  "jsonschema>=4.26.0",
+  "mypy>=1.18",
+  "pytest>=8.4",
+  "pytest-cov>=7.0",
+  "ruff>=0.14",
+  "types-jsonschema>=4.26.0.20261006",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+  "E", "W", "F", "I", "N", "UP", "B", "A", "C4", "DTZ", "S", "SIM", "PT",
+  "RET", "ARG", "PTH", "PL", "TRY", "PERF", "RUF", "ANN", "BLE", "T20", "ERA",
+]
+ignore = ["TRY003"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "PLR2004", "ANN201"]
+
+[tool.ruff.format]
+line-ending = "lf"
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+mypy_path = "src"
+files = ["src", "tests"]
+warn_unreachable = true
+enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-markers", "--strict-config", "--import-mode=importlib"]
+xfail_strict = true
+filterwarnings = ["error"]
+
+[tool.coverage.run]
+branch = true
+source_pkgs = ["settlecal"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+skip_covered = true

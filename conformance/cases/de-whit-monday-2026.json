@@ -1,0 +1,15 @@
+{
+  "id": "de-whit-monday-2026",
+  "description": "Whit Monday 2026 (25 May) is a nationwide public holiday in Germany.",
+  "dataset_release": "2026.10.28.1",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "DE"
+    ],
+    "date": "2026-05-25"
+  },
+  "expected": {
+    "is_business_day": false
+  }
+}

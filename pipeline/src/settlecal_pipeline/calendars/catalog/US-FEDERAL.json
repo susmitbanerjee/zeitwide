@@ -1,0 +1,25 @@
+{
+  "id": "US-FEDERAL",
+  "name": "US federal holidays",
+  "kind": "public",
+  "timezone": "America/New_York",
+  "weekend": [
+    "saturday",
+    "sunday"
+  ],
+  "observance": {
+    "saturday": "preceding_friday",
+    "sunday": "following_monday",
+    "note": "Under 5 U.S.C. 6103(b), a holiday on a Saturday is observed on the Friday before and one on a Sunday on the Monday after. OPM publishes the observed dates."
+  },
+  "operator_sources": [
+    "opm-federal-holidays"
+  ],
+  "provenance": [
+    {
+      "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/",
+      "retrieved": "2026-10-28",
+      "states": "Federal holidays by year, as observed dates."
+    }
+  ]
+}

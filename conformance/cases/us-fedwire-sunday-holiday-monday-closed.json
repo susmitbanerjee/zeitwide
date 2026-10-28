@@ -1,0 +1,15 @@
+{
+  "id": "us-fedwire-sunday-holiday-monday-closed",
+  "description": "Independence Day 2027 is a Sunday; Fedwire is closed on Monday 5 July.",
+  "dataset_release": "2026.10.28.1",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "US-FEDWIRE"
+    ],
+    "date": "2027-07-05"
+  },
+  "expected": {
+    "is_business_day": false
+  }
+}
