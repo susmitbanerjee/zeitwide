@@ -11,7 +11,7 @@ The SettleCal MVP has three parts: Python ingests and verifies calendar data, Po
 | Web UI | React + TypeScript on Next.js | Public answer pages need server rendering for SEO (M8); the app and admin share one codebase |
 | Serving layer | Java 21, Spring Boot 3 | REST API, hosted MCP server, webhook dispatch, receipt signing |
 | Data layer | Python 3.12 | Source monitors, parsers, diffing, review tooling, the open library and the local MCP server |
-| Database | PostgreSQL 16, bitemporal tables | As-of answers (M2) need every version kept with valid and recorded time |
+| Database | PostgreSQL 18, bitemporal tables | As-of answers (M2) need every version kept with valid and recorded time |
 | Snapshots | Google Cloud Storage (fake-gcs-server locally) | Raw source pages stored by SHA-256 for provenance (M1) |
 | Cache and limits | Caffeine in-process cache; rate limits in Postgres (Bucket4j) | Rate limits per key, hot-answer cache |
 | Job queue | Postgres-backed queue (Procrastinate) | One less system to run; jobs share the database's transactions |
@@ -49,7 +49,7 @@ If a source page fails to fetch or parse three times in a row, the job stops and
 
 ## Database
 
-Use PostgreSQL 16 as the single system of record, with **bitemporal** calendar entries. Every entry row has two time ranges: the date it describes, and when SettleCal believed it (`recorded_during`). Rows are never updated in place; a change closes the old row's `recorded_during` and inserts a new one. An as-of query is then one indexed lookup:
+Use PostgreSQL 18 as the single system of record, with **bitemporal** calendar entries. Every entry row has two time ranges: the date it describes, and when SettleCal believed it (`recorded_during`). Rows are never updated in place; a change closes the old row's `recorded_during` and inserts a new one. An as-of query is then one indexed lookup:
 
 ```sql
 SELECT * FROM calendar_entry

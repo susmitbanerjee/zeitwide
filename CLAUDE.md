@@ -45,7 +45,7 @@ folder trust prompt once). After editing a skill, run `/reload-plugins`.
 Everything at once: `make check` runs every linter and test suite; `make fmt` fixes
 formatting; `make setup` installs the pre-commit hooks and dependencies.
 
-**Local stack** (Postgres 16 on 5432, Keycloak on 8180, fake GCS on 4443):
+**Local stack** (Postgres 18 on 5432, Keycloak on 8180, fake GCS on 4443):
 
 ```bash
 docker compose up -d --wait   # or: make up

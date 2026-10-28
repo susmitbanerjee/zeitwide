@@ -232,7 +232,7 @@ The images need:
   `deploy/keycloak/settlecal-realm.json` (`--import-realm`). The service starts it with
   `start --optimized`.
 - **Pipeline:** the `pg_dump` client at the same major version as the Aiven server
-  (`postgresql-client-16`), and the CLI commands `run-due` (the default) and `daily`.
+  (`postgresql-client-18`: `pg_dump` refuses to dump a newer server, and Aiven runs PostgreSQL 18), and the CLI commands `run-due` (the default) and `daily`.
 
 ### 10. Set up Firebase Hosting
 

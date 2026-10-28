@@ -1,4 +1,4 @@
-"""Containers shared by the database tests: Postgres 16 and fake-gcs-server.
+"""Containers shared by the database tests: Postgres 18 (as on Aiven) and fake-gcs-server.
 
 Each test gets a fresh database migrated with api/'s Flyway migrations, in order, and
 the least-privilege ``settlecal_pipeline`` login the jobs use on Cloud Run.
@@ -34,7 +34,7 @@ def _version(path: Path) -> int:
 
 @pytest.fixture(scope="session")
 def postgres() -> Iterator[PostgresContainer]:
-    with PostgresContainer("postgres:16-alpine", driver=None) as container:
+    with PostgresContainer("postgres:18.6-alpine", driver=None) as container:
         yield container
 
 

@@ -11,7 +11,7 @@ import org.testcontainers.utility.DockerImageName;
 public class PostgresTestcontainer {
 
   // Same major version as the compose stack and Aiven.
-  private static final DockerImageName IMAGE = DockerImageName.parse("postgres:16-alpine");
+  private static final DockerImageName IMAGE = DockerImageName.parse("postgres:18.6-alpine");
 
   @Bean
   @ServiceConnection
