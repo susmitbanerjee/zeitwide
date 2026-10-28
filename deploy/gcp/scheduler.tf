@@ -10,10 +10,8 @@ resource "google_cloud_scheduler_job" "pipeline_due" {
   schedule  = "*/15 * * * *"
   time_zone = local.scheduler_tz
 
+  # No retries (Cloud Scheduler's default): the next run 15 minutes later is the retry.
   attempt_deadline = "60s"
-  retry_config {
-    retry_count = 0
-  }
 
   http_target {
     http_method = "POST"
@@ -36,11 +34,8 @@ resource "google_cloud_scheduler_job" "outbox_drain" {
   schedule  = "* * * * *"
   time_zone = local.scheduler_tz
 
+  # No retries (Cloud Scheduler's default): the next run a minute later is the retry.
   attempt_deadline = "30s"
-  # The next run a minute later is the retry.
-  retry_config {
-    retry_count = 0
-  }
 
   http_target {
     http_method = "POST"

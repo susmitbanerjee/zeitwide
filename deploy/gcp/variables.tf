@@ -19,10 +19,21 @@ variable "billing_account" {
   }
 }
 
-variable "budget_amount_usd" {
-  description = "Monthly budget in USD; alerts fire at 50%, 90% and 100%."
+variable "budget_amount" {
+  description = "Monthly budget, in budget_currency; alerts fire at 50%, 90% and 100%."
   type        = number
   default     = 10
+}
+
+variable "budget_currency" {
+  description = "Currency of the billing account; the Budgets API rejects any other."
+  type        = string
+  default     = "USD"
+
+  validation {
+    condition     = can(regex("^[A-Z]{3}$", var.budget_currency))
+    error_message = "budget_currency is an ISO 4217 code such as USD or INR."
+  }
 }
 
 variable "github_repository" {

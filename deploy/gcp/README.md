@@ -14,7 +14,7 @@ Aiven's free plan, which you create by hand.
 | `storage.tf` | Snapshots bucket (versioned, kept forever) and backups bucket (30-day expiry) |
 | `artifact_registry.tf` | Docker repository that keeps the last 3 versions of each image |
 | `wif.tf` | Workload Identity Federation for GitHub Actions (no JSON keys) |
-| `budget.tf` | Budget of `budget_amount_usd` (default $10), alerts at 50/90/100% |
+| `budget.tf` | Budget of `budget_amount` in `budget_currency` (default USD 10), alerts at 50/90/100% |
 | `envs/*.tfvars` | Per-environment IDs and URLs (nothing secret) |
 
 Every resource that supports labels gets `app=settlecal` and `env=<workspace>` through
@@ -59,7 +59,8 @@ Raise `max_instances` or a pool size in `locals.tf` only after checking this sum
 - Your account needs Owner on the project (or the admin roles for Run, IAM, Secret
   Manager, Storage, Artifact Registry, Scheduler and Workload Identity Pools), plus
   **Billing Account Costs Manager** on the billing account for the budget.
-- The billing account's currency must be USD, because the budget is in USD.
+- Set `budget_currency` to the billing account's currency (`gcloud billing accounts
+  describe`), and `budget_amount` in that currency; the Budgets API rejects any other.
 - If an organization policy restricts domain sharing (`iam.allowedPolicyMemberDomains`),
   allow `allUsers` on this project. The three services are public at the Cloud Run
   layer and do their own auth.
