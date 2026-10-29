@@ -52,6 +52,9 @@ locals {
     KC_DB_POOL_MAX_SIZE         = tostring(local.db.keycloak_pool_max)
     KC_HTTP_ENABLED             = "true"
     KC_PROXY_HEADERS            = "xforwarded"
+    # One instance, and Cloud Run instances can't reach each other, so no cluster: the
+    # default JDBC_PING stack would also need a pool of at least 4.
+    KC_CACHE                    = "local"
     KC_BOOTSTRAP_ADMIN_USERNAME = "bootstrap-admin"
     JAVA_OPTS_KC_HEAP           = "-XX:MaxRAMPercentage=70"
   }
@@ -273,7 +276,8 @@ resource "google_cloud_run_v2_service" "keycloak" {
     containers {
       image = var.bootstrap_service_image
       # The image is pre-built with `kc.sh build` (README), so start skips the build.
-      args = ["start", "--optimized"]
+      # --import-realm creates the settlecal realm on first start and then skips it.
+      args = ["start", "--optimized", "--import-realm"]
 
       resources {
         limits = {

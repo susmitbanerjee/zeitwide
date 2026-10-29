@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.spring.dependency.management)
     alias(libs.plugins.spotless)
     alias(libs.plugins.errorprone)
+    alias(libs.plugins.jib)
 }
 
 group = "com.settlecal"
@@ -103,4 +104,24 @@ spotless {
     kotlinGradle {
         ktlint()
     }
+}
+
+// Distroless Java 21, non-root, pinned by digest. deploy/gcp/deploy-images.sh sets the
+// target image and tag.
+jib {
+    // Like bootJar: leaves out developmentOnly dependencies such as Docker Compose support.
+    configurationName = "productionRuntimeClasspath"
+    from {
+        image = "gcr.io/distroless/java21-debian12:nonroot@sha256:7e37784d94dccbf5ccb195c73b295f5ad00cd266512dfbac12eb9c3c28f8077d"
+    }
+    container {
+        ports = listOf("8080")
+        user = "nonroot"
+        creationTime = "USE_CURRENT_TIMESTAMP"
+    }
+}
+
+// Jib 3.5 still reads Task.project while it runs.
+tasks.matching { it.name.startsWith("jib") }.configureEach {
+    notCompatibleWithConfigurationCache("Jib reads Task.project at execution time")
 }

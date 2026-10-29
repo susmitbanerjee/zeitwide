@@ -7,6 +7,7 @@ errorprone-plugin = "5.0.0"
 errorprone-core = "2.50.0"
 jacoco = "0.8.15"
 archunit = "1.5.1"
+jib = "3.5.4"
 # Newer than Spring Boot 3.5 manages (11.7), for PostgreSQL 18 support; Aiven runs 18.
 flyway = "11.20.3"
 
@@ -32,3 +33,4 @@ spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 errorprone = { id = "net.ltgt.errorprone", version.ref = "errorprone-plugin" }
+jib = { id = "com.google.cloud.tools.jib", version.ref = "jib" }

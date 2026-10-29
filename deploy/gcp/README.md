@@ -226,6 +226,16 @@ repository ID, running on a ref in `github_deploy_refs`, can get a token.
 
 Push to `tofu output -raw image_repository`, then deploy with
 `gcloud run deploy <service> --image=…` and `gcloud run jobs deploy settlecal-pipeline-<env> --image=…`.
+When CI can't run (for example, the month's Actions minutes are used up), do the same
+from your machine, from the repository root:
+
+```bash
+bash deploy/gcp/deploy-images.sh
+```
+
+It builds the API with Jib and the others from `pipeline/Dockerfile`, `web/Dockerfile`
+and `deploy/keycloak/Dockerfile`, tags them with `git describe --dirty`, and rolls out
+the API first so its Flyway migrations run before the pipeline uses the schema.
 The images need:
 
 - **Keycloak:** an image built `FROM quay.io/keycloak/keycloak` that runs
