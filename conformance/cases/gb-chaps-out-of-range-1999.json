@@ -1,0 +1,15 @@
+{
+  "id": "gb-chaps-out-of-range-1999",
+  "description": "SettleCal has no CHAPS dates for 1999.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "GB-CHAPS"
+    ],
+    "date": "1999-06-01"
+  },
+  "expected": {
+    "error": "out_of_range"
+  }
+}

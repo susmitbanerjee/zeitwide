@@ -7,11 +7,17 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    deserialization:
+      # A misspelt field is an error, not a silently ignored default.
+      fail-on-unknown-properties: true
   # No URL or credentials here: Cloud Run sets SPRING_DATASOURCE_* from Secret
   # Manager, bootRun connects to the compose Postgres, and tests use Testcontainers.
   datasource:
     hikari:
-      maximum-pool-size: 5
+      # Aiven's free plan allows 20 connections across every client (deploy/gcp/README.md).
+      maximum-pool-size: 4
   docker:
     compose:
       file: ../docker-compose.yml
@@ -19,6 +25,7 @@ spring:
 
 server:
   shutdown: graceful
+  max-http-request-header-size: 16KB
   error:
     include-stacktrace: never
     include-message: never
@@ -33,3 +40,18 @@ management:
       probes:
         enabled: true
       show-details: never
+
+settlecal:
+  answers:
+    cache-max-entries: 10000
+    release-check-interval: PT30S
+  api-keys:
+    cache-ttl: PT1M
+  rate-limits:
+    anonymous:
+      capacity: 60
+      period: PT1H
+    keyed:
+      capacity: 10000
+      period: P1D
+    trusted-proxies: 0

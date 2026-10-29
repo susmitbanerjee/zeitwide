@@ -15,6 +15,8 @@ locals {
     SETTLECAL_SNAPSHOT_BUCKET                            = google_storage_bucket.snapshots.name
     SETTLECAL_OUTBOX_DRAIN_AUDIENCE                      = local.outbox_drain_audience
     SETTLECAL_OUTBOX_DRAIN_INVOKER                       = google_service_account.this["sched-drain"].email
+    # Cloud Run's front end appends the client's address to X-Forwarded-For.
+    SETTLECAL_RATE_LIMITS_TRUSTED_PROXIES = "1"
   })
 
   api_secret_env = {

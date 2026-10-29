@@ -1,0 +1,20 @@
+{
+  "id": "fedwire-and-t2-add-two-over-thanksgiving",
+  "description": "Two Fedwire and T2 business days after Tuesday 24 November 2026: Wednesday counts, Thanksgiving is skipped, Friday 27 November is the second.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "add_business_days",
+    "calendars": [
+      "US-FEDWIRE",
+      "EU-T2"
+    ],
+    "date": "2026-11-24",
+    "days": 2
+  },
+  "expected": {
+    "date": "2026-11-27",
+    "skipped": [
+      "2026-11-26"
+    ]
+  }
+}

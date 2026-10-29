@@ -15,7 +15,7 @@ endif
 PY := uv run --no-sync python -m
 
 .PHONY: check check-hooks check-api check-pipeline check-lib-python check-web \
-        fmt setup up down
+        fmt generate-clients setup up down
 
 check: check-hooks check-api check-pipeline check-lib-python check-web
 
@@ -39,6 +39,15 @@ fmt:
 	cd pipeline && $(PY) ruff format . && $(PY) ruff check --fix .
 	cd lib-python && $(PY) ruff format . && $(PY) ruff check --fix .
 	cd web && npm run format && npm run lint -- --fix
+
+# The typed clients, from api/openapi.yaml. Tests in web/ and lib-python/ fail when they are stale.
+generate-clients:
+	cd web && npm run generate:api
+	cd lib-python && $(PY) datamodel_code_generator --input ../api/openapi.yaml --input-file-type openapi \
+		--output src/settlecal/api_types.py --output-model-type typing.TypedDict \
+		--target-python-version 3.12 --disable-timestamp --use-standard-collections \
+		--use-union-operator --use-schema-description --use-field-description \
+		--no-use-closed-typed-dict --formatters builtin
 
 setup:
 	pre-commit install

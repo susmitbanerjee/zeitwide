@@ -1,0 +1,15 @@
+{
+  "id": "gb-chaps-leap-day-2024",
+  "description": "Thursday 29 February 2024 is a CHAPS business day.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "GB-CHAPS"
+    ],
+    "date": "2024-02-29"
+  },
+  "expected": {
+    "is_business_day": true
+  }
+}

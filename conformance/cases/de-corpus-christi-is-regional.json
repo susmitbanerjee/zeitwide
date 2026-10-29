@@ -1,0 +1,15 @@
+{
+  "id": "de-corpus-christi-is-regional",
+  "description": "Corpus Christi (4 June 2026) is a holiday only in some German states, so the nationwide calendar is open.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "DE"
+    ],
+    "date": "2026-06-04"
+  },
+  "expected": {
+    "is_business_day": true
+  }
+}

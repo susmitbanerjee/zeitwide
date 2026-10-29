@@ -1,0 +1,15 @@
+{
+  "id": "gb-chaps-state-funeral-closed",
+  "description": "CHAPS was closed for the State Funeral of Queen Elizabeth II on Monday 19 September 2022.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "GB-CHAPS"
+    ],
+    "date": "2022-09-19"
+  },
+  "expected": {
+    "is_business_day": false
+  }
+}

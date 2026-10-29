@@ -1,0 +1,21 @@
+{
+  "id": "us-fedwire-add-over-presidents-day-2028",
+  "description": "One Fedwire business day after Friday 18 February 2028 skips the weekend and Washington's Birthday.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "add_business_days",
+    "calendars": [
+      "US-FEDWIRE"
+    ],
+    "date": "2028-02-18",
+    "days": 1
+  },
+  "expected": {
+    "date": "2028-02-22",
+    "skipped": [
+      "2028-02-19",
+      "2028-02-20",
+      "2028-02-21"
+    ]
+  }
+}

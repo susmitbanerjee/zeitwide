@@ -1,0 +1,15 @@
+{
+  "id": "us-fedwire-mlk-day-2026",
+  "description": "Fedwire is closed on Martin Luther King Jr. Day, Monday 19 January 2026.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "US-FEDWIRE"
+    ],
+    "date": "2026-01-19"
+  },
+  "expected": {
+    "is_business_day": false
+  }
+}

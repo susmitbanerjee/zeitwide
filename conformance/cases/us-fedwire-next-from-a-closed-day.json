@@ -1,0 +1,16 @@
+{
+  "id": "us-fedwire-next-from-a-closed-day",
+  "description": "The next business day after Thanksgiving is the Friday; a closed start day is not skipped, it just doesn't count.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "next_business_day",
+    "calendars": [
+      "US-FEDWIRE"
+    ],
+    "date": "2026-11-26"
+  },
+  "expected": {
+    "date": "2026-11-27",
+    "skipped": []
+  }
+}

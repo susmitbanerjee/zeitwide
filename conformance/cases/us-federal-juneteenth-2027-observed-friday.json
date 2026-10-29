@@ -1,0 +1,15 @@
+{
+  "id": "us-federal-juneteenth-2027-observed-friday",
+  "description": "Juneteenth 2027 is a Saturday, so federal offices observe it on Friday 18 June.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "US-FEDERAL"
+    ],
+    "date": "2027-06-18"
+  },
+  "expected": {
+    "is_business_day": false
+  }
+}

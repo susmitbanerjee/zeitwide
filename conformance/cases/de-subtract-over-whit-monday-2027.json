@@ -1,0 +1,21 @@
+{
+  "id": "de-subtract-over-whit-monday-2027",
+  "description": "One German business day before Tuesday 18 May 2027 is Friday 14 May, before the weekend and Whit Monday.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "add_business_days",
+    "calendars": [
+      "DE"
+    ],
+    "date": "2027-05-18",
+    "days": -1
+  },
+  "expected": {
+    "date": "2027-05-14",
+    "skipped": [
+      "2027-05-17",
+      "2027-05-16",
+      "2027-05-15"
+    ]
+  }
+}

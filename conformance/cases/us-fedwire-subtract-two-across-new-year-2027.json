@@ -1,0 +1,21 @@
+{
+  "id": "us-fedwire-subtract-two-across-new-year-2027",
+  "description": "Two Fedwire business days before Monday 4 January 2027 is Wednesday 30 December 2026.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "add_business_days",
+    "calendars": [
+      "US-FEDWIRE"
+    ],
+    "date": "2027-01-04",
+    "days": -2
+  },
+  "expected": {
+    "date": "2026-12-30",
+    "skipped": [
+      "2027-01-03",
+      "2027-01-02",
+      "2027-01-01"
+    ]
+  }
+}

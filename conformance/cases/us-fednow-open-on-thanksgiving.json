@@ -1,0 +1,15 @@
+{
+  "id": "us-fednow-open-on-thanksgiving",
+  "description": "FedNow operates every day, Thanksgiving included.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "US-FEDNOW"
+    ],
+    "date": "2026-11-26"
+  },
+  "expected": {
+    "is_business_day": true
+  }
+}

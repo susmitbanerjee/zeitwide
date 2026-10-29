@@ -1,0 +1,18 @@
+{
+  "id": "fedwire-and-t2-next-any-open-good-friday",
+  "description": "On Good Friday 2026 Fedwire is open, so with any_open it is the next business day after Thursday 2 April.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "next_business_day",
+    "calendars": [
+      "US-FEDWIRE",
+      "EU-T2"
+    ],
+    "date": "2026-04-02",
+    "combine": "any_open"
+  },
+  "expected": {
+    "date": "2026-04-03",
+    "skipped": []
+  }
+}

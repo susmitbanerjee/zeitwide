@@ -1,0 +1,15 @@
+{
+  "id": "eu-t2-new-year-2027",
+  "description": "T2 is closed on New Year's Day, Friday 1 January 2027.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "EU-T2"
+    ],
+    "date": "2027-01-01"
+  },
+  "expected": {
+    "is_business_day": false
+  }
+}

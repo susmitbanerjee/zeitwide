@@ -1,0 +1,15 @@
+{
+  "id": "eu-t2-easter-monday-2028",
+  "description": "T2 is closed on Easter Monday, 17 April 2028.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "EU-T2"
+    ],
+    "date": "2028-04-17"
+  },
+  "expected": {
+    "is_business_day": false
+  }
+}

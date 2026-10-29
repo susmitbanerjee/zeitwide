@@ -1,0 +1,20 @@
+{
+  "id": "us-federal-add-one-at-end-of-february-2027",
+  "description": "2027 has no leap day: one business day after Friday 26 February 2027 is Monday 1 March.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "add_business_days",
+    "calendars": [
+      "US-FEDERAL"
+    ],
+    "date": "2027-02-26",
+    "days": 1
+  },
+  "expected": {
+    "date": "2027-03-01",
+    "skipped": [
+      "2027-02-27",
+      "2027-02-28"
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "gb-chaps-and-us-fedwire-thanksgiving-all-open",
+  "description": "On Thanksgiving 2026 CHAPS is open but Fedwire isn't, so not both are.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "GB-CHAPS",
+      "US-FEDWIRE"
+    ],
+    "date": "2026-11-26",
+    "combine": "all_open"
+  },
+  "expected": {
+    "is_business_day": false
+  }
+}

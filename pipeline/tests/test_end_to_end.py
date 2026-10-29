@@ -24,7 +24,7 @@ import pytest
 import respx
 from google.cloud import storage
 from psycopg.rows import TupleRow, tuple_row
-from settlecal.conformance import load_cases, run_cases
+from settlecal.conformance import Outcome, load_cases, run_cases
 from settlecal.release import parse_release
 from tenacity import wait_none
 
@@ -262,8 +262,8 @@ def test_fixture_change_flows_to_a_release_that_passes_conformance(world: World)
     content = world.bucket.blob(release_object_key(release_id)).download_as_bytes()
     jsonschema.validate(json.loads(content), json.loads(RELEASE_SCHEMA.read_text(encoding="utf-8")))
     outcomes = run_cases(parse_release(content), load_cases(CASES))
-    assert outcomes, "no conformance case applies to the release"
-    assert [o for o in outcomes if not o.passed] == []
+    assert [o for o in outcomes if o.outcome is Outcome.FAILED] == []
+    assert any(o.passed for o in outcomes), "no conformance case applies to the release"
 
 
 def test_seed_publishes_first_versions_with_their_basis(world: World) -> None:

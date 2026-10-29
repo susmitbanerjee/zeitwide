@@ -14,7 +14,7 @@
       "additionalProperties": false,
       "required": ["operation", "calendars", "date"],
       "properties": {
-        "operation": { "enum": ["is_business_day", "add_business_days"] },
+        "operation": { "enum": ["is_business_day", "next_business_day", "add_business_days"] },
         "calendars": {
           "type": "array",
           "minItems": 1,
@@ -25,19 +25,38 @@
         "date": { "type": "string", "format": "date" },
         "days": { "type": "integer" },
         "as_of": { "type": "string", "format": "date-time" }
-      }
+      },
+      "if": { "properties": { "operation": { "const": "add_business_days" } } },
+      "then": { "required": ["days"] },
+      "else": { "not": { "required": ["days"] } }
     },
     "expected": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "is_business_day": { "type": "boolean" },
-        "date": { "type": "string", "format": "date" },
-        "skipped": {
-          "type": "array",
-          "items": { "type": "string", "format": "date" }
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["is_business_day"],
+          "properties": { "is_business_day": { "type": "boolean" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["date", "skipped"],
+          "properties": {
+            "date": { "type": "string", "format": "date" },
+            "skipped": {
+              "type": "array",
+              "items": { "type": "string", "format": "date" }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["error"],
+          "properties": { "error": { "enum": ["out_of_range", "unknown_calendar"] } }
         }
-      }
+      ]
     }
   }
 }

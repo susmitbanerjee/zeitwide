@@ -1,0 +1,15 @@
+{
+  "id": "gb-eaw-state-funeral-monday-closed",
+  "description": "The State Funeral bank holiday closed a Monday in England and Wales.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "GB-EAW"
+    ],
+    "date": "2022-09-19"
+  },
+  "expected": {
+    "is_business_day": false
+  }
+}

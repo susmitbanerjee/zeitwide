@@ -1,0 +1,16 @@
+{
+  "id": "us-fedwire-next-onto-leap-day",
+  "description": "The next Fedwire business day after Monday 28 February 2028 is the leap day.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "next_business_day",
+    "calendars": [
+      "US-FEDWIRE"
+    ],
+    "date": "2028-02-28"
+  },
+  "expected": {
+    "date": "2028-02-29",
+    "skipped": []
+  }
+}

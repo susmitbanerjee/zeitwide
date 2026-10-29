@@ -1,0 +1,15 @@
+{
+  "id": "us-fednow-has-no-coverage-limit",
+  "description": "FedNow closes on no holiday, so its rule answers any date.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "US-FEDNOW"
+    ],
+    "date": "2099-01-01"
+  },
+  "expected": {
+    "is_business_day": true
+  }
+}

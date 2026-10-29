@@ -4,3 +4,5 @@ node_modules/
 package-lock.json
 next-env.d.ts
 AGENTS.md
+# Generated from api/openapi.yaml; schema.test.ts checks it byte for byte.
+src/api/schema.ts

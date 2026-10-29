@@ -1,0 +1,19 @@
+{
+  "id": "us-fedwire-next-after-friday",
+  "description": "The next Fedwire business day after Friday 27 November 2026 is Monday 30 November.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "next_business_day",
+    "calendars": [
+      "US-FEDWIRE"
+    ],
+    "date": "2026-11-27"
+  },
+  "expected": {
+    "date": "2026-11-30",
+    "skipped": [
+      "2026-11-28",
+      "2026-11-29"
+    ]
+  }
+}

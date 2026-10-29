@@ -1,0 +1,15 @@
+{
+  "id": "eu-t2-saturday",
+  "description": "T2 is closed on Saturdays.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "EU-T2"
+    ],
+    "date": "2026-10-31"
+  },
+  "expected": {
+    "is_business_day": false
+  }
+}

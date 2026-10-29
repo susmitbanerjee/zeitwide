@@ -9,7 +9,7 @@ locals {
   }
 
   # Postgres runs on Aiven's free plan, which allows 20 connections. The per-client
-  # pool caps below keep the worst case at 17 (README has the table).
+  # pool caps below keep the worst case at 16 (README has the table).
   db = {
     settlecal_database = "settlecal"
     keycloak_database  = "keycloak"
@@ -17,7 +17,7 @@ locals {
     pipeline_user      = "settlecal_pipeline"
     backup_user        = "settlecal_backup"
     keycloak_user      = "keycloak"
-    api_pool_max       = 5
+    api_pool_max       = 4
     pipeline_pool_max  = 2
     keycloak_pool_max  = 3
   }

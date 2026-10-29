@@ -1,0 +1,17 @@
+{
+  "id": "gb-chaps-and-us-fedwire-both-closed-25-may-2026",
+  "description": "Monday 25 May 2026 is both the UK spring bank holiday and US Memorial Day, so neither is open.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "GB-CHAPS",
+      "US-FEDWIRE"
+    ],
+    "date": "2026-05-25",
+    "combine": "any_open"
+  },
+  "expected": {
+    "is_business_day": false
+  }
+}

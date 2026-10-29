@@ -1,0 +1,510 @@
+openapi: 3.1.0
+info:
+  title: SettleCal API
+  version: 1.0.0
+  summary: Is this a business day, and what is the next one? Every answer with its evidence.
+  description: |
+    Business-day answers for payment rails (Fedwire, FedACH, FedNow, T2, CHAPS) and public
+    holiday calendars. The rules are in `dataset/README.md`; this API, the hosted MCP server
+    and the open Python library all answer through the same engine and pass the same
+    conformance suite.
+
+    **Determinism.** Answers come from the latest dataset release. Every response names it
+    (`dataset_release`, and the `SettleCal-Dataset-Release` header) with the revision of each
+    calendar it used, so the same request against the same release always gives the same
+    answer.
+
+    **As of.** `as_of` answers with what SettleCal had recorded at that instant (the
+    default is now). A release holds everything recorded up to its own `as_of`, so a later
+    `as_of` is answered as of the release; the response's `as_of` says which instant was
+    used.
+
+    **Never a guess.** A calendar covers 1 January of the first year to 31 December of the
+    last year its sources published. A date outside that is `out_of_range`, never an answer
+    from the weekend rule. Calendars that close on no holiday (FedNow) have no limit.
+
+    **Limits.** Without a key: 60 requests an hour per IP address. With a key
+    (`Authorization: Bearer sc_live_…`): 10,000 a day.
+
+    **Errors** are RFC 9457 problem details with a stable `code`.
+  license:
+    name: API terms of service; dataset under CC BY-NC 4.0
+    identifier: CC-BY-NC-4.0
+servers:
+  - url: https://api.settlecal.com
+  - url: http://localhost:8080
+    description: Local development
+security:
+  - {}
+  - apiKey: []
+tags:
+  - name: calendars
+  - name: business-days
+
+paths:
+  /v1/calendars:
+    get:
+      operationId: listCalendars
+      tags: [calendars]
+      summary: Every calendar, with its rules, revision and coverage
+      parameters:
+        - $ref: "#/components/parameters/AsOf"
+      responses:
+        "200":
+          description: The calendars in the dataset release.
+          headers:
+            SettleCal-Dataset-Release: { $ref: "#/components/headers/DatasetRelease" }
+            SettleCal-As-Of: { $ref: "#/components/headers/AsOf" }
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimitLimit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimitRemaining" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CalendarList" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401": { $ref: "#/components/responses/InvalidApiKey" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "503": { $ref: "#/components/responses/DatasetUnavailable" }
+
+  /v1/calendars/{id}/days/{date}:
+    get:
+      operationId: getDay
+      tags: [calendars]
+      summary: Whether a date is a business day on one calendar, and why
+      parameters:
+        - $ref: "#/components/parameters/CalendarIdPath"
+        - name: date
+          in: path
+          required: true
+          schema: { type: string, format: date }
+        - $ref: "#/components/parameters/AsOf"
+      responses:
+        "200":
+          description: The answer and the entry or rule that decided it.
+          headers:
+            SettleCal-Dataset-Release: { $ref: "#/components/headers/DatasetRelease" }
+            SettleCal-Calendar-Revision: { $ref: "#/components/headers/CalendarRevision" }
+            SettleCal-As-Of: { $ref: "#/components/headers/AsOf" }
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimitLimit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimitRemaining" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DayAnswer" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401": { $ref: "#/components/responses/InvalidApiKey" }
+        "404": { $ref: "#/components/responses/UnknownCalendar" }
+        "422": { $ref: "#/components/responses/OutOfRange" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "503": { $ref: "#/components/responses/DatasetUnavailable" }
+
+  /v1/calendars/{id}/closures:
+    get:
+      operationId: listClosures
+      tags: [calendars]
+      summary: The closures on one calendar between two dates
+      description: |
+        Closures are the dates an entry closes (weekends aren't listed). The range is at most
+        731 days, and all of it must be within the calendar's coverage.
+      parameters:
+        - $ref: "#/components/parameters/CalendarIdPath"
+        - name: from
+          in: query
+          required: true
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          required: true
+          description: Inclusive; on or after `from`.
+          schema: { type: string, format: date }
+        - $ref: "#/components/parameters/AsOf"
+      responses:
+        "200":
+          description: The closures in date order.
+          headers:
+            SettleCal-Dataset-Release: { $ref: "#/components/headers/DatasetRelease" }
+            SettleCal-Calendar-Revision: { $ref: "#/components/headers/CalendarRevision" }
+            SettleCal-As-Of: { $ref: "#/components/headers/AsOf" }
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimitLimit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimitRemaining" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ClosureList" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401": { $ref: "#/components/responses/InvalidApiKey" }
+        "404": { $ref: "#/components/responses/UnknownCalendar" }
+        "422": { $ref: "#/components/responses/OutOfRange" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "503": { $ref: "#/components/responses/DatasetUnavailable" }
+
+  /v1/business-days/check:
+    post:
+      operationId: checkBusinessDay
+      tags: [business-days]
+      summary: Whether a date is a business day on several calendars combined
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DayRequest" }
+      responses:
+        "200":
+          description: The combined answer, with each calendar's answer as evidence.
+          headers:
+            SettleCal-Dataset-Release: { $ref: "#/components/headers/DatasetRelease" }
+            SettleCal-Calendar-Revision: { $ref: "#/components/headers/CalendarRevision" }
+            SettleCal-As-Of: { $ref: "#/components/headers/AsOf" }
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimitLimit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimitRemaining" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DayAnswer" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401": { $ref: "#/components/responses/InvalidApiKey" }
+        "404": { $ref: "#/components/responses/UnknownCalendar" }
+        "422": { $ref: "#/components/responses/OutOfRange" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "503": { $ref: "#/components/responses/DatasetUnavailable" }
+
+  /v1/business-days/add:
+    post:
+      operationId: addBusinessDays
+      tags: [business-days]
+      summary: Move a number of business days from a date
+      description: |
+        Moves `days` business days from `date`, backwards when negative. `date` itself
+        doesn't count, and 0 returns `date`. Every day passed over is listed in `skipped`,
+        in the order met, with why it isn't a business day.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AddRequest" }
+      responses:
+        "200":
+          description: Where the move landed.
+          headers:
+            SettleCal-Dataset-Release: { $ref: "#/components/headers/DatasetRelease" }
+            SettleCal-Calendar-Revision: { $ref: "#/components/headers/CalendarRevision" }
+            SettleCal-As-Of: { $ref: "#/components/headers/AsOf" }
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimitLimit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimitRemaining" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Shifted" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401": { $ref: "#/components/responses/InvalidApiKey" }
+        "404": { $ref: "#/components/responses/UnknownCalendar" }
+        "422": { $ref: "#/components/responses/OutOfRange" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "503": { $ref: "#/components/responses/DatasetUnavailable" }
+
+  /v1/business-days/next:
+    post:
+      operationId: nextBusinessDay
+      tags: [business-days]
+      summary: The first business day after a date
+      description: Never `date` itself; the same as adding one business day.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DayRequest" }
+      responses:
+        "200":
+          description: The next business day.
+          headers:
+            SettleCal-Dataset-Release: { $ref: "#/components/headers/DatasetRelease" }
+            SettleCal-Calendar-Revision: { $ref: "#/components/headers/CalendarRevision" }
+            SettleCal-As-Of: { $ref: "#/components/headers/AsOf" }
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimitLimit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimitRemaining" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Shifted" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401": { $ref: "#/components/responses/InvalidApiKey" }
+        "404": { $ref: "#/components/responses/UnknownCalendar" }
+        "422": { $ref: "#/components/responses/OutOfRange" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "503": { $ref: "#/components/responses/DatasetUnavailable" }
+
+components:
+  securitySchemes:
+    apiKey:
+      type: http
+      scheme: bearer
+      description: An API key such as `sc_live_AbCd1234_…`, shown once when it is created.
+
+  parameters:
+    CalendarIdPath:
+      name: id
+      in: path
+      required: true
+      schema: { $ref: "#/components/schemas/CalendarId" }
+    AsOf:
+      name: as_of
+      in: query
+      required: false
+      description: Answer with what SettleCal had recorded at this instant. Default now.
+      schema: { type: string, format: date-time }
+
+  headers:
+    DatasetRelease:
+      description: The dataset release the answer came from.
+      schema: { $ref: "#/components/schemas/DatasetRelease" }
+    CalendarRevision:
+      description: Each calendar's revision at `as_of`, such as `US-FEDWIRE=3, EU-T2=2`.
+      schema: { type: string }
+    AsOf:
+      description: The instant the answer was read as of.
+      schema: { type: string, format: date-time }
+    RateLimitLimit:
+      description: Requests allowed in the current window.
+      schema: { type: integer }
+    RateLimitRemaining:
+      description: Requests left in the current window.
+      schema: { type: integer }
+
+  responses:
+    ValidationFailed:
+      description: "`validation_failed`: the request is malformed."
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+    InvalidApiKey:
+      description: "`invalid_api_key`: the key is unknown, malformed or revoked."
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+    UnknownCalendar:
+      description: "`unknown_calendar`: no calendar has this ID."
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+    OutOfRange:
+      description: "`out_of_range`: a date is outside a calendar's source coverage."
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+    RateLimited:
+      description: "`rate_limited`: too many requests; try again after `Retry-After` seconds."
+      headers:
+        Retry-After:
+          schema: { type: integer }
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+    DatasetUnavailable:
+      description: "`dataset_unavailable`: no dataset release has been cut yet."
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+
+  schemas:
+    CalendarId:
+      type: string
+      pattern: "^[A-Z0-9]+(-[A-Z0-9]+)*$"
+      maxLength: 64
+      examples: [US-FEDWIRE]
+    DatasetRelease:
+      type: string
+      pattern: "^\\d{4}\\.\\d{2}\\.\\d{2}\\.\\d+$"
+      examples: [2026.10.28.1]
+    Combine:
+      type: string
+      enum: [all_open, any_open]
+      default: all_open
+      description: "`all_open`: every calendar is open. `any_open`: at least one is."
+    Basis:
+      type: string
+      enum: [published, projected]
+      description: "`published` by the operator, or `projected` by SettleCal from other sources."
+    CalendarRevisions:
+      type: object
+      description: Each calendar's revision at `as_of`, by calendar ID.
+      additionalProperties: { type: integer, minimum: 0 }
+
+    DayRequest:
+      type: object
+      additionalProperties: false
+      required: [calendars, date]
+      properties:
+        calendars:
+          type: array
+          minItems: 1
+          maxItems: 10
+          uniqueItems: true
+          items: { $ref: "#/components/schemas/CalendarId" }
+        date: { type: string, format: date }
+        combine: { $ref: "#/components/schemas/Combine" }
+        as_of: { type: string, format: date-time }
+    AddRequest:
+      type: object
+      additionalProperties: false
+      required: [calendars, date, days]
+      properties:
+        calendars:
+          type: array
+          minItems: 1
+          maxItems: 10
+          uniqueItems: true
+          items: { $ref: "#/components/schemas/CalendarId" }
+        date: { type: string, format: date }
+        days: { type: integer, minimum: -1000, maximum: 1000 }
+        combine: { $ref: "#/components/schemas/Combine" }
+        as_of: { type: string, format: date-time }
+
+    Source:
+      type: object
+      description: A snapshot of an official source that backs an entry.
+      required: [publisher, url, retrieved_at, snapshot_sha256]
+      properties:
+        publisher: { type: string }
+        url: { type: string, format: uri }
+        retrieved_at: { type: string, format: date-time }
+        snapshot_sha256: { type: string, pattern: "^[0-9a-f]{64}$" }
+    CalendarDay:
+      type: object
+      description: One calendar's answer for one date, and what decided it.
+      required: [calendar_id, is_open, decided_by, sources]
+      properties:
+        calendar_id: { $ref: "#/components/schemas/CalendarId" }
+        is_open: { type: boolean }
+        decided_by:
+          type: string
+          enum: [entry, weekend_rule]
+          description: An entry (with its reason, basis and sources), or the weekend rule.
+        reason: { type: string, description: Only when an entry decided. }
+        basis: { $ref: "#/components/schemas/Basis" }
+        revision: { type: integer, description: The calendar revision that published the entry. }
+        recorded_from: { type: string, format: date-time }
+        sources:
+          type: array
+          items: { $ref: "#/components/schemas/Source" }
+    DayAnswer:
+      type: object
+      required:
+        [date, is_business_day, combine, calendars, as_of, dataset_release, calendar_revisions]
+      properties:
+        date: { type: string, format: date }
+        is_business_day: { type: boolean }
+        combine: { $ref: "#/components/schemas/Combine" }
+        calendars:
+          type: array
+          items: { $ref: "#/components/schemas/CalendarDay" }
+        as_of: { type: string, format: date-time }
+        dataset_release: { $ref: "#/components/schemas/DatasetRelease" }
+        calendar_revisions: { $ref: "#/components/schemas/CalendarRevisions" }
+    SkippedDay:
+      type: object
+      required: [date, calendars]
+      properties:
+        date: { type: string, format: date }
+        calendars:
+          type: array
+          items: { $ref: "#/components/schemas/CalendarDay" }
+    Shifted:
+      type: object
+      required:
+        [start, days, date, combine, calendars, skipped, as_of, dataset_release, calendar_revisions]
+      properties:
+        start: { type: string, format: date }
+        days: { type: integer }
+        date: { type: string, format: date, description: Where the move landed. }
+        combine: { $ref: "#/components/schemas/Combine" }
+        calendars:
+          type: array
+          description: Each calendar's answer for `date`.
+          items: { $ref: "#/components/schemas/CalendarDay" }
+        skipped:
+          type: array
+          description: Days passed over because they weren't business days, in the order met.
+          items: { $ref: "#/components/schemas/SkippedDay" }
+        as_of: { type: string, format: date-time }
+        dataset_release: { $ref: "#/components/schemas/DatasetRelease" }
+        calendar_revisions: { $ref: "#/components/schemas/CalendarRevisions" }
+
+    Closure:
+      type: object
+      required: [date, reason, basis, revision, recorded_from, sources]
+      properties:
+        date: { type: string, format: date }
+        reason: { type: string }
+        basis: { $ref: "#/components/schemas/Basis" }
+        revision: { type: integer }
+        recorded_from: { type: string, format: date-time }
+        sources:
+          type: array
+          items: { $ref: "#/components/schemas/Source" }
+    ClosureList:
+      type: object
+      required: [calendar_id, from, to, closures, as_of, dataset_release, calendar_revision]
+      properties:
+        calendar_id: { $ref: "#/components/schemas/CalendarId" }
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+        closures:
+          type: array
+          items: { $ref: "#/components/schemas/Closure" }
+        as_of: { type: string, format: date-time }
+        dataset_release: { $ref: "#/components/schemas/DatasetRelease" }
+        calendar_revision: { type: integer, minimum: 0 }
+
+    Coverage:
+      type: object
+      description: |
+        The dates the calendar can answer for. `years`: from `from` to `to`, both
+        inclusive. `unlimited`: any date (the calendar closes on no holiday). `none`: nothing
+        recorded yet, so no date.
+      required: [type]
+      properties:
+        type: { type: string, enum: [years, unlimited, none] }
+        from: { type: string, format: date, description: Only for `years`. }
+        to: { type: string, format: date, description: Only for `years`. }
+    Calendar:
+      type: object
+      required:
+        [id, name, kind, timezone, weekend, closes_on_holidays, revision, coverage]
+      properties:
+        id: { $ref: "#/components/schemas/CalendarId" }
+        name: { type: string }
+        kind: { type: string, enum: [rail, public, exchange] }
+        timezone: { type: string, examples: [America/New_York] }
+        weekend:
+          type: array
+          items:
+            type: string
+            enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+        closes_on_holidays: { type: boolean }
+        revision: { type: integer, minimum: 0 }
+        coverage: { $ref: "#/components/schemas/Coverage" }
+    CalendarList:
+      type: object
+      required: [calendars, as_of, dataset_release]
+      properties:
+        calendars:
+          type: array
+          items: { $ref: "#/components/schemas/Calendar" }
+        as_of: { type: string, format: date-time }
+        dataset_release: { $ref: "#/components/schemas/DatasetRelease" }
+
+    Problem:
+      type: object
+      description: RFC 9457 problem details.
+      required: [title, status, code]
+      properties:
+        type: { type: string, format: uri-reference }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string, format: uri-reference }
+        code:
+          type: string
+          enum:
+            - validation_failed
+            - invalid_api_key
+            - unknown_calendar
+            - out_of_range
+            - rate_limited
+            - dataset_unavailable
+            - not_found
+            - internal_error

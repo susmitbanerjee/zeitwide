@@ -1,0 +1,17 @@
+{
+  "id": "gb-chaps-add-beyond-what-was-known-in-2022",
+  "description": "As of 9 September 2022 GOV.UK listed bank holidays only to the end of 2023, so counting into 2024 is out of range.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "add_business_days",
+    "calendars": [
+      "GB-CHAPS"
+    ],
+    "date": "2023-12-28",
+    "days": 5,
+    "as_of": "2022-09-09T12:00:00Z"
+  },
+  "expected": {
+    "error": "out_of_range"
+  }
+}

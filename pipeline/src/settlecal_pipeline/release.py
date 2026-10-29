@@ -1,8 +1,9 @@
 """Dataset releases: the JSON in ``dataset/schema/release.schema.json``.
 
-A release is everything SettleCal recorded at one instant (``as_of``). Entries are
-bitemporal, so exporting the same ``as_of`` again gives the same bytes, which is how a
-failed upload or pull request is retried without cutting a new release.
+A release is everything SettleCal had recorded by one instant (``as_of``): every entry
+version, with when it was believed, so the open library can answer as-of questions too.
+Entries are bitemporal, so exporting the same ``as_of`` again gives the same bytes, which
+is how a failed upload or pull request is retried without cutting a new release.
 """
 
 import hashlib
@@ -16,7 +17,7 @@ import psycopg
 from psycopg.rows import TupleRow
 from psycopg.types.json import Jsonb
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 LICENSE = "CC BY-NC 4.0"
 _RELEASE_ID = re.compile(r"^(?P<day>\d{4}\.\d{2}\.\d{2})\.(?P<n>\d+)$")
 
@@ -175,12 +176,15 @@ class PostgresReleaseStore:
         rows = self._db.execute(
             """
             SELECT e.id, e.calendar_id, e.entry_date, e.is_open, e.reason, e.basis, e.revision,
-                   lower(e.recorded_during)
+                   lower(e.recorded_during),
+                   -- A version replaced after as_of was still current at as_of.
+                   CASE WHEN upper(e.recorded_during) <= %(as_of)s
+                        THEN upper(e.recorded_during) END
             FROM calendar_entry AS e
-            WHERE e.recorded_during @> %s
-            ORDER BY e.calendar_id, e.entry_date
+            WHERE lower(e.recorded_during) <= %(as_of)s
+            ORDER BY e.calendar_id, e.entry_date, lower(e.recorded_during)
             """,
-            (as_of,),
+            {"as_of": as_of},
         ).fetchall()
         sources = self._sources([int(row[0]) for row in rows])
         entries: dict[str, list[dict[str, object]]] = {}
@@ -193,6 +197,7 @@ class PostgresReleaseStore:
                     "basis": str(row[5]),
                     "revision": int(row[6]),
                     "recorded_from": _utc_iso(row[7]),
+                    "recorded_to": None if row[8] is None else _utc_iso(row[8]),
                     "sources": sources.get(int(row[0]), []),
                 }
             )
@@ -201,7 +206,7 @@ class PostgresReleaseStore:
     def _sources(self, entry_ids: list[int]) -> dict[int, list[dict[str, object]]]:
         rows = self._db.execute(
             """
-            SELECT es.entry_id, s.slug, s.url, ss.sha256, ss.fetched_at
+            SELECT es.entry_id, s.slug, s.publisher, s.url, ss.sha256, ss.fetched_at
             FROM entry_source AS es
             JOIN source_snapshot AS ss ON ss.id = es.snapshot_id
             JOIN source AS s ON s.id = ss.source_id
@@ -215,9 +220,10 @@ class PostgresReleaseStore:
             sources.setdefault(int(row[0]), []).append(
                 {
                     "source_id": str(row[1]),
-                    "url": str(row[2]),
-                    "sha256": bytes(row[3]).hex(),
-                    "fetched_at": _utc_iso(row[4]),
+                    "publisher": str(row[2]),
+                    "url": str(row[3]),
+                    "sha256": bytes(row[4]).hex(),
+                    "fetched_at": _utc_iso(row[5]),
                 }
             )
         return sources

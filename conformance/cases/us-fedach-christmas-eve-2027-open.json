@@ -1,0 +1,15 @@
+{
+  "id": "us-fedach-christmas-eve-2027-open",
+  "description": "Christmas 2027 is a Saturday; FedACH stays open on Friday 24 December.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "US-FEDACH"
+    ],
+    "date": "2027-12-24"
+  },
+  "expected": {
+    "is_business_day": true
+  }
+}

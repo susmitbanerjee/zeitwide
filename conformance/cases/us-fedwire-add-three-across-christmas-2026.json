@@ -1,0 +1,21 @@
+{
+  "id": "us-fedwire-add-three-across-christmas-2026",
+  "description": "Three Fedwire business days after Thursday 24 December 2026 skip Christmas and the weekend.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "add_business_days",
+    "calendars": [
+      "US-FEDWIRE"
+    ],
+    "date": "2026-12-24",
+    "days": 3
+  },
+  "expected": {
+    "date": "2026-12-30",
+    "skipped": [
+      "2026-12-25",
+      "2026-12-26",
+      "2026-12-27"
+    ]
+  }
+}

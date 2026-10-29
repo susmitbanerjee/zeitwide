@@ -1,0 +1,20 @@
+{
+  "id": "eu-t2-next-over-new-year-2027",
+  "description": "From Thursday 31 December 2026 the next T2 business day is Monday 4 January 2027.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "next_business_day",
+    "calendars": [
+      "EU-T2"
+    ],
+    "date": "2026-12-31"
+  },
+  "expected": {
+    "date": "2027-01-04",
+    "skipped": [
+      "2027-01-01",
+      "2027-01-02",
+      "2027-01-03"
+    ]
+  }
+}

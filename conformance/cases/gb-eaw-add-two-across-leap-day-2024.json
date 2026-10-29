@@ -1,0 +1,17 @@
+{
+  "id": "gb-eaw-add-two-across-leap-day-2024",
+  "description": "Two business days after Wednesday 28 February 2024 pass the leap day and land on Friday 1 March.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "add_business_days",
+    "calendars": [
+      "GB-EAW"
+    ],
+    "date": "2024-02-28",
+    "days": 2
+  },
+  "expected": {
+    "date": "2024-03-01",
+    "skipped": []
+  }
+}

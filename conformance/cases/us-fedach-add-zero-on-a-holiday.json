@@ -1,0 +1,17 @@
+{
+  "id": "us-fedach-add-zero-on-a-holiday",
+  "description": "Adding zero business days returns the start date, even when it is closed.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "add_business_days",
+    "calendars": [
+      "US-FEDACH"
+    ],
+    "date": "2026-11-26",
+    "days": 0
+  },
+  "expected": {
+    "date": "2026-11-26",
+    "skipped": []
+  }
+}

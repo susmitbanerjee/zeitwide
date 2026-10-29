@@ -1,0 +1,17 @@
+{
+  "id": "us-fedach-add-zero-on-a-saturday",
+  "description": "Adding zero business days to a Saturday returns the Saturday.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "add_business_days",
+    "calendars": [
+      "US-FEDACH"
+    ],
+    "date": "2026-11-28",
+    "days": 0
+  },
+  "expected": {
+    "date": "2026-11-28",
+    "skipped": []
+  }
+}

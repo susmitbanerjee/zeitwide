@@ -1,0 +1,17 @@
+{
+  "id": "any-open-out-of-range-is-not-guessed",
+  "description": "Even with any_open and FedNow open, a Fedwire date beyond coverage is out of range.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "US-FEDNOW",
+      "US-FEDWIRE"
+    ],
+    "date": "2099-01-02",
+    "combine": "any_open"
+  },
+  "expected": {
+    "error": "out_of_range"
+  }
+}

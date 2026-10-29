@@ -1,0 +1,19 @@
+{
+  "id": "us-fedwire-and-fednow-any-open-add-onto-saturday",
+  "description": "With any_open, FedNow keeps Saturday 28 November 2026 a business day.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "add_business_days",
+    "calendars": [
+      "US-FEDWIRE",
+      "US-FEDNOW"
+    ],
+    "date": "2026-11-27",
+    "days": 1,
+    "combine": "any_open"
+  },
+  "expected": {
+    "date": "2026-11-28",
+    "skipped": []
+  }
+}

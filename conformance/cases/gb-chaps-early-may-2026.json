@@ -1,0 +1,15 @@
+{
+  "id": "gb-chaps-early-may-2026",
+  "description": "CHAPS is closed on the early May bank holiday, Monday 4 May 2026.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "GB-CHAPS"
+    ],
+    "date": "2026-05-04"
+  },
+  "expected": {
+    "is_business_day": false
+  }
+}

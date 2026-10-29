@@ -31,6 +31,8 @@ dependencies {
     implementation(libs.spring.boot.starter.jdbc)
     implementation(libs.flyway.core)
     implementation(libs.flyway.database.postgresql)
+    implementation(libs.caffeine)
+    implementation(libs.bucket4j.postgresql)
     runtimeOnly(libs.postgresql)
     developmentOnly(libs.spring.boot.docker.compose)
 
@@ -41,6 +43,7 @@ dependencies {
     testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.testcontainers.junit.jupiter)
     testImplementation(libs.archunit.junit5)
+    testImplementation(libs.jqwik)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 
@@ -54,6 +57,12 @@ tasks.withType<JavaCompile>().configureEach {
 
 tasks.test {
     useJUnitPlatform()
+    // The conformance suite reads ../conformance (cases and golden dataset). Declared as an
+    // input so a changed case reruns the tests instead of reusing a cached pass.
+    inputs
+        .dir(layout.projectDirectory.dir("../conformance"))
+        .withPropertyName("conformance")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
     finalizedBy(tasks.jacocoTestReport)
 }
 

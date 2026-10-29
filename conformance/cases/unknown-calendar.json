@@ -1,0 +1,15 @@
+{
+  "id": "unknown-calendar",
+  "description": "XX-NOWHERE is not a SettleCal calendar.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "XX-NOWHERE"
+    ],
+    "date": "2026-11-24"
+  },
+  "expected": {
+    "error": "unknown_calendar"
+  }
+}

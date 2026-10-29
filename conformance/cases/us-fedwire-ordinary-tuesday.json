@@ -1,0 +1,15 @@
+{
+  "id": "us-fedwire-ordinary-tuesday",
+  "description": "Tuesday 24 November 2026 is an ordinary Fedwire business day.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "US-FEDWIRE"
+    ],
+    "date": "2026-11-24"
+  },
+  "expected": {
+    "is_business_day": true
+  }
+}

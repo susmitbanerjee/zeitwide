@@ -1,0 +1,15 @@
+{
+  "id": "us-fedwire-new-year-2028-no-friday-closure",
+  "description": "New Year's Day 2028 is a Saturday; Fedwire stays open on Friday 31 December 2027.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "US-FEDWIRE"
+    ],
+    "date": "2027-12-31"
+  },
+  "expected": {
+    "is_business_day": true
+  }
+}

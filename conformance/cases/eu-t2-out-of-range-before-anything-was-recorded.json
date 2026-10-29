@@ -1,0 +1,16 @@
+{
+  "id": "eu-t2-out-of-range-before-anything-was-recorded",
+  "description": "As of 1 January 2025 nothing was recorded for T2, so no date can be answered.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "EU-T2"
+    ],
+    "date": "2026-04-03",
+    "as_of": "2025-01-01T00:00:00Z"
+  },
+  "expected": {
+    "error": "out_of_range"
+  }
+}

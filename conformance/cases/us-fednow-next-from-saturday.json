@@ -1,0 +1,16 @@
+{
+  "id": "us-fednow-next-from-saturday",
+  "description": "FedNow's next business day after a Saturday is the Sunday.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "next_business_day",
+    "calendars": [
+      "US-FEDNOW"
+    ],
+    "date": "2026-11-28"
+  },
+  "expected": {
+    "date": "2026-11-29",
+    "skipped": []
+  }
+}

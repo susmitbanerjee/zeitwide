@@ -1,0 +1,15 @@
+{
+  "id": "us-fedwire-out-of-range-2099",
+  "description": "No source publishes Fedwire holidays for 2099, so the engine doesn't guess.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "US-FEDWIRE"
+    ],
+    "date": "2099-01-02"
+  },
+  "expected": {
+    "error": "out_of_range"
+  }
+}

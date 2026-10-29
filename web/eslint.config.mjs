@@ -15,7 +15,15 @@ const eslintConfig = defineConfig([
     },
   },
   prettier,
-  globalIgnores([".next/**", "out/**", "build/**", "coverage/**", "next-env.d.ts"]),
+  // src/api/schema.ts is generated from api/openapi.yaml.
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    "build/**",
+    "coverage/**",
+    "next-env.d.ts",
+    "src/api/schema.ts",
+  ]),
 ]);
 
 export default eslintConfig;

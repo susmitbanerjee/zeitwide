@@ -7,6 +7,8 @@ errorprone-plugin = "5.0.0"
 errorprone-core = "2.50.0"
 jacoco = "0.8.15"
 archunit = "1.5.1"
+jqwik = "1.9.3"
+bucket4j = "8.21.0"
 jib = "3.5.4"
 # Newer than Spring Boot 3.5 manages (11.7), for PostgreSQL 18 support; Aiven runs 18.
 flyway = "11.20.3"
@@ -27,6 +29,9 @@ testcontainers-junit-jupiter = { module = "org.testcontainers:junit-jupiter" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 errorprone-core = { module = "com.google.errorprone:error_prone_core", version.ref = "errorprone-core" }
 archunit-junit5 = { module = "com.tngtech.archunit:archunit-junit5", version.ref = "archunit" }
+jqwik = { module = "net.jqwik:jqwik", version.ref = "jqwik" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine" }
+bucket4j-postgresql = { module = "com.bucket4j:bucket4j_jdk17-postgresql", version.ref = "bucket4j" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }

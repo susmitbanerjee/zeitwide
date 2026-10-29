@@ -1,0 +1,17 @@
+{
+  "id": "de-and-eu-t2-whit-monday-2026-any-open",
+  "description": "Whit Monday 2026 closes Germany but not T2, so at least one is open.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "DE",
+      "EU-T2"
+    ],
+    "date": "2026-05-25",
+    "combine": "any_open"
+  },
+  "expected": {
+    "is_business_day": true
+  }
+}

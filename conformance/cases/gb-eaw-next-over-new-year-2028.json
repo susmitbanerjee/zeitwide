@@ -1,0 +1,20 @@
+{
+  "id": "gb-eaw-next-over-new-year-2028",
+  "description": "New Year's Day 2028 is a Saturday, so the bank holiday moves to Monday 3 January; from Friday 31 December 2027 the next business day is Tuesday 4 January 2028.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "next_business_day",
+    "calendars": [
+      "GB-EAW"
+    ],
+    "date": "2027-12-31"
+  },
+  "expected": {
+    "date": "2028-01-04",
+    "skipped": [
+      "2028-01-01",
+      "2028-01-02",
+      "2028-01-03"
+    ]
+  }
+}

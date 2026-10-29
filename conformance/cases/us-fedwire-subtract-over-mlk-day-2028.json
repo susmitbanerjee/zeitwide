@@ -1,0 +1,21 @@
+{
+  "id": "us-fedwire-subtract-over-mlk-day-2028",
+  "description": "One Fedwire business day before Tuesday 18 January 2028 is Friday 14 January, before the weekend and Martin Luther King Jr. Day.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "add_business_days",
+    "calendars": [
+      "US-FEDWIRE"
+    ],
+    "date": "2028-01-18",
+    "days": -1
+  },
+  "expected": {
+    "date": "2028-01-14",
+    "skipped": [
+      "2028-01-17",
+      "2028-01-16",
+      "2028-01-15"
+    ]
+  }
+}

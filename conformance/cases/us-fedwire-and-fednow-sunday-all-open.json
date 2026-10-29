@@ -1,0 +1,16 @@
+{
+  "id": "us-fedwire-and-fednow-sunday-all-open",
+  "description": "On a Sunday Fedwire is closed, so not both of Fedwire and FedNow are open.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "US-FEDWIRE",
+      "US-FEDNOW"
+    ],
+    "date": "2026-11-29"
+  },
+  "expected": {
+    "is_business_day": false
+  }
+}

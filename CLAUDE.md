@@ -44,6 +44,10 @@ folder trust prompt once). After editing a skill, run `/reload-plugins`.
 
 Everything at once: `make check` runs every linter and test suite; `make fmt` fixes
 formatting; `make setup` installs the pre-commit hooks and dependencies.
+`api/openapi.yaml` is the API contract: after changing it, `make generate-clients`
+regenerates `web/src/api/schema.ts` and `lib-python/src/settlecal/api_types.py` (tests in
+both fail while they are stale, and an `api/` test fails if the controllers and the file
+disagree).
 
 **Local stack** (Postgres 18 on 5432, Keycloak on 8180, fake GCS on 4443):
 

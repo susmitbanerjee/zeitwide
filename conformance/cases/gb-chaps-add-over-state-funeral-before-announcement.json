@@ -1,0 +1,21 @@
+{
+  "id": "gb-chaps-add-over-state-funeral-before-announcement",
+  "description": "As of 9 September 2022, one CHAPS business day after Friday 16 September 2022 was Monday 19 September.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "add_business_days",
+    "calendars": [
+      "GB-CHAPS"
+    ],
+    "date": "2022-09-16",
+    "days": 1,
+    "as_of": "2022-09-09T12:00:00Z"
+  },
+  "expected": {
+    "date": "2022-09-19",
+    "skipped": [
+      "2022-09-17",
+      "2022-09-18"
+    ]
+  }
+}

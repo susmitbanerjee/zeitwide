@@ -1,0 +1,15 @@
+{
+  "id": "us-fedwire-juneteenth-2027-friday-open",
+  "description": "The Federal Reserve Banks open on the Friday before a Saturday holiday, so Fedwire is open on 18 June 2027.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "US-FEDWIRE"
+    ],
+    "date": "2027-06-18"
+  },
+  "expected": {
+    "is_business_day": true
+  }
+}

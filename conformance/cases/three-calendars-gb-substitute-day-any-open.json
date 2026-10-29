@@ -1,0 +1,18 @@
+{
+  "id": "three-calendars-gb-substitute-day-any-open",
+  "description": "On 28 December 2026 Fedwire and T2 are open, so at least one of the three is.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "US-FEDWIRE",
+      "EU-T2",
+      "GB-CHAPS"
+    ],
+    "date": "2026-12-28",
+    "combine": "any_open"
+  },
+  "expected": {
+    "is_business_day": true
+  }
+}

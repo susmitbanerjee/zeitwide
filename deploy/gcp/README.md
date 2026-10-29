@@ -44,11 +44,11 @@ with your own credentials.
 
 | Client | Instances | Pool | Worst case |
 | --- | --- | --- | --- |
-| API (Hikari) | 2 | 5 | 10 |
+| API (Hikari) | 2 | 4 | 8 |
 | Keycloak | 1 | 3 | 3 |
 | Pipeline, regular run | 1 | 2 | 2 |
 | Pipeline, daily run overlapping a regular run | 1 | 2 + 1 for `pg_dump` | 3 |
-| **Total** | | | **18** |
+| **Total** | | | **16** |
 
 Raise `max_instances` or a pool size in `locals.tf` only after checking this sum.
 

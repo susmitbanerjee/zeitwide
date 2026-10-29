@@ -1,0 +1,19 @@
+{
+  "id": "de-next-over-unity-day-2026",
+  "description": "German Unity Day 2026 is a Saturday; from Friday 2 October the next business day is Monday 5 October.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "next_business_day",
+    "calendars": [
+      "DE"
+    ],
+    "date": "2026-10-02"
+  },
+  "expected": {
+    "date": "2026-10-05",
+    "skipped": [
+      "2026-10-03",
+      "2026-10-04"
+    ]
+  }
+}

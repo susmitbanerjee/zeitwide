@@ -1,0 +1,22 @@
+{
+  "id": "gb-chaps-subtract-over-easter-2028",
+  "description": "One CHAPS business day before Tuesday 18 April 2028 is Thursday 13 April, before Good Friday.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "add_business_days",
+    "calendars": [
+      "GB-CHAPS"
+    ],
+    "date": "2028-04-18",
+    "days": -1
+  },
+  "expected": {
+    "date": "2028-04-13",
+    "skipped": [
+      "2028-04-17",
+      "2028-04-16",
+      "2028-04-15",
+      "2028-04-14"
+    ]
+  }
+}

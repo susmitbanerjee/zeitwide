@@ -1,0 +1,15 @@
+{
+  "id": "us-fedwire-next-out-of-range",
+  "description": "The next business day after a date beyond coverage is out of range.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "next_business_day",
+    "calendars": [
+      "US-FEDWIRE"
+    ],
+    "date": "2099-01-02"
+  },
+  "expected": {
+    "error": "out_of_range"
+  }
+}

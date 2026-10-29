@@ -1,0 +1,21 @@
+{
+  "id": "gb-chaps-next-over-easter-2027",
+  "description": "From Thursday 25 March 2027 the next CHAPS business day is Tuesday 30 March, after Good Friday, the weekend and Easter Monday.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "next_business_day",
+    "calendars": [
+      "GB-CHAPS"
+    ],
+    "date": "2027-03-25"
+  },
+  "expected": {
+    "date": "2027-03-30",
+    "skipped": [
+      "2027-03-26",
+      "2027-03-27",
+      "2027-03-28",
+      "2027-03-29"
+    ]
+  }
+}

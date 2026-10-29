@@ -12,7 +12,12 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["src/**/*.{ts,tsx}"],
-      exclude: ["src/**/*.test.{ts,tsx}", "src/app/**/{layout,page}.tsx"],
+      exclude: [
+        "src/**/*.test.{ts,tsx}",
+        "src/app/**/{layout,page}.tsx",
+        // Types only, generated from api/openapi.yaml.
+        "src/api/schema.ts",
+      ],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },
   },

@@ -1,0 +1,16 @@
+{
+  "id": "gb-chaps-state-funeral-closed-after-announcement",
+  "description": "As of 11 September 2022, after GOV.UK listed the State Funeral bank holiday, CHAPS was closed on Monday 19 September 2022.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "is_business_day",
+    "calendars": [
+      "GB-CHAPS"
+    ],
+    "date": "2022-09-19",
+    "as_of": "2022-09-11T12:00:00Z"
+  },
+  "expected": {
+    "is_business_day": false
+  }
+}

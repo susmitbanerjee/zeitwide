@@ -1,0 +1,23 @@
+{
+  "id": "us-fedwire-and-gb-chaps-add-over-christmas-2026",
+  "description": "Fedwire reopens on 28 December 2026 but CHAPS doesn't, so with all_open the next business day after 24 December is Tuesday 29 December.",
+  "dataset_release": "2026.10.29.0",
+  "input": {
+    "operation": "add_business_days",
+    "calendars": [
+      "US-FEDWIRE",
+      "GB-CHAPS"
+    ],
+    "date": "2026-12-24",
+    "days": 1
+  },
+  "expected": {
+    "date": "2026-12-29",
+    "skipped": [
+      "2026-12-25",
+      "2026-12-26",
+      "2026-12-27",
+      "2026-12-28"
+    ]
+  }
+}
