@@ -13,10 +13,12 @@ from pydantic import BaseModel
 
 from settlecal_pipeline.calendars import CalendarDefinition
 from settlecal_pipeline.diff import (
+    CalendarYear,
     EntryKey,
     PendingCandidate,
     PublishedEntry,
     corroboration,
+    covered_years,
     entry_key,
     plan_diff,
 )
@@ -244,10 +246,13 @@ class PostgresPipelineStore:
         observations: Sequence[Observation],
         operator_calendars: frozenset[str] = frozenset(),
     ) -> DiffOutcome:
-        observation_ids = self.record_observations(snapshot_id, parser_version, observations)
-        keys = [entry_key(observation) for observation in observations]
+        # Whole years, so the plan sees closures the snapshot stopped listing.
+        years = covered_years(map(entry_key, observations))
         plan = plan_diff(
-            observations, self._published(keys), self._pending(keys), operator_calendars
+            observations, self._published(years), self._pending(years), operator_calendars
+        )
+        observation_ids = self.record_observations(
+            snapshot_id, parser_version, [*observations, *plan.not_listed]
         )
         with self._db.cursor() as cursor:
             cursor.executemany(
@@ -268,7 +273,7 @@ class PostgresPipelineStore:
                     for candidate in plan.new_candidates
                 ],
             )
-        pending = self._pending(keys)
+        pending = self._pending(years)
         # A candidate approved or rejected meanwhile is no longer pending; skip it.
         links = [
             (pending[key].id, observation_ids[key])
@@ -419,14 +424,18 @@ class PostgresPipelineStore:
         ).fetchall()
         return {(str(row[1]), _date(row[2])): _int(row[0]) for row in rows}
 
-    def _published(self, keys: Sequence[EntryKey]) -> dict[EntryKey, PublishedEntry]:
+    def _published(self, years: Iterable[CalendarYear]) -> dict[EntryKey, PublishedEntry]:
         rows = self._db.execute(
             """
-            SELECT calendar_id, entry_date, is_open, reason, basis FROM calendar_entry
-            WHERE upper_inf(recorded_during)
-              AND (calendar_id, entry_date) IN (SELECT * FROM unnest(%s::text[], %s::date[]))
+            SELECT e.calendar_id, e.entry_date, e.is_open, e.reason, e.basis
+            FROM calendar_entry AS e
+            JOIN unnest(%s::text[], %s::int[]) AS covered (calendar_id, year)
+              ON e.calendar_id = covered.calendar_id
+             AND e.entry_date >= make_date(covered.year, 1, 1)
+             AND e.entry_date < make_date(covered.year + 1, 1, 1)
+            WHERE upper_inf(e.recorded_during)
             """,
-            _unzip(keys),
+            _unzip(years),
         ).fetchall()
         return {
             (str(row[0]), _date(row[1])): PublishedEntry(
@@ -435,15 +444,18 @@ class PostgresPipelineStore:
             for row in rows
         }
 
-    def _pending(self, keys: Sequence[EntryKey]) -> dict[EntryKey, PendingCandidate]:
+    def _pending(self, years: Iterable[CalendarYear]) -> dict[EntryKey, PendingCandidate]:
         rows = self._db.execute(
             """
-            SELECT id, calendar_id, entry_date, (after_state ->> 'is_open')::boolean
-            FROM candidate_change
-            WHERE status = 'pending'
-              AND (calendar_id, entry_date) IN (SELECT * FROM unnest(%s::text[], %s::date[]))
+            SELECT c.id, c.calendar_id, c.entry_date, (c.after_state ->> 'is_open')::boolean
+            FROM candidate_change AS c
+            JOIN unnest(%s::text[], %s::int[]) AS covered (calendar_id, year)
+              ON c.calendar_id = covered.calendar_id
+             AND c.entry_date >= make_date(covered.year, 1, 1)
+             AND c.entry_date < make_date(covered.year + 1, 1, 1)
+            WHERE c.status = 'pending'
             """,
-            _unzip(keys),
+            _unzip(years),
         ).fetchall()
         return {
             (str(row[1]), _date(row[2])): PendingCandidate(_int(row[0]), bool(row[3]))
@@ -475,8 +487,9 @@ def _published_json(entry: PublishedEntry | None) -> Jsonb | None:
     return Jsonb({"is_open": entry.is_open, "reason": entry.reason, "basis": entry.basis})
 
 
-def _unzip(keys: Sequence[EntryKey]) -> tuple[list[str], list[date]]:
-    return [calendar_id for calendar_id, _ in keys], [entry_date for _, entry_date in keys]
+def _unzip(years: Iterable[CalendarYear]) -> tuple[list[str], list[int]]:
+    pairs = sorted(years)
+    return [calendar_id for calendar_id, _ in pairs], [year for _, year in pairs]
 
 
 def _required(row: TupleRow | None) -> TupleRow:

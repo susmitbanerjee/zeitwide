@@ -9,11 +9,20 @@ from settlecal_pipeline.models import Basis, Corroboration, Observation
 # The source that proposed a change plus one more that agrees.
 MIN_INDEPENDENT_SOURCES = 2
 
+# The reason on the open observation a snapshot implies by dropping a closure.
+NOT_LISTED_REASON = "No longer listed by the source"
+
 type EntryKey = tuple[str, date]
+type CalendarYear = tuple[str, int]
 
 
 def entry_key(observation: Observation) -> EntryKey:
     return (observation.calendar_id, observation.entry_date)
+
+
+def covered_years(keys: Iterable[EntryKey]) -> frozenset[CalendarYear]:
+    """The calendars and years a snapshot lists, which is all it can speak for."""
+    return frozenset((calendar_id, day.year) for calendar_id, day in keys)
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,6 +57,9 @@ class DiffPlan:
     supporting: tuple[Observation, ...]
     # Observations that contradict a pending candidate; logged, never linked.
     conflicting: tuple[Observation, ...]
+    # Open observations the snapshot implies by no longer listing a published closure.
+    # They are not in the snapshot, so the caller records them as its evidence.
+    not_listed: tuple[Observation, ...] = ()
 
 
 def plan_diff(
@@ -64,10 +76,18 @@ def plan_diff(
     projected entry that its operator now confirms: that proposes the same state with
     basis=published. ``operator_calendars`` lists the calendars whose operator runs this
     snapshot's source.
+
+    A published closure the snapshot no longer lists counts as an "open" observation, but
+    only in a calendar and year the snapshot lists, so a page that shows fewer years
+    removes nothing outside them. ``published`` and ``pending`` must therefore hold every
+    entry in those years, not only the dates the snapshot mentions.
     """
     by_date: dict[EntryKey, list[Observation]] = {}
     for observation in observations:
         by_date.setdefault(entry_key(observation), []).append(observation)
+    not_listed = _not_listed(by_date, published)
+    for row in not_listed:
+        by_date[entry_key(row)] = [row]
 
     new_candidates: list[NewCandidate] = []
     supporting: list[Observation] = []
@@ -87,7 +107,20 @@ def plan_diff(
         # Judged per date, not per row, so row order in the snapshot doesn't matter.
         for row in rows:
             (supporting if row.is_open == proposed_open else conflicting).append(row)
-    return DiffPlan(tuple(new_candidates), tuple(supporting), tuple(conflicting))
+    return DiffPlan(tuple(new_candidates), tuple(supporting), tuple(conflicting), not_listed)
+
+
+def _not_listed(
+    listed: Mapping[EntryKey, object], published: Mapping[EntryKey, PublishedEntry]
+) -> tuple[Observation, ...]:
+    covered = covered_years(listed)
+    return tuple(
+        Observation(calendar_id, day, is_open=True, reason=NOT_LISTED_REASON)
+        for (calendar_id, day), entry in sorted(published.items())
+        if not entry.is_open
+        and (calendar_id, day.year) in covered
+        and (calendar_id, day) not in listed
+    )
 
 
 def _matches_published(

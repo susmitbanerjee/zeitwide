@@ -25,6 +25,7 @@ import respx
 from google.cloud import storage
 from psycopg.rows import TupleRow, tuple_row
 from settlecal.conformance import Outcome, load_cases, run_cases
+from settlecal.engine import is_business_day
 from settlecal.release import parse_release
 from tenacity import wait_none
 
@@ -52,6 +53,7 @@ CASES = REPO_ROOT / "conformance" / "cases"
 DATASET_REPOSITORY = "settlecal/dataset"
 GITHUB_HOST = "api.github.com"
 GITHUB_PATH = f"/repos/{DATASET_REPOSITORY}"
+COLUMBUS_DAY = date(2027, 10, 11)
 MOVED_COLUMBUS_DAY = date(2027, 10, 12)
 SEED_YEARS = frozenset({2026, 2027})
 REVIEW = Review(reviewer="cli:test-reviewer", reason="Both Federal Reserve sources agree")
@@ -251,9 +253,11 @@ def test_fixture_change_flows_to_a_release_that_passes_conformance(world: World)
     change_fed_pages(world)
     world.run_due()
 
-    fedwire = world.candidate("US-FEDWIRE", MOVED_COLUMBUS_DAY)
+    # Both halves of the move: the new date closes and the old one reopens.
     with open_review_store(world.database.pipeline, world.calendars) as review:
-        assert review.approve(fedwire, REVIEW, world.clock()) is PublishResult.PUBLISHED
+        for entry_date in (MOVED_COLUMBUS_DAY, COLUMBUS_DAY):
+            candidate = world.candidate("US-FEDWIRE", entry_date)
+            assert review.approve(candidate, REVIEW, world.clock()) is PublishResult.PUBLISHED
     result = world.daily()
 
     assert result.ok, result.failed
@@ -261,9 +265,17 @@ def test_fixture_change_flows_to_a_release_that_passes_conformance(world: World)
     assert release_id == "2026.10.29.1"
     content = world.bucket.blob(release_object_key(release_id)).download_as_bytes()
     jsonschema.validate(json.loads(content), json.loads(RELEASE_SCHEMA.read_text(encoding="utf-8")))
-    outcomes = run_cases(parse_release(content), load_cases(CASES))
+    release = parse_release(content)
+    outcomes = run_cases(release, load_cases(CASES))
     assert [o for o in outcomes if o.outcome is Outcome.FAILED] == []
     assert any(o.passed for o in outcomes), "no conformance case applies to the release"
+    assert [
+        is_business_day(release, ["US-FEDWIRE"], day) for day in (COLUMBUS_DAY, MOVED_COLUMBUS_DAY)
+    ] == [True, False]
+    # The release keeps the version the reopening replaced, so as-of answers still see it.
+    replaced, reopened = release.calendar("US-FEDWIRE").entries[COLUMBUS_DAY]
+    assert replaced.recorded_to == reopened.recorded_from
+    assert not is_business_day(release, ["US-FEDWIRE"], COLUMBUS_DAY, as_of=replaced.recorded_from)
 
 
 def test_seed_publishes_first_versions_with_their_basis(world: World) -> None:
@@ -298,13 +310,16 @@ def test_change_becomes_corroborated_candidates(world: World) -> None:
 
     assert world.rows(
         """
-        SELECT calendar_id, corroboration, source_count, status FROM candidate_change
-        WHERE entry_date = %s ORDER BY calendar_id
+        SELECT entry_date, calendar_id, after_state ->> 'is_open', corroboration, source_count,
+               status
+        FROM candidate_change WHERE entry_date IN (%s, %s) ORDER BY entry_date, calendar_id
         """,
-        (MOVED_COLUMBUS_DAY,),
+        (COLUMBUS_DAY, MOVED_COLUMBUS_DAY),
     ) == [
-        ("US-FEDACH", "corroborated", 2, "pending"),
-        ("US-FEDWIRE", "corroborated", 2, "pending"),
+        (COLUMBUS_DAY, "US-FEDACH", "true", "corroborated", 2, "pending"),
+        (COLUMBUS_DAY, "US-FEDWIRE", "true", "corroborated", 2, "pending"),
+        (MOVED_COLUMBUS_DAY, "US-FEDACH", "false", "corroborated", 2, "pending"),
+        (MOVED_COLUMBUS_DAY, "US-FEDWIRE", "false", "corroborated", 2, "pending"),
     ]
 
 
