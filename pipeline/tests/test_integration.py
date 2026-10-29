@@ -49,7 +49,10 @@ PRIMARY_PAGE = holiday_page(
     ("2026-11-26", "Thanksgiving Day", "Closed"),
     ("2026-12-25", "Christmas Day", "Closed"),
 )
-SECOND_PAGE = holiday_page(("2026-11-26", "Thanksgiving", "Closed"))
+# It lists every 2026 closure it knows, or diffing would propose reopening the rest.
+SECOND_PAGE = holiday_page(
+    ("2026-11-26", "Thanksgiving", "Closed"), ("2026-12-25", "Christmas", "Closed")
+)
 
 
 @pytest.fixture
@@ -145,7 +148,7 @@ def test_new_pages_become_snapshots_observations_and_candidates(
     snapshots = rows(database.admin, "SELECT object_key FROM source_snapshot ORDER BY id")
     assert len(snapshots) == 2
     assert all(bucket.blob(str(key)).exists() for (key,) in snapshots)
-    assert rows(database.admin, "SELECT count(*) FROM observation") == [(4,)]
+    assert rows(database.admin, "SELECT count(*) FROM observation") == [(5,)]
     # Christmas matches the published entry, so only two dates change.
     assert rows(
         database.admin,

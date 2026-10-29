@@ -3,6 +3,7 @@ from datetime import date
 import pytest
 
 from settlecal_pipeline.diff import (
+    NOT_LISTED_REASON,
     PendingCandidate,
     PublishedEntry,
     corroboration,
@@ -12,6 +13,9 @@ from settlecal_pipeline.models import Basis, Corroboration, Observation
 
 THANKSGIVING = date(2026, 11, 26)
 KEY = ("US-FEDWIRE", THANKSGIVING)
+COLUMBUS_DAY = date(2026, 10, 12)
+COLUMBUS_KEY = ("US-FEDWIRE", COLUMBUS_DAY)
+PUBLISHED_COLUMBUS_DAY = {COLUMBUS_KEY: PublishedEntry(False, "Columbus Day", Basis.PUBLISHED)}
 
 
 def closed(reason: str = "Thanksgiving Day") -> Observation:
@@ -84,6 +88,59 @@ def test_planning_twice_gives_the_same_plan() -> None:
     observations = [closed()]
 
     assert plan_diff(observations, {}, {}) == plan_diff(observations, {}, {})
+
+
+def test_dropped_closure_proposes_reopening_the_date() -> None:
+    plan = plan_diff([closed()], PUBLISHED_COLUMBUS_DAY, {})
+
+    reopened = Observation("US-FEDWIRE", COLUMBUS_DAY, True, NOT_LISTED_REASON)
+    assert plan.not_listed == (reopened,)
+    assert [(c.entry_date, c.before, c.after) for c in plan.new_candidates] == [
+        (THANKSGIVING, None, closed()),
+        (COLUMBUS_DAY, PUBLISHED_COLUMBUS_DAY[COLUMBUS_KEY], reopened),
+    ]
+    assert plan.supporting == (closed(), reopened)
+
+
+@pytest.mark.parametrize(
+    "listed",
+    [
+        Observation("US-FEDWIRE", date(2027, 11, 25), False, "Thanksgiving Day"),
+        Observation("US-FEDACH", THANKSGIVING, False, "Thanksgiving Day"),
+    ],
+    ids=["other-year", "other-calendar"],
+)
+def test_closure_outside_what_the_snapshot_lists_stays(listed: Observation) -> None:
+    plan = plan_diff([listed], PUBLISHED_COLUMBUS_DAY, {})
+
+    assert plan.not_listed == ()
+    assert [c.entry_date for c in plan.new_candidates] == [listed.entry_date]
+
+
+def test_dropped_open_entry_is_no_change() -> None:
+    published = {COLUMBUS_KEY: PublishedEntry(True, "Open", Basis.PUBLISHED)}
+
+    plan = plan_diff([closed()], published, {})
+
+    assert (plan.not_listed, [c.entry_date for c in plan.new_candidates]) == ((), [THANKSGIVING])
+
+
+def test_dropped_closure_already_proposed_only_supports_it() -> None:
+    pending = {COLUMBUS_KEY: PendingCandidate(id=7, is_open=True)}
+
+    plan = plan_diff([closed()], PUBLISHED_COLUMBUS_DAY, pending)
+
+    assert [c.entry_date for c in plan.new_candidates] == [THANKSGIVING]
+    assert plan.supporting == (closed(), *plan.not_listed)
+    assert plan.conflicting == ()
+
+
+def test_dropped_closure_conflicts_with_a_pending_closure() -> None:
+    pending = {COLUMBUS_KEY: PendingCandidate(id=7, is_open=False)}
+
+    plan = plan_diff([closed()], PUBLISHED_COLUMBUS_DAY, pending)
+
+    assert plan.conflicting == plan.not_listed
 
 
 @pytest.mark.parametrize(
