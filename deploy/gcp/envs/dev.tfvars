@@ -5,6 +5,9 @@ billing_account = "01D9BB-5B0C19-F66CB0"
 github_repository    = "susmitbanerjee/Zeit"
 github_repository_id = "1436841628"
 
+receipt_key_id = "sc-2026-10"
+receipt_public_keys_json = "[{\"key_id\":\"sc-2026-10\",\"public_key\":\"-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAN591c3SENCQArrPMxqG6p9lOf/s39awzcUwcXSSxrgE=\\n-----END PUBLIC KEY-----\\n\",\"valid_from\":\"2026-10-28T09:28:06.69439Z\",\"valid_to\":null}]"
+
 web_origin         = "https://zeit-dev-6eaae4e0.web.app"
 dataset_repository = "susmitbanerjee/zeit-dataset"
 bot_contact_url    = "https://github.com/susmitbanerjee/zeit-dataset#crawler"
