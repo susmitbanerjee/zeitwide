@@ -1,5 +1,5 @@
 # Raw source snapshots, keyed by SHA-256 and kept forever: they are the evidence
-# behind every answer, so prod can't be destroyed with objects in it.
+# behind every answer, so Terraform must never empty a bucket during deletion.
 resource "google_storage_bucket" "snapshots" {
   name     = "${var.project_id}-${local.prefix}-snapshots"
   location = var.region
@@ -7,7 +7,7 @@ resource "google_storage_bucket" "snapshots" {
   storage_class               = "STANDARD"
   uniform_bucket_level_access = true
   public_access_prevention    = "enforced"
-  force_destroy               = local.env != "prod"
+  force_destroy               = false
 
   versioning {
     enabled = true
@@ -25,7 +25,7 @@ resource "google_storage_bucket" "backups" {
   storage_class               = "STANDARD"
   uniform_bucket_level_access = true
   public_access_prevention    = "enforced"
-  force_destroy               = local.env != "prod"
+  force_destroy               = false
 
   lifecycle_rule {
     condition {
