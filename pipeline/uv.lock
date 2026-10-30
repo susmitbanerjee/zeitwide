@@ -1121,7 +1121,7 @@ wheels = [
 ]
 
 [[package]]
-name = "settlecal"
+name = "zeitwide"
 version = "0.1.0"
 source = { editable = "../lib-python" }
 
@@ -1139,7 +1139,7 @@ dev = [
 ]
 
 [[package]]
-name = "settlecal-pipeline"
+name = "zeitwide-pipeline"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
@@ -1165,7 +1165,7 @@ dev = [
     { name = "pytest-cov" },
     { name = "respx" },
     { name = "ruff" },
-    { name = "settlecal" },
+    { name = "zeitwide" },
     { name = "testcontainers" },
     { name = "types-jsonschema" },
 ]
@@ -1194,7 +1194,7 @@ dev = [
     { name = "pytest-cov", specifier = ">=7.0" },
     { name = "respx", specifier = ">=0.23.1" },
     { name = "ruff", specifier = ">=0.14" },
-    { name = "settlecal", editable = "../lib-python" },
+    { name = "zeitwide", editable = "../lib-python" },
     { name = "testcontainers", extras = ["postgres"], specifier = ">=4.15.0" },
     { name = "types-jsonschema", specifier = ">=4.26.0.20261006" },
 ]

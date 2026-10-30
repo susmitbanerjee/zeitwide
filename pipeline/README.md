@@ -1,16 +1,16 @@
-# settlecal-pipeline
+# zeitwide-pipeline
 
 Python workers that **write** calendar data: source monitors, parsers, diffing,
 corroboration, the review CLI and the release builder. Runs as Cloud Run Jobs.
 
 ```bash
 uv sync
-uv run settlecal-pipeline health
+uv run zeitwide-pipeline health
 ```
 
 ## Commands
 
-The `settlecal` command (also installed as `settlecal-pipeline`, the name the Cloud Run
+The `zeitwide` command (also installed as `zeitwide-pipeline`, the name the Cloud Run
 jobs use):
 
 | Command | What it does |
@@ -25,7 +25,7 @@ jobs use):
 | `resume-source ID` | Checks a suspended source again. |
 | `dry-run [ID …]`, `save-fixture ID NAME` | Fetch and parse live sources; save a real snapshot for golden tests. |
 
-`--reviewer` (or `SETTLECAL_REVIEWER`) is recorded with every decision. The CLI connects
+`--reviewer` (or `ZEITWIDE_REVIEWER`) is recorded with every decision. The CLI connects
 with the pipeline's database login, so anyone who can run it can approve. The web review
 screen will record the reviewer's Keycloak subject instead.
 
@@ -60,7 +60,7 @@ rendered with sorted keys, so the same `as_of` always gives the same bytes.
 **Distribution:**
 - `dataset_release` records the release's SHA-256.
 - The file goes to the snapshots bucket as `releases/<id>.json`.
-- A pull request adds `releases/<id>.json` to `SETTLECAL_DATASET_REPOSITORY`.
+- A pull request adds `releases/<id>.json` to `ZEITWIDE_DATASET_REPOSITORY`.
 - If an upload or pull request fails, the next `daily` rebuilds the latest release,
   checks it against the recorded SHA-256 and finishes the job.
 
@@ -76,7 +76,7 @@ dates that already have an entry.
 
 ## How a check works
 
-`settlecal-pipeline run-due` is the Cloud Run job's entry point. It syncs every source
+`zeitwide-pipeline run-due` is the Cloud Run job's entry point. It syncs every source
 module into the `source` table, defers one Procrastinate job per source that is due
 (Postgres-backed queue, one queued and one running job per source), works the queue
 until it is empty, and exits. Nothing runs between invocations: Cloud Scheduler starts
@@ -86,7 +86,7 @@ Each `check_source` job runs four steps, each with its own OpenTelemetry span:
 
 1. **Monitor** (`fetch.py`, `storage.py`): `httpx` with 5 s connect and 30 s read
    timeouts, and `tenacity` retries with jittered backoff for timeouts, 429 and 5xx.
-   It sends the `SettleCalBot` User-Agent with a contact URL, obeys `robots.txt`,
+   It sends the `ZeitwideBot` User-Agent with a contact URL, obeys `robots.txt`,
    waits at least 1 s between requests to the same host, and sends
    `If-None-Match`/`If-Modified-Since`. It follows only same-host https redirects and
    caps the size. New bytes go to Cloud Storage as `sha256/<hex>` (create-only), then
@@ -104,18 +104,18 @@ Each `check_source` job runs four steps, each with its own OpenTelemetry span:
 Steps 3 and 4 and the success record are one transaction. A failed check (fetch or parse)
 increments `source_state.consecutive_failures`. After 3 in a row the source is
 suspended: it isn't checked again until someone runs
-`settlecal-pipeline resume-source <id>`.
+`zeitwide-pipeline resume-source <id>`.
 
 **Signals:** JSON logs from structlog with `severity`, `trace_id`, `source_id` and
 `snapshot_sha256`. Metrics:
-- `settlecal.source.last_success_timestamp` (gauge): alert when it is older than twice
+- `zeitwide.source.last_success_timestamp` (gauge): alert when it is older than twice
   the source's schedule.
-- `settlecal.source.parse_failures` (counter).
-- `settlecal.source.suspended` (gauge): alert when it is 1.
+- `zeitwide.source.parse_failures` (counter).
+- `zeitwide.source.suspended` (gauge): alert when it is 1.
 
 ## Adding a source
 
-Add one module to `src/settlecal_pipeline/sources/catalog/` that defines `SOURCE` (see
+Add one module to `src/zeitwide_pipeline/sources/catalog/` that defines `SOURCE` (see
 `sources/base.py` for the protocol). Then add golden tests: a stored real snapshot in
 `tests/fixtures/<source id>/` and its expected observations as JSON. When the page
 changes layout, add the new snapshot and keep the old ones. No other file changes;
@@ -125,20 +125,20 @@ the registry finds the module.
 
 | Variable | Meaning |
 | --- | --- |
-| `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGSSLMODE`, … | libpq connection (Cloud Run sets these), or `SETTLECAL_DATABASE_CONNINFO` |
-| `SETTLECAL_SNAPSHOT_BUCKET` | Snapshot bucket |
-| `SETTLECAL_BOT_CONTACT_URL` | https page about the crawler, sent in the User-Agent |
-| `SETTLECAL_DB_POOL_MAX_SIZE` | Connections in total (2–5; default 2) |
-| `SETTLECAL_GCS_ENDPOINT` | fake-gcs-server URL locally; unset on GCP |
-| `SETTLECAL_BACKUP_BUCKET`, `SETTLECAL_BACKUP_DB_USER`, `SETTLECAL_BACKUP_DB_PASSWORD`, `SETTLECAL_BACKUP_DATABASES` | `daily`'s `pg_dump` (skipped with a warning when unset) |
-| `SETTLECAL_DATASET_REPOSITORY`, `GITHUB_TOKEN` | `daily`'s release pull request (skipped with a warning when unset) |
+| `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGSSLMODE`, … | libpq connection (Cloud Run sets these), or `ZEITWIDE_DATABASE_CONNINFO` |
+| `ZEITWIDE_SNAPSHOT_BUCKET` | Snapshot bucket |
+| `ZEITWIDE_BOT_CONTACT_URL` | https page about the crawler, sent in the User-Agent |
+| `ZEITWIDE_DB_POOL_MAX_SIZE` | Connections in total (2–5; default 2) |
+| `ZEITWIDE_GCS_ENDPOINT` | fake-gcs-server URL locally; unset on GCP |
+| `ZEITWIDE_BACKUP_BUCKET`, `ZEITWIDE_BACKUP_DB_USER`, `ZEITWIDE_BACKUP_DB_PASSWORD`, `ZEITWIDE_BACKUP_DATABASES` | `daily`'s `pg_dump` (skipped with a warning when unset) |
+| `ZEITWIDE_DATASET_REPOSITORY`, `GITHUB_TOKEN` | `daily`'s release pull request (skipped with a warning when unset) |
 | `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS`, `OTEL_SERVICE_NAME` | OTLP export; nothing is exported when unset |
 
 Locally, against `docker compose up` (start the API once first so Flyway creates the
 schema):
 
 ```bash
-SETTLECAL_DATABASE_CONNINFO=postgresql://settlecal:settlecal@localhost:5432/settlecal SETTLECAL_SNAPSHOT_BUCKET=settlecal-snapshots SETTLECAL_GCS_ENDPOINT=http://localhost:4443 SETTLECAL_BOT_CONTACT_URL=https://github.com/OWNER/settlecal uv run settlecal-pipeline run-due
+ZEITWIDE_DATABASE_CONNINFO=postgresql://zeitwide:zeitwide@localhost:5432/zeitwide ZEITWIDE_SNAPSHOT_BUCKET=zeitwide-snapshots ZEITWIDE_GCS_ENDPOINT=http://localhost:4443 ZEITWIDE_BOT_CONTACT_URL=https://github.com/OWNER/zeitwide uv run zeitwide-pipeline run-due
 ```
 
 ## Schema
@@ -152,5 +152,5 @@ its SQL migrations between the two versions, then bump the pin. Never run
 
 `uv run python -m pytest` runs the unit tests (HTTP mocked with respx) and a
 Testcontainers run. That run starts Postgres and fake-gcs-server, applies `api/`'s
-migrations, and runs `run-due` end to end as the least-privilege `settlecal_pipeline`
+migrations, and runs `run-due` end to end as the least-privilege `zeitwide_pipeline`
 login. It needs Docker.

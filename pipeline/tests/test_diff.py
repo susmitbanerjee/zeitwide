@@ -2,14 +2,14 @@ from datetime import date
 
 import pytest
 
-from settlecal_pipeline.diff import (
+from zeitwide_pipeline.diff import (
     NOT_LISTED_REASON,
     PendingCandidate,
     PublishedEntry,
     corroboration,
     plan_diff,
 )
-from settlecal_pipeline.models import Basis, Corroboration, Observation
+from zeitwide_pipeline.models import Basis, Corroboration, Observation
 
 THANKSGIVING = date(2026, 11, 26)
 KEY = ("US-FEDWIRE", THANKSGIVING)

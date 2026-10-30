@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Adds a value to one of SettleCal's secrets, typed at a hidden prompt.
+# Adds a value to one of Zeitwide's secrets, typed at a hidden prompt.
 #
 #   bash deploy/gcp/add-secret.sh github-release-token
 #
@@ -10,7 +10,7 @@ set -euo pipefail
 PROJECT="${PROJECT:-project-6eaae4e0-3164-4e31-bc4}"
 ENVIRONMENT="${ENVIRONMENT:-dev}"
 NAME="${1:?Usage: add-secret.sh SECRET (for example github-release-token)}"
-SECRET="settlecal-$ENVIRONMENT-$NAME"
+SECRET="zeitwide-$ENVIRONMENT-$NAME"
 
 if command -v gcloud.cmd >/dev/null 2>&1; then GCLOUD=gcloud.cmd; else GCLOUD=gcloud; fi
 

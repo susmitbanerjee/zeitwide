@@ -1,15 +1,15 @@
 {
-  "name": "settlecal",
-  "description": "Claude Code plugins for developing SettleCal",
+  "name": "zeitwide",
+  "description": "Claude Code plugins for developing Zeitwide",
   "owner": {
     "name": "Susmit Banerjee",
     "email": "susmit@swarmbase.net"
   },
   "plugins": [
     {
-      "name": "settlecal-dev",
-      "source": "./plugins/settlecal-dev",
-      "description": "SettleCal coding standards packaged as skills"
+      "name": "zeitwide-dev",
+      "source": "./plugins/zeitwide-dev",
+      "description": "Zeitwide coding standards packaged as skills"
     }
   ]
 }

@@ -3,13 +3,13 @@ from pathlib import Path
 
 import pytest
 
-from settlecal_pipeline.db import RegisteredSource, SourceState
-from settlecal_pipeline.fetch import Validators
-from settlecal_pipeline.jobs import due_sources
-from settlecal_pipeline.schedule import is_due, iso_duration
-from settlecal_pipeline.sources import SourceRegistry, UnknownSourceError, builtin_registry, catalog
 from support.doubles import START
 from support.fixture_source import HolidayTableParser, HolidayTableSource
+from zeitwide_pipeline.db import RegisteredSource, SourceState
+from zeitwide_pipeline.fetch import Validators
+from zeitwide_pipeline.jobs import due_sources
+from zeitwide_pipeline.schedule import is_due, iso_duration
+from zeitwide_pipeline.sources import SourceRegistry, UnknownSourceError, builtin_registry, catalog
 
 SOURCE = HolidayTableSource(
     id="fixture-holidays",

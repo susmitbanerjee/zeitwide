@@ -3,7 +3,7 @@ from datetime import date, time
 import pytest
 from pydantic import ValidationError
 
-from settlecal_pipeline.calendars import (
+from zeitwide_pipeline.calendars import (
     CalendarDefinition,
     Observance,
     OperatingHours,

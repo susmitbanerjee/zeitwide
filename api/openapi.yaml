@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: SettleCal API
+  title: Zeitwide API
   version: 1.0.0
   summary: Is this a business day, and what is the next one? Every answer with its evidence.
   description: |
@@ -10,11 +10,11 @@ info:
     conformance suite.
 
     **Determinism.** Answers come from the latest dataset release. Every response names it
-    (`dataset_release`, and the `SettleCal-Dataset-Release` header) with the revision of each
+    (`dataset_release`, and the `Zeitwide-Dataset-Release` header) with the revision of each
     calendar it used, so the same request against the same release always gives the same
     answer.
 
-    **As of.** `as_of` answers with what SettleCal had recorded at that instant (the
+    **As of.** `as_of` answers with what Zeitwide had recorded at that instant (the
     default is now). A release holds everything recorded up to its own `as_of`, so a later
     `as_of` is answered as of the release; the response's `as_of` says which instant was
     used.
@@ -31,15 +31,19 @@ info:
     name: API terms of service; dataset under CC BY-NC 4.0
     identifier: CC-BY-NC-4.0
 servers:
-  - url: https://api.settlecal.com
+  - url: https://api.zeitwide.com
   - url: http://localhost:8080
     description: Local development
 security:
   - {}
   - apiKey: []
+  - bearerAuth: []
 tags:
   - name: calendars
   - name: business-days
+  - name: changes
+  - name: receipts
+  - name: account
 
 paths:
   /v1/calendars:
@@ -53,8 +57,8 @@ paths:
         "200":
           description: The calendars in the dataset release.
           headers:
-            SettleCal-Dataset-Release: { $ref: "#/components/headers/DatasetRelease" }
-            SettleCal-As-Of: { $ref: "#/components/headers/AsOf" }
+            Zeitwide-Dataset-Release: { $ref: "#/components/headers/DatasetRelease" }
+            Zeitwide-As-Of: { $ref: "#/components/headers/AsOf" }
             RateLimit-Limit: { $ref: "#/components/headers/RateLimitLimit" }
             RateLimit-Remaining: { $ref: "#/components/headers/RateLimitRemaining" }
           content:
@@ -81,9 +85,9 @@ paths:
         "200":
           description: The answer and the entry or rule that decided it.
           headers:
-            SettleCal-Dataset-Release: { $ref: "#/components/headers/DatasetRelease" }
-            SettleCal-Calendar-Revision: { $ref: "#/components/headers/CalendarRevision" }
-            SettleCal-As-Of: { $ref: "#/components/headers/AsOf" }
+            Zeitwide-Dataset-Release: { $ref: "#/components/headers/DatasetRelease" }
+            Zeitwide-Calendar-Revision: { $ref: "#/components/headers/CalendarRevision" }
+            Zeitwide-As-Of: { $ref: "#/components/headers/AsOf" }
             RateLimit-Limit: { $ref: "#/components/headers/RateLimitLimit" }
             RateLimit-Remaining: { $ref: "#/components/headers/RateLimitRemaining" }
           content:
@@ -120,9 +124,9 @@ paths:
         "200":
           description: The closures in date order.
           headers:
-            SettleCal-Dataset-Release: { $ref: "#/components/headers/DatasetRelease" }
-            SettleCal-Calendar-Revision: { $ref: "#/components/headers/CalendarRevision" }
-            SettleCal-As-Of: { $ref: "#/components/headers/AsOf" }
+            Zeitwide-Dataset-Release: { $ref: "#/components/headers/DatasetRelease" }
+            Zeitwide-Calendar-Revision: { $ref: "#/components/headers/CalendarRevision" }
+            Zeitwide-As-Of: { $ref: "#/components/headers/AsOf" }
             RateLimit-Limit: { $ref: "#/components/headers/RateLimitLimit" }
             RateLimit-Remaining: { $ref: "#/components/headers/RateLimitRemaining" }
           content:
@@ -140,6 +144,8 @@ paths:
       operationId: checkBusinessDay
       tags: [business-days]
       summary: Whether a date is a business day on several calendars combined
+      parameters:
+        - $ref: "#/components/parameters/AsOf"
       requestBody:
         required: true
         content:
@@ -149,9 +155,9 @@ paths:
         "200":
           description: The combined answer, with each calendar's answer as evidence.
           headers:
-            SettleCal-Dataset-Release: { $ref: "#/components/headers/DatasetRelease" }
-            SettleCal-Calendar-Revision: { $ref: "#/components/headers/CalendarRevision" }
-            SettleCal-As-Of: { $ref: "#/components/headers/AsOf" }
+            Zeitwide-Dataset-Release: { $ref: "#/components/headers/DatasetRelease" }
+            Zeitwide-Calendar-Revision: { $ref: "#/components/headers/CalendarRevision" }
+            Zeitwide-As-Of: { $ref: "#/components/headers/AsOf" }
             RateLimit-Limit: { $ref: "#/components/headers/RateLimitLimit" }
             RateLimit-Remaining: { $ref: "#/components/headers/RateLimitRemaining" }
           content:
@@ -169,6 +175,8 @@ paths:
       operationId: addBusinessDays
       tags: [business-days]
       summary: Move a number of business days from a date
+      parameters:
+        - $ref: "#/components/parameters/AsOf"
       description: |
         Moves `days` business days from `date`, backwards when negative. `date` itself
         doesn't count, and 0 returns `date`. Every day passed over is listed in `skipped`,
@@ -182,9 +190,9 @@ paths:
         "200":
           description: Where the move landed.
           headers:
-            SettleCal-Dataset-Release: { $ref: "#/components/headers/DatasetRelease" }
-            SettleCal-Calendar-Revision: { $ref: "#/components/headers/CalendarRevision" }
-            SettleCal-As-Of: { $ref: "#/components/headers/AsOf" }
+            Zeitwide-Dataset-Release: { $ref: "#/components/headers/DatasetRelease" }
+            Zeitwide-Calendar-Revision: { $ref: "#/components/headers/CalendarRevision" }
+            Zeitwide-As-Of: { $ref: "#/components/headers/AsOf" }
             RateLimit-Limit: { $ref: "#/components/headers/RateLimitLimit" }
             RateLimit-Remaining: { $ref: "#/components/headers/RateLimitRemaining" }
           content:
@@ -203,6 +211,8 @@ paths:
       tags: [business-days]
       summary: The first business day after a date
       description: Never `date` itself; the same as adding one business day.
+      parameters:
+        - $ref: "#/components/parameters/AsOf"
       requestBody:
         required: true
         content:
@@ -212,9 +222,9 @@ paths:
         "200":
           description: The next business day.
           headers:
-            SettleCal-Dataset-Release: { $ref: "#/components/headers/DatasetRelease" }
-            SettleCal-Calendar-Revision: { $ref: "#/components/headers/CalendarRevision" }
-            SettleCal-As-Of: { $ref: "#/components/headers/AsOf" }
+            Zeitwide-Dataset-Release: { $ref: "#/components/headers/DatasetRelease" }
+            Zeitwide-Calendar-Revision: { $ref: "#/components/headers/CalendarRevision" }
+            Zeitwide-As-Of: { $ref: "#/components/headers/AsOf" }
             RateLimit-Limit: { $ref: "#/components/headers/RateLimitLimit" }
             RateLimit-Remaining: { $ref: "#/components/headers/RateLimitRemaining" }
           content:
@@ -227,12 +237,316 @@ paths:
         "429": { $ref: "#/components/responses/RateLimited" }
         "503": { $ref: "#/components/responses/DatasetUnavailable" }
 
+  /v1/changes:
+    get:
+      operationId: listChanges
+      tags: [changes]
+      summary: List published calendar changes using keyset pagination
+      parameters:
+        - name: calendars
+          in: query
+          required: false
+          description: Up to 10 calendar IDs; omit to include all calendars.
+          schema:
+            type: array
+            maxItems: 10
+            uniqueItems: true
+            items: { $ref: "#/components/schemas/CalendarId" }
+          style: form
+          explode: true
+        - name: since
+          in: query
+          required: true
+          schema: { type: string, format: date-time }
+        - name: types
+          in: query
+          required: false
+          description: Change types to include; omit to include all types.
+          schema:
+            type: array
+            maxItems: 4
+            uniqueItems: true
+            items: { $ref: "#/components/schemas/ChangeType" }
+          style: form
+          explode: true
+        - name: cursor
+          in: query
+          required: false
+          schema: { type: string, maxLength: 256 }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+      responses:
+        "200":
+          description: Changes ordered by publication instant and stable event ID.
+          headers:
+            RateLimit-Limit: { $ref: "#/components/headers/RateLimitLimit" }
+            RateLimit-Remaining: { $ref: "#/components/headers/RateLimitRemaining" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ChangePage" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /v1/receipts/verify:
+    post:
+      operationId: verifyReceipt
+      tags: [receipts]
+      summary: Verify a receipt against the configured public key history
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Receipt" }
+      responses:
+        "200":
+          description: "`valid` is false for a modified payload, signature, ID or unknown key."
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReceiptVerification" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+
+  /.well-known/zeitwide-keys.json:
+    get:
+      operationId: getReceiptKeys
+      tags: [receipts]
+      summary: Public Ed25519 verification keys and validity intervals
+      responses:
+        "200":
+          description: Current and retained historical public keys.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReceiptKeySet" }
+
+  /.well-known/oauth-protected-resource/mcp:
+    get:
+      operationId: getMcpProtectedResourceMetadata
+      tags: [mcp]
+      summary: OAuth protected resource metadata for the MCP endpoint
+      responses:
+        "200":
+          description: MCP resource identifier, authorization server, and supported bearer method.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [resource, authorization_servers, bearer_methods_supported]
+                properties:
+                  resource: { type: string, format: uri }
+                  authorization_servers:
+                    type: array
+                    items: { type: string, format: uri }
+                  bearer_methods_supported:
+                    type: array
+                    items: { type: string, enum: [header] }
+
+  /v1/account/api-keys:
+    get:
+      operationId: listApiKeys
+      tags: [account]
+      summary: List API keys for the authenticated account
+      security:
+        - bearerAuth: []
+        - apiKey: []
+      responses:
+        "200":
+          description: Up to 100 key metadata rows. Secret values are never returned by this operation.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ApiKeySummary" }
+        "401": { $ref: "#/components/responses/InvalidApiKey" }
+    post:
+      operationId: createApiKey
+      tags: [account]
+      summary: Create an API key and return its value once
+      security:
+        - bearerAuth: []
+        - apiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, minLength: 1, maxLength: 100 }
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          description: A 16–128 character key. Reuse is rejected so a retry cannot create another secret.
+          schema: { type: string, minLength: 16, maxLength: 128 }
+      responses:
+        "201":
+          description: The key value is present only in this response.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CreatedApiKey" }
+        "401": { $ref: "#/components/responses/InvalidApiKey" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "409":
+          description: API key account limit reached or this idempotency key was already used.
+          content:
+            application/problem+json:
+              schema: { $ref: "#/components/schemas/Problem" }
+  /v1/account/api-keys/{id}:
+    delete:
+      operationId: revokeApiKey
+      tags: [account]
+      summary: Revoke one API key belonging to the authenticated account
+      security:
+        - bearerAuth: []
+        - apiKey: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: The key was revoked or was already absent. }
+        "401": { $ref: "#/components/responses/InvalidApiKey" }
+
+  /v1/account/webhooks:
+    get:
+      operationId: listWebhooks
+      tags: [account]
+      summary: List webhook subscriptions without their signing secrets
+      security:
+        - bearerAuth: []
+        - apiKey: []
+      responses:
+        "200":
+          description: Up to 100 active subscriptions for the authenticated account.
+          content:
+            application/json:
+              schema:
+                type: array
+                maxItems: 100
+                items: { $ref: "#/components/schemas/WebhookSubscription" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      operationId: createWebhook
+      tags: [account]
+      summary: Create a webhook and return its signing secret once
+      security:
+        - bearerAuth: []
+        - apiKey: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: { type: string, minLength: 16, maxLength: 128 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WebhookConfiguration" }
+      responses:
+        "201":
+          description: The generated signing secret is returned only in this response.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CreatedWebhook" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "409": { $ref: "#/components/responses/IdempotencyConflict" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+  /v1/account/webhooks/{id}:
+    put:
+      operationId: updateWebhook
+      tags: [account]
+      summary: Update a webhook URL and event filter
+      security:
+        - bearerAuth: []
+        - apiKey: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WebhookConfiguration" }
+      responses:
+        "200":
+          description: The updated subscription; its signing secret remains hidden.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebhookSubscription" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      operationId: deleteWebhook
+      tags: [account]
+      summary: Disable a webhook and abandon its pending deliveries
+      security:
+        - bearerAuth: []
+        - apiKey: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: The subscription was disabled or was already absent. }
+  /v1/account/webhooks/{id}/test:
+    post:
+      operationId: sendWebhookTestEvent
+      tags: [account]
+      summary: Send a signed test event to a webhook
+      security:
+        - bearerAuth: []
+        - apiKey: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Test event delivery result; receiver response bodies are discarded.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebhookTestResult" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /internal/outbox/drain:
+    post:
+      operationId: drainOutbox
+      tags: [webhooks]
+      summary: Fan out and deliver due webhook events
+      security:
+        - schedulerOidc: []
+      responses:
+        "200":
+          description: Counts for this drain invocation.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OutboxDrainResult" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
 components:
   securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Keycloak access token with issuer zeitwide and audience zeitwide-api.
     apiKey:
       type: http
       scheme: bearer
       description: An API key such as `sc_live_AbCd1234_…`, shown once when it is created.
+    schedulerOidc:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Google-issued Cloud Scheduler OIDC token with the configured audience and service-account email.
 
   parameters:
     CalendarIdPath:
@@ -244,7 +558,7 @@ components:
       name: as_of
       in: query
       required: false
-      description: Answer with what SettleCal had recorded at this instant. Default now.
+      description: Answer with what Zeitwide had recorded at this instant. Default now.
       schema: { type: string, format: date-time }
 
   headers:
@@ -275,6 +589,21 @@ components:
       content:
         application/problem+json:
           schema: { $ref: "#/components/schemas/Problem" }
+    Unauthorized:
+      description: "`unauthorized`: authentication is required."
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+    NotFound:
+      description: "`not_found`: no active resource has this ID."
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+    IdempotencyConflict:
+      description: "`idempotency_key_reused`: this key was already used."
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
     UnknownCalendar:
       description: "`unknown_calendar`: no calendar has this ID."
       content:
@@ -300,6 +629,132 @@ components:
           schema: { $ref: "#/components/schemas/Problem" }
 
   schemas:
+    CreatedApiKey:
+      type: object
+      required: [id, name, prefix, key, created_at]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        prefix: { type: string, pattern: "^sc_live_[A-Za-z0-9]{8}$" }
+        key: { type: string, pattern: "^sc_live_[A-Za-z0-9]{8}_[A-Za-z0-9]{43}$" }
+        created_at: { type: string, format: date-time }
+    WebhookConfiguration:
+      type: object
+      required: [url, events]
+      properties:
+        url: { type: string, format: uri, maxLength: 2048, description: HTTPS URL on a public host using port 443. }
+        events:
+          type: array
+          minItems: 1
+          maxItems: 16
+          uniqueItems: true
+          items: { $ref: "#/components/schemas/ChangeType" }
+    CreatedWebhook:
+      allOf:
+        - $ref: "#/components/schemas/WebhookSubscription"
+        - type: object
+          required: [secret]
+          properties:
+            secret: { type: string, pattern: "^whsec_[A-Za-z0-9_-]{43}$" }
+    WebhookSubscription:
+      type: object
+      required: [id, url, events, created_at]
+      properties:
+        id: { type: string, format: uuid }
+        url: { type: string, format: uri }
+        events:
+          type: array
+          items: { $ref: "#/components/schemas/ChangeType" }
+        created_at: { type: string, format: date-time }
+    WebhookTestResult:
+      type: object
+      required: [succeeded, response_status]
+      properties:
+        succeeded: { type: boolean }
+        response_status: { type: [integer, "null"], minimum: 100, maximum: 599 }
+    OutboxDrainResult:
+      type: object
+      required: [outbox_events, claimed, succeeded, retried, failed]
+      properties:
+        outbox_events: { type: integer, minimum: 0 }
+        claimed: { type: integer, minimum: 0 }
+        succeeded: { type: integer, minimum: 0 }
+        retried: { type: integer, minimum: 0 }
+        failed: { type: integer, minimum: 0 }
+    ApiKeySummary:
+      type: object
+      required: [id, name, prefix, created_at]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        prefix: { type: string, pattern: "^sc_live_[A-Za-z0-9]{8}$" }
+        created_at: { type: string, format: date-time }
+        last_used_at: { type: [string, "null"], format: date-time }
+        revoked_at: { type: [string, "null"], format: date-time }
+    ReceiptPayload:
+      type: object
+      required: [request, answer, dataset_release, calendar_revisions, issued_at]
+      properties:
+        request: { type: object, additionalProperties: true }
+        answer: { type: object, additionalProperties: true }
+        dataset_release: { $ref: "#/components/schemas/DatasetRelease" }
+        calendar_revisions: { $ref: "#/components/schemas/CalendarRevisions" }
+        issued_at: { type: string, format: date-time }
+    Receipt:
+      type: object
+      required: [id, payload, payload_hash, key_id, signature]
+      properties:
+        id: { type: string, pattern: "^rcpt_[0-9a-f]{32}$" }
+        payload: { $ref: "#/components/schemas/ReceiptPayload" }
+        payload_hash: { type: string, pattern: "^[0-9a-f]{64}$" }
+        key_id: { type: string, maxLength: 64 }
+        signature: { type: string, pattern: "^[A-Za-z0-9_-]{86}$" }
+    ReceiptVerification:
+      type: object
+      required: [valid]
+      properties:
+        valid: { type: boolean }
+    ReceiptKeySet:
+      type: object
+      required: [keys]
+      properties:
+        keys:
+          type: array
+          items: { $ref: "#/components/schemas/ReceiptPublicKey" }
+    ReceiptPublicKey:
+      type: object
+      required: [key_id, public_key, valid_from, valid_to]
+      properties:
+        key_id: { type: string }
+        public_key: { type: string, description: PEM-encoded Ed25519 SubjectPublicKeyInfo. }
+        valid_from: { type: string, format: date-time }
+        valid_to: { type: [string, "null"], format: date-time }
+    ChangeType:
+      type: string
+      enum: [closure_added, closure_removed, closure_changed, basis_changed]
+    ChangePage:
+      type: object
+      required: [changes, next_cursor, since, limit]
+      properties:
+        changes:
+          type: array
+          maxItems: 100
+          items: { $ref: "#/components/schemas/Change" }
+        next_cursor: { type: [string, "null"], maxLength: 256 }
+        since: { type: string, format: date-time }
+        limit: { type: integer, minimum: 1, maximum: 100 }
+    Change:
+      type: object
+      required: [id, type, calendar_id, entry_date, after, notice_days, published_at]
+      properties:
+        id: { type: integer, format: int64, minimum: 1 }
+        type: { $ref: "#/components/schemas/ChangeType" }
+        calendar_id: { $ref: "#/components/schemas/CalendarId" }
+        entry_date: { type: string, format: date }
+        before: { type: [object, "null"], additionalProperties: true }
+        after: { type: object, additionalProperties: true }
+        notice_days: { type: integer }
+        published_at: { type: string, format: date-time }
     CalendarId:
       type: string
       pattern: "^[A-Z0-9]+(-[A-Z0-9]+)*$"
@@ -317,7 +772,7 @@ components:
     Basis:
       type: string
       enum: [published, projected]
-      description: "`published` by the operator, or `projected` by SettleCal from other sources."
+      description: "`published` by the operator, or `projected` by Zeitwide from other sources."
     CalendarRevisions:
       type: object
       description: Each calendar's revision at `as_of`, by calendar ID.
@@ -383,7 +838,7 @@ components:
     DayAnswer:
       type: object
       required:
-        [date, is_business_day, combine, calendars, as_of, dataset_release, calendar_revisions]
+        [date, is_business_day, combine, calendars, as_of, dataset_release, calendar_revisions, receipt]
       properties:
         date: { type: string, format: date }
         is_business_day: { type: boolean }
@@ -394,6 +849,7 @@ components:
         as_of: { type: string, format: date-time }
         dataset_release: { $ref: "#/components/schemas/DatasetRelease" }
         calendar_revisions: { $ref: "#/components/schemas/CalendarRevisions" }
+        receipt: { $ref: "#/components/schemas/Receipt" }
     SkippedDay:
       type: object
       required: [date, calendars]
@@ -405,7 +861,7 @@ components:
     Shifted:
       type: object
       required:
-        [start, days, date, combine, calendars, skipped, as_of, dataset_release, calendar_revisions]
+        [start, days, date, combine, calendars, skipped, as_of, dataset_release, calendar_revisions, receipt]
       properties:
         start: { type: string, format: date }
         days: { type: integer }
@@ -422,6 +878,7 @@ components:
         as_of: { type: string, format: date-time }
         dataset_release: { $ref: "#/components/schemas/DatasetRelease" }
         calendar_revisions: { $ref: "#/components/schemas/CalendarRevisions" }
+        receipt: { $ref: "#/components/schemas/Receipt" }
 
     Closure:
       type: object
@@ -437,7 +894,7 @@ components:
           items: { $ref: "#/components/schemas/Source" }
     ClosureList:
       type: object
-      required: [calendar_id, from, to, closures, as_of, dataset_release, calendar_revision]
+      required: [calendar_id, from, to, closures, as_of, dataset_release, calendar_revision, calendar_revisions, receipt]
       properties:
         calendar_id: { $ref: "#/components/schemas/CalendarId" }
         from: { type: string, format: date }
@@ -448,6 +905,8 @@ components:
         as_of: { type: string, format: date-time }
         dataset_release: { $ref: "#/components/schemas/DatasetRelease" }
         calendar_revision: { type: integer, minimum: 0 }
+        calendar_revisions: { $ref: "#/components/schemas/CalendarRevisions" }
+        receipt: { $ref: "#/components/schemas/Receipt" }
 
     Coverage:
       type: object
@@ -479,13 +938,15 @@ components:
         coverage: { $ref: "#/components/schemas/Coverage" }
     CalendarList:
       type: object
-      required: [calendars, as_of, dataset_release]
+      required: [calendars, as_of, dataset_release, calendar_revisions, receipt]
       properties:
         calendars:
           type: array
           items: { $ref: "#/components/schemas/Calendar" }
         as_of: { type: string, format: date-time }
         dataset_release: { $ref: "#/components/schemas/DatasetRelease" }
+        calendar_revisions: { $ref: "#/components/schemas/CalendarRevisions" }
+        receipt: { $ref: "#/components/schemas/Receipt" }
 
     Problem:
       type: object
@@ -502,6 +963,13 @@ components:
           enum:
             - validation_failed
             - invalid_api_key
+            - unauthorized
+            - forbidden
+            - length_required
+            - payload_too_large
+            - api_key_limit_reached
+            - idempotency_key_reused
+            - webhook_limit_reached
             - unknown_calendar
             - out_of_range
             - rate_limited

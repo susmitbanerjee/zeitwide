@@ -1,7 +1,7 @@
 [project]
-name = "settlecal"
+name = "zeitwide"
 version = "0.1.0"
-description = "Open SettleCal library: business-day answers from the bundled SettleCal dataset, plus a local MCP server."
+description = "Open Zeitwide library: business-day answers from the bundled Zeitwide dataset, plus a local MCP server."
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 license = "MIT"
@@ -35,7 +35,7 @@ line-length = 100
 target-version = "py312"
 src = ["src", "tests"]
 # Generated from api/openapi.yaml by `make generate-clients`; a test checks it is current.
-extend-exclude = ["src/settlecal/api_types.py"]
+extend-exclude = ["src/zeitwide/api_types.py"]
 
 [tool.ruff.lint]
 select = [
@@ -66,7 +66,7 @@ filterwarnings = ["error"]
 
 [tool.coverage.run]
 branch = true
-source_pkgs = ["settlecal"]
+source_pkgs = ["zeitwide"]
 
 [tool.coverage.report]
 fail_under = 80

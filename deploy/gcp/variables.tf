@@ -84,6 +84,36 @@ variable "auth_base_url" {
   default     = null
 }
 
+variable "google_client_id" {
+  description = "Google OAuth client ID for Keycloak's identity provider."
+  type        = string
+  default     = ""
+}
+
+variable "microsoft_client_id" {
+  description = "Microsoft Entra OAuth client ID for Keycloak's identity provider."
+  type        = string
+  default     = ""
+}
+
+variable "github_client_id" {
+  description = "GitHub OAuth application client ID for Keycloak's identity provider."
+  type        = string
+  default     = ""
+}
+
+variable "receipt_key_id" {
+  description = "Active Ed25519 receipt key ID, also present in receipt_public_keys_json."
+  type        = string
+  default     = ""
+}
+
+variable "receipt_public_keys_json" {
+  description = "JSON public key ring; include old public keys until their receipts no longer need verification."
+  type        = string
+  default     = "[]"
+}
+
 variable "dataset_repository" {
   description = "Public GitHub repository, as owner/name, that receives a pull request for each dataset release."
   type        = string
@@ -95,7 +125,7 @@ variable "dataset_repository" {
 }
 
 variable "bot_contact_url" {
-  description = "Page that explains SettleCal's crawler and how to reach us; sent in the pipeline's User-Agent."
+  description = "Page that explains Zeitwide's crawler and how to reach us; sent in the pipeline's User-Agent."
   type        = string
 
   validation {

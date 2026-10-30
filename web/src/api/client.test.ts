@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createSettleCalClient, type DayAnswer } from "./client";
+import { createZeitwideClient, type DayAnswer } from "./client";
 
 const ANSWER: DayAnswer = {
   date: "2026-11-26",
@@ -10,6 +10,20 @@ const ANSWER: DayAnswer = {
   as_of: "2026-10-29T00:00:00Z",
   dataset_release: "2026.10.29.0",
   calendar_revisions: { "US-FEDWIRE": 1 },
+  receipt: {
+    id: "rcpt_0123456789abcdef0123456789abcdef",
+    payload: {
+      request: {},
+      answer: {},
+      dataset_release: "2026.10.29.0",
+      calendar_revisions: { "US-FEDWIRE": 1 },
+      issued_at: "2026-10-29T00:00:00Z",
+    },
+    payload_hash: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    key_id: "test-key",
+    signature:
+      "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+  },
 };
 
 function recordingFetch(status: number, body: unknown) {
@@ -21,7 +35,7 @@ function recordingFetch(status: number, body: unknown) {
   return { fetch: fetch as typeof globalThis.fetch, requests };
 }
 
-describe("createSettleCalClient", () => {
+describe("createZeitwideClient", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
   });
@@ -29,7 +43,7 @@ describe("createSettleCalClient", () => {
   it("uses the global fetch by default", async () => {
     const { fetch, requests } = recordingFetch(200, ANSWER);
     vi.stubGlobal("fetch", fetch);
-    const client = createSettleCalClient({ baseUrl: "https://api.test" });
+    const client = createZeitwideClient({ baseUrl: "https://api.test" });
 
     await client.GET("/v1/calendars");
 
@@ -38,7 +52,7 @@ describe("createSettleCalClient", () => {
 
   it("asks for a day on the documented path", async () => {
     const { fetch, requests } = recordingFetch(200, ANSWER);
-    const client = createSettleCalClient({ baseUrl: "https://api.test", fetch });
+    const client = createZeitwideClient({ baseUrl: "https://api.test", fetch });
 
     const { data } = await client.GET("/v1/calendars/{id}/days/{date}", {
       params: { path: { id: "US-FEDWIRE", date: "2026-11-26" } },
@@ -51,7 +65,7 @@ describe("createSettleCalClient", () => {
 
   it("sends an API key as a bearer token", async () => {
     const { fetch, requests } = recordingFetch(200, ANSWER);
-    const client = createSettleCalClient({
+    const client = createZeitwideClient({
       baseUrl: "https://api.test",
       apiKey: "sc_test_x",
       fetch,
@@ -72,7 +86,7 @@ describe("createSettleCalClient", () => {
   it("returns problem details as the error", async () => {
     const problem = { title: "Out of range", status: 422, code: "out_of_range" };
     const { fetch } = recordingFetch(422, problem);
-    const client = createSettleCalClient({ baseUrl: "https://api.test", fetch });
+    const client = createZeitwideClient({ baseUrl: "https://api.test", fetch });
 
     const { data, error } = await client.POST("/v1/business-days/add", {
       body: { calendars: ["US-FEDWIRE"], date: "2099-01-02", days: 1 },

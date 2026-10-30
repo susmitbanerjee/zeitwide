@@ -11,8 +11,8 @@ from pathlib import Path
 import jsonschema
 import pytest
 
-from settlecal import load_release
-from settlecal.conformance import Outcome, load_cases, run_cases
+from zeitwide import load_release
+from zeitwide.conformance import Outcome, load_cases, run_cases
 
 REPO_ROOT = Path(__file__).parents[2]
 CASES = REPO_ROOT / "conformance" / "cases"

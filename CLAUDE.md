@@ -1,6 +1,6 @@
-# SettleCal
+# Zeitwide
 
-SettleCal answers "is this a business day, and what is the next one?" for payment rails
+Zeitwide answers "is this a business day, and what is the next one?" for payment rails
 (Fedwire, FedACH, FedNow, T2, CHAPS) and public holiday calendars, with every answer
 backed by evidence. Python monitors official sources, parses them into observations,
 and publishes a change only after two independent sources agree and a human reviewer
@@ -13,7 +13,7 @@ design is in [docs/design.md](docs/design.md).
 ## Before coding
 
 **Load the three skills before coding:** `java-spring-best-practices`,
-`python-best-practices` and `clean-secure-code-review`. They ship in the `settlecal-dev`
+`python-best-practices` and `clean-secure-code-review`. They ship in the `zeitwide-dev`
 plugin under `plugins/`, which `.claude/settings.json` enables for this repo (accept the
 folder trust prompt once). After editing a skill, run `/reload-plugins`.
 
@@ -45,7 +45,7 @@ folder trust prompt once). After editing a skill, run `/reload-plugins`.
 Everything at once: `make check` runs every linter and test suite; `make fmt` fixes
 formatting; `make setup` installs the pre-commit hooks and dependencies.
 `api/openapi.yaml` is the API contract: after changing it, `make generate-clients`
-regenerates `web/src/api/schema.ts` and `lib-python/src/settlecal/api_types.py` (tests in
+regenerates `web/src/api/schema.ts` and `lib-python/src/zeitwide/api_types.py` (tests in
 both fail while they are stale, and an `api/` test fails if the controllers and the file
 disagree).
 
@@ -57,7 +57,7 @@ docker compose down           # or: make down
 ```
 
 Keycloak admin console: http://localhost:8180 (admin / admin locally; override in `.env`,
-see `.env.example`). Realm `settlecal`, public client `settlecal-web`, role `reviewer`.
+see `.env.example`). Realm `zeitwide`, public client `zeitwide-web`, role `reviewer`.
 
 **api/** needs a JDK 17+ as `JAVA_HOME` to run Gradle; it compiles with a Java 21 toolchain.
 
@@ -76,7 +76,7 @@ uv sync
 uv run python -m ruff format . && uv run python -m ruff check .
 uv run python -m mypy                       # strict
 uv run python -m pytest --cov
-uv run settlecal-pipeline health            # pipeline only
+uv run zeitwide-pipeline health            # pipeline only
 ```
 
 **web/**

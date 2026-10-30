@@ -1,6 +1,6 @@
 locals {
   env    = terraform.workspace
-  app    = "settlecal"
+  app    = "zeitwide"
   prefix = "${local.app}-${local.env}"
 
   labels = {
@@ -11,15 +11,15 @@ locals {
   # Postgres runs on Aiven's free plan, which allows 20 connections. The per-client
   # pool caps below keep the worst case at 16 (README has the table).
   db = {
-    settlecal_database = "settlecal"
-    keycloak_database  = "keycloak"
-    api_user           = "settlecal_api"
-    pipeline_user      = "settlecal_pipeline"
-    backup_user        = "settlecal_backup"
-    keycloak_user      = "keycloak"
-    api_pool_max       = 4
-    pipeline_pool_max  = 2
-    keycloak_pool_max  = 3
+    zeitwide_database = "zeitwide"
+    keycloak_database = "keycloak"
+    api_user          = "zeitwide_api"
+    pipeline_user     = "zeitwide_pipeline"
+    backup_user       = "zeitwide_backup"
+    keycloak_user     = "keycloak"
+    api_pool_max      = 4
+    pipeline_pool_max = 2
+    keycloak_pool_max = 3
   }
 
   db_ca_mount_dir = "/secrets/db-ca"
@@ -31,15 +31,15 @@ locals {
     keycloak = 1
   }
 
-  realm = "settlecal"
+  realm = "zeitwide"
 
   # Runtime identities. Scheduler jobs get their own two accounts so the token that
   # can start the pipeline is never the one sent to the API.
   service_accounts = {
-    api         = "Cloud Run service settlecal-api"
-    web         = "Cloud Run service settlecal-web"
+    api         = "Cloud Run service zeitwide-api"
+    web         = "Cloud Run service zeitwide-web"
     keycloak    = "Cloud Run service keycloak"
-    pipeline    = "Cloud Run job settlecal-pipeline"
+    pipeline    = "Cloud Run job zeitwide-pipeline"
     sched-run   = "Cloud Scheduler: starts the pipeline job"
     sched-drain = "Cloud Scheduler: calls the API outbox drain"
     deployer    = "GitHub Actions deploys via Workload Identity Federation"
@@ -48,18 +48,22 @@ locals {
   # Secret containers only. Values are added by hand (README), never in code.
   # Each secret lists the runtime accounts that may read it.
   secrets = {
-    "db-host"                 = ["api", "pipeline", "keycloak"]
-    "db-port"                 = ["api", "pipeline", "keycloak"]
-    "db-ca-cert"              = ["api", "pipeline", "keycloak"]
-    "db-api-password"         = ["api"]
-    "db-pipeline-password"    = ["pipeline"]
-    "db-backup-password"      = ["pipeline"]
-    "db-keycloak-password"    = ["keycloak"]
-    "keycloak-admin-password" = ["keycloak"]
-    "receipt-signing-key"     = ["api"]
-    "web-auth-secret"         = ["web"]
-    "otlp-headers"            = ["api", "pipeline", "web"]
-    "github-release-token"    = ["pipeline"]
+    "db-host"                       = ["api", "pipeline", "keycloak"]
+    "db-port"                       = ["api", "pipeline", "keycloak"]
+    "db-ca-cert"                    = ["api", "pipeline", "keycloak"]
+    "db-api-password"               = ["api"]
+    "db-pipeline-password"          = ["pipeline"]
+    "db-backup-password"            = ["pipeline"]
+    "db-keycloak-password"          = ["keycloak"]
+    "keycloak-admin-password"       = ["keycloak"]
+    "google-oauth-client-secret"    = ["keycloak"]
+    "microsoft-oauth-client-secret" = ["keycloak"]
+    "github-oauth-client-secret"    = ["keycloak"]
+    "webhook-encryption-key"        = ["api"]
+    "receipt-signing-key"           = ["api"]
+    "web-auth-secret"               = ["web"]
+    "otlp-headers"                  = ["api", "pipeline", "web"]
+    "github-release-token"          = ["pipeline"]
   }
 
   secret_access = merge([
@@ -69,6 +73,10 @@ locals {
   ]...)
 
   api_url = coalesce(var.api_base_url, google_cloud_run_v2_service.api.uri)
+  api_public_url = coalesce(
+    var.api_base_url,
+    "https://${local.prefix}-api-${data.google_project.this.number}.${var.region}.run.app"
+  )
 
   # Cloud Run's deterministic URL, known before the service exists, so Keycloak can
   # be told its own hostname.

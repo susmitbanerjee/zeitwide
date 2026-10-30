@@ -8,12 +8,13 @@ import httpx
 import pytest
 import respx
 
-from settlecal_pipeline.backup import DatabaseBackup
-from settlecal_pipeline.calendars import load_catalog
-from settlecal_pipeline.diff import PublishedEntry, plan_diff
-from settlecal_pipeline.github import DatasetRepository, GitHubError
-from settlecal_pipeline.models import Basis, ChangeType, Observation
-from settlecal_pipeline.publish import (
+from support.doubles import START, FakeClock, MemorySnapshotStore
+from zeitwide_pipeline.backup import DatabaseBackup
+from zeitwide_pipeline.calendars import load_catalog
+from zeitwide_pipeline.diff import PublishedEntry, plan_diff
+from zeitwide_pipeline.github import DatasetRepository, GitHubError
+from zeitwide_pipeline.models import Basis, ChangeType, Observation
+from zeitwide_pipeline.publish import (
     ChangeEvent,
     EntryState,
     basis_for,
@@ -21,20 +22,19 @@ from settlecal_pipeline.publish import (
     is_urgent,
     notice_days,
 )
-from settlecal_pipeline.release import (
+from zeitwide_pipeline.release import (
     ReleaseRecord,
     next_release_id,
     release_object_key,
     render,
     revisions_changed,
 )
-from settlecal_pipeline.review_db import Review
-from settlecal_pipeline.seed import Evidence, plan_seed
-from support.doubles import START, FakeClock, MemorySnapshotStore
+from zeitwide_pipeline.review_db import Review
+from zeitwide_pipeline.seed import Evidence, plan_seed
 
 CLOSED = EntryState(is_open=False, reason="Thanksgiving Day", basis=Basis.PUBLISHED)
 DAY = date(2026, 11, 26)
-REPOSITORY = "settlecal/dataset"
+REPOSITORY = "zeitwide/dataset"
 API = f"https://api.github.com/repos/{REPOSITORY}"
 
 
@@ -173,14 +173,14 @@ def github() -> Iterator[respx.MockRouter]:
 
 def test_release_pull_request_adds_the_file_on_its_own_branch(github: respx.MockRouter) -> None:
     github.get(
-        f"{API}/pulls", params={"state": "all", "head": "settlecal:release/2026.10.28.1"}
+        f"{API}/pulls", params={"state": "all", "head": "zeitwide:release/2026.10.28.1"}
     ).respond(200, json=[])
     github.get(API).respond(200, json={"default_branch": "main"})
     github.get(f"{API}/git/ref/heads/main").respond(200, json={"object": {"sha": "abc"}})
     branch = github.post(f"{API}/git/refs").respond(201, json={})
     put = github.put(f"{API}/contents/releases/2026.10.28.1.json").respond(201, json={})
     github.post(f"{API}/pulls").respond(
-        201, json={"html_url": "https://github.com/settlecal/dataset/pull/1"}
+        201, json={"html_url": "https://github.com/zeitwide/dataset/pull/1"}
     )
 
     with httpx.Client() as client:
@@ -188,7 +188,7 @@ def test_release_pull_request_adds_the_file_on_its_own_branch(github: respx.Mock
             "2026.10.28.1", b"{}\n"
         )
 
-    assert url == "https://github.com/settlecal/dataset/pull/1"
+    assert url == "https://github.com/zeitwide/dataset/pull/1"
     assert json.loads(branch.calls.last.request.content) == {
         "ref": "refs/heads/release/2026.10.28.1",
         "sha": "abc",
@@ -234,20 +234,20 @@ def test_backup_dumps_each_database_without_a_shell() -> None:
     backup = DatabaseBackup(
         store,
         FakeClock(datetime(2026, 10, 28, 3, 15, tzinfo=UTC)),
-        user="settlecal_backup",
+        user="zeitwide_backup",
         password="pw",
-        databases=["settlecal", "keycloak"],
+        databases=["zeitwide", "keycloak"],
         runner=runner,
     )
 
     keys = backup.run()
 
     assert keys == [
-        "pg_dump/settlecal/20261028T031500Z.dump",
+        "pg_dump/zeitwide/20261028T031500Z.dump",
         "pg_dump/keycloak/20261028T031500Z.dump",
     ]
     assert calls[0] == (
-        ["pg_dump", "--format=custom", "--no-owner", "--no-privileges", "--dbname=settlecal"],
+        ["pg_dump", "--format=custom", "--no-owner", "--no-privileges", "--dbname=zeitwide"],
         "pw",
     )
     assert store.objects[keys[1]] == (b"dump", "application/octet-stream")

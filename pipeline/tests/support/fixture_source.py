@@ -1,15 +1,15 @@
 """A stand-in source whose page is an HTML table of dates, like many official pages.
 
-It exists only in tests; real sources live in ``settlecal_pipeline/sources/catalog/``.
+It exists only in tests; real sources live in ``zeitwide_pipeline/sources/catalog/``.
 """
 
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from html.parser import HTMLParser
 
-from settlecal_pipeline.models import Observation, SnapshotMeta, SourceRole
-from settlecal_pipeline.sources import ParseError
-from settlecal_pipeline.sources.base import DocumentLink
+from zeitwide_pipeline.models import Observation, SnapshotMeta, SourceRole
+from zeitwide_pipeline.sources import ParseError
+from zeitwide_pipeline.sources.base import DocumentLink
 
 EXPECTED_HEADER = ("Date", "Holiday", "Status")
 STATUS_IS_OPEN = {"Closed": False, "Open": True}

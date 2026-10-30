@@ -10,7 +10,7 @@ from opentelemetry.sdk.trace import ReadableSpan, TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 
-from settlecal_pipeline.telemetry import SOURCE_ATTRIBUTE, Telemetry
+from zeitwide_pipeline.telemetry import SOURCE_ATTRIBUTE, Telemetry
 
 START = datetime(2026, 10, 28, 6, 0, tzinfo=UTC)
 

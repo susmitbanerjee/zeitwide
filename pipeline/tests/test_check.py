@@ -10,15 +10,15 @@ import pytest
 import respx
 from tenacity import wait_none
 
-from settlecal_pipeline.calendars import CalendarDefinition
-from settlecal_pipeline.check import MAX_CONSECUTIVE_FAILURES, CheckResult, SourceChecker
-from settlecal_pipeline.db import DiffOutcome, RegisteredSource, SourceState
-from settlecal_pipeline.fetch import Fetched, Fetcher, HostThrottle, Validators, new_client
-from settlecal_pipeline.models import Corroboration, Observation
-from settlecal_pipeline.sources import Source
-from settlecal_pipeline.storage import snapshot_key
 from support.doubles import FakeClock, MemorySnapshotStore, RecordingTelemetry
 from support.fixture_source import HolidayTableParser, HolidayTableSource, holiday_page
+from zeitwide_pipeline.calendars import CalendarDefinition
+from zeitwide_pipeline.check import MAX_CONSECUTIVE_FAILURES, CheckResult, SourceChecker
+from zeitwide_pipeline.db import DiffOutcome, RegisteredSource, SourceState
+from zeitwide_pipeline.fetch import Fetched, Fetcher, HostThrottle, Validators, new_client
+from zeitwide_pipeline.models import Corroboration, Observation
+from zeitwide_pipeline.sources import Source
+from zeitwide_pipeline.storage import snapshot_key
 
 URL = "https://fixtures.example.test/holidays"
 SOURCE = HolidayTableSource(id="fixture-holidays", url=URL, parser=HolidayTableParser("US-FEDWIRE"))
@@ -202,7 +202,7 @@ def test_success_records_last_success_timestamp(
 
     checker.check(SOURCE, SOURCE_DB_ID, FakeStore())
 
-    assert recorder.metric("settlecal.source.last_success_timestamp", SOURCE.id) == pytest.approx(
+    assert recorder.metric("zeitwide.source.last_success_timestamp", SOURCE.id) == pytest.approx(
         FakeClock().now.timestamp()
     )
 
@@ -252,7 +252,7 @@ def test_parse_failure_is_counted_and_recorded(
     assert store.state.consecutive_failures == 1
     assert store.state.last_parsed_sha256 is None
     assert store.snapshots, "the snapshot that failed to parse is kept as evidence"
-    assert recorder.metric("settlecal.source.parse_failures", SOURCE.id) == 1
+    assert recorder.metric("zeitwide.source.parse_failures", SOURCE.id) == 1
 
 
 def test_failed_step_span_is_marked_as_error(
@@ -276,7 +276,7 @@ def test_source_is_suspended_after_consecutive_failures(
 
     assert results == [CheckResult.FAILED, CheckResult.FAILED, CheckResult.SUSPENDED]
     assert store.state.suspended_at is not None
-    assert recorder.metric("settlecal.source.suspended", SOURCE.id) == 1
+    assert recorder.metric("zeitwide.source.suspended", SOURCE.id) == 1
 
 
 def test_suspended_source_is_not_fetched(router: respx.MockRouter, checker: SourceChecker) -> None:

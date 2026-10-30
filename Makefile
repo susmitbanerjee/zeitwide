@@ -1,4 +1,4 @@
-# SettleCal monorepo tasks. Recipes stay POSIX- and cmd.exe-compatible so `make` works
+# Zeitwide monorepo tasks. Recipes stay POSIX- and cmd.exe-compatible so `make` works
 # from Git Bash, WSL, macOS, Linux and plain Windows shells.
 #
 # Requires: JDK 17+ as JAVA_HOME (Gradle runs on it; the build compiles with a Java 21
@@ -44,7 +44,7 @@ fmt:
 generate-clients:
 	cd web && npm run generate:api
 	cd lib-python && $(PY) datamodel_code_generator --input ../api/openapi.yaml --input-file-type openapi \
-		--output src/settlecal/api_types.py --output-model-type typing.TypedDict \
+		--output src/zeitwide/api_types.py --output-model-type typing.TypedDict \
 		--target-python-version 3.12 --disable-timestamp --use-standard-collections \
 		--use-union-operator --use-schema-description --use-field-description \
 		--no-use-closed-typed-dict --formatters builtin

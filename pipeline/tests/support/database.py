@@ -2,9 +2,9 @@
 
 from dataclasses import dataclass
 
-PIPELINE_LOGIN = "settlecal_pipeline"
+PIPELINE_LOGIN = "zeitwide_pipeline"
 PIPELINE_PASSWORD = "pipeline-test-only"  # noqa: S105 - throwaway container login
-BUCKET = "settlecal-snapshots"
+BUCKET = "zeitwide-snapshots"
 
 
 @dataclass(frozen=True)

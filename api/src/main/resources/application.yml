@@ -1,6 +1,19 @@
 spring:
+  ai:
+    mcp:
+      server:
+        name: zeitwide-api
+        version: 0.1.0
+        protocol: STREAMABLE
+        type: SYNC
+        instructions: >-
+          Never guess whether a date is a holiday; use a Zeitwide tool. Cite the returned
+          source when explaining an answer. Store the receipt for later verification. Before
+          acting on an old date, call get_changes to check for updates since the relevant time.
+        streamable-http:
+          mcp-endpoint: /mcp
   application:
-    name: settlecal-api
+    name: zeitwide-api
   threads:
     virtual:
       enabled: true
@@ -41,12 +54,28 @@ management:
         enabled: true
       show-details: never
 
-settlecal:
+zeitwide:
+  auth:
+    issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:http://localhost:8180/realms/zeitwide}
+    jwk-set-uri: ${ZEITWIDE_AUTH_JWK_SET_URI:http://localhost:8180/realms/zeitwide/protocol/openid-connect/certs}
+    audience: ${ZEITWIDE_AUTH_AUDIENCE:zeitwide-api}
+  internal:
+    audience: ${ZEITWIDE_OUTBOX_DRAIN_AUDIENCE:zeitwide-outbox-drain-local}
+    service-account-email: ${ZEITWIDE_OUTBOX_DRAIN_INVOKER:scheduler@zeitwide.local}
+    google-jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+  cors:
+    allowed-origins: ${ZEITWIDE_CORS_ALLOWED_ORIGINS:http://localhost:3000}
+  receipts:
+    active-key-id: ${ZEITWIDE_RECEIPT_KEY_ID:}
+    signing-key-pem: ${ZEITWIDE_RECEIPT_SIGNING_KEY:}
+    public-keys-json: ${ZEITWIDE_RECEIPT_PUBLIC_KEYS_JSON:[]}
+  webhooks:
+    encryption-key: ${ZEITWIDE_WEBHOOK_ENCRYPTION_KEY:}
+  mcp:
+    resource-url: ${ZEITWIDE_MCP_RESOURCE_URL:http://localhost:8080/mcp}
   answers:
     cache-max-entries: 10000
     release-check-interval: PT30S
-  api-keys:
-    cache-ttl: PT1M
   rate-limits:
     anonymous:
       capacity: 60

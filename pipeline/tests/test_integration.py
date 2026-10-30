@@ -1,7 +1,7 @@
 """fetch -> parse -> diff -> corroborate through Procrastinate, on real Postgres and fake-gcs.
 
 The schema comes from api/'s Flyway migrations, applied in order, and the pipeline runs
-as the least-privilege ``settlecal_pipeline`` login, as on Cloud Run. HTTP is mocked with
+as the least-privilege ``zeitwide_pipeline`` login, as on Cloud Run. HTTP is mocked with
 respx; nothing reaches a real source.
 """
 
@@ -20,17 +20,17 @@ from google.cloud import storage
 from tenacity import wait_none
 from typer.testing import CliRunner
 
-from settlecal_pipeline.check import MAX_CONSECUTIVE_FAILURES, SourceChecker
-from settlecal_pipeline.cli import EXIT_NOT_FOUND, app
-from settlecal_pipeline.db import open_store
-from settlecal_pipeline.fetch import Fetcher, HostThrottle, new_client
-from settlecal_pipeline.jobs import PipelineContext, create_app, run_due_blocking
-from settlecal_pipeline.models import Observation, SourceRole
-from settlecal_pipeline.sources import SourceRegistry
-from settlecal_pipeline.storage import GcsSnapshotStore
 from support.database import Database
 from support.doubles import FakeClock, RecordingTelemetry
 from support.fixture_source import HolidayTableParser, HolidayTableSource, holiday_page
+from zeitwide_pipeline.check import MAX_CONSECUTIVE_FAILURES, SourceChecker
+from zeitwide_pipeline.cli import EXIT_NOT_FOUND, app
+from zeitwide_pipeline.db import open_store
+from zeitwide_pipeline.fetch import Fetcher, HostThrottle, new_client
+from zeitwide_pipeline.jobs import PipelineContext, create_app, run_due_blocking
+from zeitwide_pipeline.models import Observation, SourceRole
+from zeitwide_pipeline.sources import SourceRegistry
+from zeitwide_pipeline.storage import GcsSnapshotStore
 
 PRIMARY_URL = "https://fed.example.test/holidays"
 SECOND_URL = "https://board.example.test/k8"
@@ -232,7 +232,7 @@ def test_failing_source_is_suspended_and_skipped(
         JOIN source s ON s.id = st.source_id WHERE s.slug = 'fixture-fed-schedule'
         """,
     ) == [(MAX_CONSECUTIVE_FAILURES, True)]
-    assert pipeline.recorder.metric("settlecal.source.suspended", PRIMARY.id) == 1
+    assert pipeline.recorder.metric("zeitwide.source.suspended", PRIMARY.id) == 1
 
 
 def test_resumed_source_is_checked_again(
@@ -272,10 +272,10 @@ def _counts(database: Database) -> list[tuple[object, ...]]:
 def cli_env(
     monkeypatch: pytest.MonkeyPatch, database: Database, gcs_endpoint: str, bucket: storage.Bucket
 ) -> Iterator[None]:
-    monkeypatch.setenv("SETTLECAL_DATABASE_CONNINFO", database.pipeline)
-    monkeypatch.setenv("SETTLECAL_SNAPSHOT_BUCKET", bucket.name)
-    monkeypatch.setenv("SETTLECAL_GCS_ENDPOINT", gcs_endpoint)
-    monkeypatch.setenv("SETTLECAL_BOT_CONTACT_URL", "https://settlecal.example/bot")
+    monkeypatch.setenv("ZEITWIDE_DATABASE_CONNINFO", database.pipeline)
+    monkeypatch.setenv("ZEITWIDE_SNAPSHOT_BUCKET", bucket.name)
+    monkeypatch.setenv("ZEITWIDE_GCS_ENDPOINT", gcs_endpoint)
+    monkeypatch.setenv("ZEITWIDE_BOT_CONTACT_URL", "https://zeitwide.example/bot")
     monkeypatch.delenv("OTEL_EXPORTER_OTLP_ENDPOINT", raising=False)
     yield
     structlog.reset_defaults()

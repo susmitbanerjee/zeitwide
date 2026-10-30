@@ -1,6 +1,6 @@
 {
   "id": "eu-t2-good-friday-2026-known-in-january",
-  "description": "As of 15 January 2026 SettleCal already had Good Friday 2026 as a T2 closure.",
+  "description": "As of 15 January 2026 Zeitwide already had Good Friday 2026 as a T2 closure.",
   "dataset_release": "2026.10.29.0",
   "input": {
     "operation": "is_business_day",

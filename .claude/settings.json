@@ -1,10 +1,10 @@
 {
   "extraKnownMarketplaces": {
-    "settlecal": {
+    "zeitwide": {
       "source": { "source": "directory", "path": "./" }
     }
   },
   "enabledPlugins": {
-    "settlecal-dev@settlecal": true
+    "zeitwide-dev@zeitwide": true
   }
 }

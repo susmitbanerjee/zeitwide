@@ -5,7 +5,8 @@ import pytest
 import respx
 from tenacity import wait_none
 
-from settlecal_pipeline.fetch import (
+from support.doubles import FakeClock
+from zeitwide_pipeline.fetch import (
     Fetched,
     Fetcher,
     FetchError,
@@ -13,10 +14,9 @@ from settlecal_pipeline.fetch import (
     Validators,
     new_client,
 )
-from settlecal_pipeline.retrieve import fetch_source
-from settlecal_pipeline.sources import ParseError
-from settlecal_pipeline.sources.catalog import bundesbank_holidays
-from support.doubles import FakeClock
+from zeitwide_pipeline.retrieve import fetch_source
+from zeitwide_pipeline.sources import ParseError
+from zeitwide_pipeline.sources.catalog import bundesbank_holidays
 
 SOURCE = bundesbank_holidays.SOURCE
 PDF = "https://www.bundesbank.de/resource/blob/764518/abc/x/feiertage-in-deutschland-1-data.pdf"

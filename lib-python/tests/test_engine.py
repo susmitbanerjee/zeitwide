@@ -6,7 +6,7 @@ import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
-from settlecal import (
+from zeitwide import (
     Basis,
     Combine,
     OutOfRangeError,
@@ -17,8 +17,8 @@ from settlecal import (
     next_business_day,
     parse_release,
 )
-from settlecal.conformance import Outcome, run_case, run_cases
-from settlecal.release import release_version
+from zeitwide.conformance import Outcome, run_case, run_cases
+from zeitwide.release import release_version
 
 THANKSGIVING = date(2026, 11, 26)
 RECORDED = "2026-01-01T00:00:00+00:00"

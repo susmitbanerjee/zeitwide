@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SettleCal",
+  title: "Zeitwide",
   description: "Verified settlement and holiday calendars.",
 };
 

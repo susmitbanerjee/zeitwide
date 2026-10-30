@@ -24,33 +24,33 @@ import pytest
 import respx
 from google.cloud import storage
 from psycopg.rows import TupleRow, tuple_row
-from settlecal.conformance import Outcome, load_cases, run_cases
-from settlecal.engine import is_business_day
-from settlecal.release import parse_release
 from tenacity import wait_none
+from zeitwide.conformance import Outcome, load_cases, run_cases
+from zeitwide.engine import is_business_day
+from zeitwide.release import parse_release
 
-from settlecal_pipeline.backup import DatabaseBackup
-from settlecal_pipeline.calendars import CalendarDefinition, load_catalog
-from settlecal_pipeline.check import SourceChecker
-from settlecal_pipeline.daily import DailyJob, DailyResult
-from settlecal_pipeline.db import open_store, run_cleanup
-from settlecal_pipeline.fetch import Fetcher, HostThrottle, new_client
-from settlecal_pipeline.github import DatasetRepository
-from settlecal_pipeline.jobs import PipelineContext, create_app, run_due_blocking
-from settlecal_pipeline.release import PostgresReleaseStore, release_object_key
-from settlecal_pipeline.review_db import PublishResult, Review, open_review_store
-from settlecal_pipeline.seed import PostgresSeedStore, Seeder
-from settlecal_pipeline.sources import builtin_registry
-from settlecal_pipeline.sources.catalog import federalreserve_k8, frbservices_holiday_schedules
-from settlecal_pipeline.storage import GcsSnapshotStore
 from support.database import Database
 from support.doubles import FakeClock, RecordingTelemetry
 from support.goldens import goldens
+from zeitwide_pipeline.backup import DatabaseBackup
+from zeitwide_pipeline.calendars import CalendarDefinition, load_catalog
+from zeitwide_pipeline.check import SourceChecker
+from zeitwide_pipeline.daily import DailyJob, DailyResult
+from zeitwide_pipeline.db import open_store, run_cleanup
+from zeitwide_pipeline.fetch import Fetcher, HostThrottle, new_client
+from zeitwide_pipeline.github import DatasetRepository
+from zeitwide_pipeline.jobs import PipelineContext, create_app, run_due_blocking
+from zeitwide_pipeline.release import PostgresReleaseStore, release_object_key
+from zeitwide_pipeline.review_db import PublishResult, Review, open_review_store
+from zeitwide_pipeline.seed import PostgresSeedStore, Seeder
+from zeitwide_pipeline.sources import builtin_registry
+from zeitwide_pipeline.sources.catalog import federalreserve_k8, frbservices_holiday_schedules
+from zeitwide_pipeline.storage import GcsSnapshotStore
 
 REPO_ROOT = Path(__file__).parents[2]
 RELEASE_SCHEMA = REPO_ROOT / "dataset" / "schema" / "release.schema.json"
 CASES = REPO_ROOT / "conformance" / "cases"
-DATASET_REPOSITORY = "settlecal/dataset"
+DATASET_REPOSITORY = "zeitwide/dataset"
 GITHUB_HOST = "api.github.com"
 GITHUB_PATH = f"/repos/{DATASET_REPOSITORY}"
 COLUMBUS_DAY = date(2027, 10, 11)
@@ -148,9 +148,9 @@ class World:
                 backup=DatabaseBackup(
                     self.store(),
                     self.clock,
-                    user="settlecal_backup",
+                    user="zeitwide_backup",
                     password="unused",
-                    databases=["settlecal"],
+                    databases=["zeitwide"],
                     runner=_fake_pg_dump,
                 ),
                 telemetry=RecordingTelemetry().telemetry,
@@ -183,7 +183,7 @@ def _release_store(conninfo: str) -> Iterator[PostgresReleaseStore]:
 
 def _fake_pg_dump(args: Sequence[str], env: Mapping[str, str], output: Path) -> None:
     assert args[0] == "pg_dump"
-    assert env["PGUSER"] == "settlecal_backup"
+    assert env["PGUSER"] == "zeitwide_backup"
     output.write_bytes(b"PGDMP fake dump")
 
 
@@ -431,7 +431,7 @@ def test_daily_records_release_checksum_and_backup(world: World) -> None:
     )
     assert isinstance(stored, bytes)
     assert stored.hex() == hashlib.sha256(content).hexdigest()
-    assert result.backups == ["pg_dump/settlecal/20261028T060000Z.dump"]
+    assert result.backups == ["pg_dump/zeitwide/20261028T060000Z.dump"]
     assert result.pull_request is not None
 
 

@@ -1,7 +1,7 @@
 """Containers shared by the database tests: Postgres 18 (as on Aiven) and fake-gcs-server.
 
 Each test gets a fresh database migrated with api/'s Flyway migrations, in order, and
-the least-privilege ``settlecal_pipeline`` login the jobs use on Cloud Run.
+the least-privilege ``zeitwide_pipeline`` login the jobs use on Cloud Run.
 """
 
 import re
@@ -16,8 +16,8 @@ from google.cloud import storage
 from testcontainers.community.postgres import PostgresContainer
 from testcontainers.core.container import DockerContainer
 
-from settlecal_pipeline.storage import GcsSnapshotStore
 from support.database import BUCKET, PIPELINE_LOGIN, PIPELINE_PASSWORD, Database
+from zeitwide_pipeline.storage import GcsSnapshotStore
 
 MIGRATIONS = Path(__file__).parents[2] / "api" / "src" / "main" / "resources" / "db" / "migration"
 FAKE_GCS_IMAGE = "fsouza/fake-gcs-server:1.55.1"

@@ -5,9 +5,9 @@ import structlog
 from opentelemetry.sdk.trace import TracerProvider
 from pydantic import ValidationError
 
-from settlecal_pipeline.logs import configure_logging
-from settlecal_pipeline.settings import Settings
-from settlecal_pipeline.telemetry import configure_telemetry
+from zeitwide_pipeline.logs import configure_logging
+from zeitwide_pipeline.settings import Settings
+from zeitwide_pipeline.telemetry import configure_telemetry
 
 
 @pytest.fixture(autouse=True)
@@ -16,10 +16,10 @@ def _reset_structlog() -> None:
 
 
 def required_env(
-    monkeypatch: pytest.MonkeyPatch, contact: str = "https://settlecal.example/bot"
+    monkeypatch: pytest.MonkeyPatch, contact: str = "https://zeitwide.example/bot"
 ) -> None:
-    monkeypatch.setenv("SETTLECAL_SNAPSHOT_BUCKET", "settlecal-snapshots")
-    monkeypatch.setenv("SETTLECAL_BOT_CONTACT_URL", contact)
+    monkeypatch.setenv("ZEITWIDE_SNAPSHOT_BUCKET", "zeitwide-snapshots")
+    monkeypatch.setenv("ZEITWIDE_BOT_CONTACT_URL", contact)
 
 
 def test_settings_read_environment(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -29,14 +29,14 @@ def test_settings_read_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     settings = Settings()  # type: ignore[call-arg]
 
     assert (settings.snapshot_bucket, settings.db_pool_max_size, settings.otlp_endpoint) == (
-        "settlecal-snapshots",
+        "zeitwide-snapshots",
         2,
         "https://otlp.example",
     )
 
 
 def test_settings_require_https_contact_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    required_env(monkeypatch, contact="http://settlecal.example/bot")
+    required_env(monkeypatch, contact="http://zeitwide.example/bot")
 
     with pytest.raises(ValidationError, match="https"):
         Settings()  # type: ignore[call-arg]
@@ -44,7 +44,7 @@ def test_settings_require_https_contact_url(monkeypatch: pytest.MonkeyPatch) -> 
 
 def test_settings_cap_the_connection_pool(monkeypatch: pytest.MonkeyPatch) -> None:
     required_env(monkeypatch)
-    monkeypatch.setenv("SETTLECAL_DB_POOL_MAX_SIZE", "20")
+    monkeypatch.setenv("ZEITWIDE_DB_POOL_MAX_SIZE", "20")
 
     with pytest.raises(ValidationError):
         Settings()  # type: ignore[call-arg]
@@ -70,5 +70,5 @@ def test_telemetry_without_export_still_records() -> None:
     telemetry, shutdown = configure_telemetry(export=False)
 
     with telemetry.tracer.start_as_current_span("step"):
-        telemetry.parse_failures.add(1, {"settlecal.source": "fixture"})
+        telemetry.parse_failures.add(1, {"zeitwide.source": "fixture"})
     shutdown()

@@ -1,4 +1,4 @@
-"""Golden fixtures: real snapshots saved by ``settlecal-pipeline save-fixture``.
+"""Golden fixtures: real snapshots saved by ``zeitwide-pipeline save-fixture``.
 
 Each ``tests/fixtures/<source id>/<name>.gz`` holds the exact bytes a source served,
 ``<name>.meta.json`` says where and when they came from, and ``<name>.expected.json``
@@ -11,7 +11,7 @@ from dataclasses import asdict, dataclass
 from datetime import date, datetime
 from pathlib import Path
 
-from settlecal_pipeline.models import Observation, SnapshotMeta
+from zeitwide_pipeline.models import Observation, SnapshotMeta
 
 FIXTURES = Path(__file__).parents[1] / "fixtures"
 

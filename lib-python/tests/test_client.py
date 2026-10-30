@@ -9,11 +9,11 @@ from pathlib import Path
 import httpx
 import pytest
 
-from settlecal.client import ApiError, SettleCalClient
+from zeitwide.client import ApiError, ZeitwideClient
 
 REPO_ROOT = Path(__file__).parents[2]
 SPEC = REPO_ROOT / "api" / "openapi.yaml"
-API_TYPES = REPO_ROOT / "lib-python" / "src" / "settlecal" / "api_types.py"
+API_TYPES = REPO_ROOT / "lib-python" / "src" / "zeitwide" / "api_types.py"
 # The same arguments as `make generate-clients`.
 GENERATE = (
     "--input-file-type",
@@ -34,12 +34,12 @@ GENERATE = (
 ANSWER = {"date": "2026-11-26", "is_business_day": False, "dataset_release": "2026.10.29.0"}
 
 
-def client_for(status: int, body: object, seen: list[httpx.Request]) -> SettleCalClient:
+def client_for(status: int, body: object, seen: list[httpx.Request]) -> ZeitwideClient:
     def handle(request: httpx.Request) -> httpx.Response:
         seen.append(request)
         return httpx.Response(status, json=body)
 
-    return SettleCalClient(
+    return ZeitwideClient(
         "https://api.test", api_key="sc_test_key", transport=httpx.MockTransport(handle)
     )
 

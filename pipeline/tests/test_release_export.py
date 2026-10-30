@@ -6,11 +6,11 @@ from pathlib import Path
 
 import jsonschema
 import psycopg
-from settlecal.engine import is_business_day
-from settlecal.release import parse_release
+from zeitwide.engine import is_business_day
+from zeitwide.release import parse_release
 
-from settlecal_pipeline.release import PostgresReleaseStore
 from support.database import Database
+from zeitwide_pipeline.release import PostgresReleaseStore
 
 RELEASE_SCHEMA = Path(__file__).parents[2] / "dataset" / "schema" / "release.schema.json"
 AS_OF = datetime(2026, 8, 1, tzinfo=UTC)

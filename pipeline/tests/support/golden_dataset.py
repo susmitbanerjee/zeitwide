@@ -17,12 +17,12 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from settlecal_pipeline.calendars import CalendarDefinition, load_catalog
-from settlecal_pipeline.models import Observation
-from settlecal_pipeline.publish import basis_for
-from settlecal_pipeline.release import LICENSE, SCHEMA_VERSION, render
-from settlecal_pipeline.sources import builtin_registry
 from support.goldens import Golden, goldens
+from zeitwide_pipeline.calendars import CalendarDefinition, load_catalog
+from zeitwide_pipeline.models import Observation
+from zeitwide_pipeline.publish import basis_for
+from zeitwide_pipeline.release import LICENSE, SCHEMA_VERSION, render
+from zeitwide_pipeline.sources import builtin_registry
 
 PATH = Path(__file__).parents[3] / "conformance" / "dataset.json"
 # N = 0 is never cut by the pipeline (dataset/README.md).

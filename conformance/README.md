@@ -23,7 +23,7 @@ so the as-of cases are backed by real evidence. To rebuild it after changing the
 fixtures, from `pipeline/`:
 
 ```bash
-SETTLECAL_WRITE_GOLDEN_DATASET=1 uv run python -m pytest tests/test_golden_dataset.py
+ZEITWIDE_WRITE_GOLDEN_DATASET=1 uv run python -m pytest tests/test_golden_dataset.py
 ```
 
 ## Where the cases run

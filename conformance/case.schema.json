@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://settlecal.com/schemas/conformance-case.json",
-  "title": "SettleCal conformance case",
+  "$id": "https://zeitwide.com/schemas/conformance-case.json",
+  "title": "Zeitwide conformance case",
   "type": "object",
   "additionalProperties": false,
   "required": ["id", "description", "dataset_release", "input", "expected"],

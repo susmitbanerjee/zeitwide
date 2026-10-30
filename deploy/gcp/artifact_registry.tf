@@ -2,7 +2,7 @@ resource "google_artifact_registry_repository" "images" {
   repository_id = local.prefix
   location      = var.region
   format        = "DOCKER"
-  description   = "SettleCal container images (${local.env})"
+  description   = "Zeitwide container images (${local.env})"
 
   cleanup_policy_dry_run = false
 

@@ -11,8 +11,14 @@ plugins {
     alias(libs.plugins.jib)
 }
 
-group = "com.settlecal"
+group = "com.zeitwide"
 version = "0.1.0-SNAPSHOT"
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.ai:spring-ai-bom:${libs.versions.spring.ai.get()}")
+    }
+}
 
 java {
     toolchain {
@@ -29,16 +35,23 @@ dependencies {
     implementation(libs.spring.boot.starter.actuator)
     implementation(libs.spring.boot.starter.validation)
     implementation(libs.spring.boot.starter.jdbc)
+    implementation(libs.spring.boot.starter.security)
+    implementation(libs.spring.boot.starter.oauth2.resource.server)
+    implementation(libs.spring.context.support)
     implementation(libs.flyway.core)
     implementation(libs.flyway.database.postgresql)
     implementation(libs.caffeine)
     implementation(libs.bucket4j.postgresql)
+    implementation(libs.java.json.canonicalization)
+    implementation(libs.apache.httpclient5)
+    implementation(libs.spring.ai.starter.mcp.server.webmvc)
     runtimeOnly(libs.postgresql)
     developmentOnly(libs.spring.boot.docker.compose)
 
     errorprone(libs.errorprone.core)
 
     testImplementation(libs.spring.boot.starter.test)
+    testImplementation(libs.spring.security.test)
     testImplementation(libs.spring.boot.testcontainers)
     testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.testcontainers.junit.jupiter)
@@ -53,6 +66,10 @@ tasks.withType<JavaCompile>().configureEach {
     options.errorprone {
         disableWarningsInGeneratedCode = true
     }
+}
+
+dependencyLocking {
+    lockAllConfigurations()
 }
 
 tasks.test {
@@ -71,7 +88,7 @@ jacoco {
 }
 
 // The Spring Boot entry point only wires the context; tests start the context directly.
-val coverageExclusions = listOf("com/settlecal/api/SettleCalApiApplication.class")
+val coverageExclusions = listOf("com/zeitwide/api/ZeitwideApiApplication.class")
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)

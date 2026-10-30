@@ -689,7 +689,7 @@ wheels = [
 ]
 
 [[package]]
-name = "settlecal"
+name = "zeitwide"
 version = "0.1.0"
 source = { editable = "." }
 

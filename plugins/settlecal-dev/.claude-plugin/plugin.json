@@ -1,9 +1,0 @@
-{
-  "name": "settlecal-dev",
-  "version": "0.1.0",
-  "description": "SettleCal coding standards packaged as skills",
-  "author": {
-    "name": "Susmit Banerjee",
-    "email": "susmit@swarmbase.net"
-  }
-}

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Creates the Keycloak role and database next to the SettleCal database.
+# Creates the Keycloak role and database next to the Zeitwide database.
 # Runs once, when the Postgres data volume is first initialised.
 set -eu
 

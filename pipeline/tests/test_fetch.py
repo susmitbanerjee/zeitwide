@@ -5,7 +5,8 @@ import pytest
 import respx
 from tenacity import wait_none
 
-from settlecal_pipeline.fetch import (
+from support.doubles import START
+from zeitwide_pipeline.fetch import (
     MAX_ATTEMPTS,
     Fetched,
     Fetcher,
@@ -17,12 +18,11 @@ from settlecal_pipeline.fetch import (
     new_client,
     user_agent,
 )
-from support.doubles import START
 
 URL = "https://fixtures.example.test/holidays"
 ROBOTS = "https://fixtures.example.test/robots.txt"
 HTML = frozenset({"text/html"})
-UA = user_agent("1.2.3", "https://settlecal.example/bot")
+UA = user_agent("1.2.3", "https://zeitwide.example/bot")
 
 
 class NoSleep:
@@ -82,7 +82,7 @@ def test_fetch_sends_honest_user_agent(router: respx.MockRouter, fetcher: Fetche
     fetcher.fetch(URL, HTML, Validators())
 
     assert route.calls.last.request.headers["User-Agent"] == (
-        "SettleCalBot/1.2.3 (+https://settlecal.example/bot)"
+        "ZeitwideBot/1.2.3 (+https://zeitwide.example/bot)"
     )
 
 
@@ -207,7 +207,7 @@ def test_fetch_rejects_plain_http_source(fetcher: Fetcher) -> None:
 
 def test_fetch_respects_robots_disallow(fetcher: Fetcher) -> None:
     with respx.mock(assert_all_called=False) as mock:
-        mock.get(ROBOTS).respond(200, text="User-agent: SettleCalBot\nDisallow: /holidays\n")
+        mock.get(ROBOTS).respond(200, text="User-agent: ZeitwideBot\nDisallow: /holidays\n")
         page = mock.get(URL).mock(return_value=html())
 
         with pytest.raises(FetchError, match=r"robots\.txt"):

@@ -7,14 +7,14 @@ from pathlib import Path
 
 import jsonschema
 import pytest
-from settlecal.conformance import load_cases, run_cases
-from settlecal.release import parse_release
+from zeitwide.conformance import load_cases, run_cases
+from zeitwide.release import parse_release
 
 from support.golden_dataset import PATH, GoldenDatasetError, build, check_nothing_removed
 
 RELEASE_SCHEMA = Path(__file__).parents[2] / "dataset" / "schema" / "release.schema.json"
 CASES = Path(__file__).parents[2] / "conformance" / "cases"
-REWRITE = "SETTLECAL_WRITE_GOLDEN_DATASET"
+REWRITE = "ZEITWIDE_WRITE_GOLDEN_DATASET"
 
 
 def test_committed_golden_dataset_is_what_the_snapshots_build() -> None:

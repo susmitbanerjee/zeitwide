@@ -4,36 +4,42 @@ locals {
   # Spring resolves ${DB_HOST} and ${DB_PORT} from the secret-backed env vars, so the
   # JDBC URL can be plain config. $$ stops OpenTofu interpolating them.
   api_env = merge(local.otel_env, {
-    OTEL_SERVICE_NAME                                    = "settlecal-api"
+    OTEL_SERVICE_NAME                                    = "zeitwide-api"
     JAVA_TOOL_OPTIONS                                    = "-XX:MaxRAMPercentage=75"
-    SPRING_DATASOURCE_URL                                = "jdbc:postgresql://$${DB_HOST}:$${DB_PORT}/${local.db.settlecal_database}?${local.db_jdbc_params}"
+    SPRING_DATASOURCE_URL                                = "jdbc:postgresql://$${DB_HOST}:$${DB_PORT}/${local.db.zeitwide_database}?${local.db_jdbc_params}"
     SPRING_DATASOURCE_USERNAME                           = local.db.api_user
     SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE           = tostring(local.db.api_pool_max)
     SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI = local.issuer
-    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES  = "settlecal-api"
-    SETTLECAL_CORS_ALLOWED_ORIGINS                       = var.web_origin
-    SETTLECAL_SNAPSHOT_BUCKET                            = google_storage_bucket.snapshots.name
-    SETTLECAL_OUTBOX_DRAIN_AUDIENCE                      = local.outbox_drain_audience
-    SETTLECAL_OUTBOX_DRAIN_INVOKER                       = google_service_account.this["sched-drain"].email
+    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES  = "zeitwide-api"
+    ZEITWIDE_AUTH_JWK_SET_URI                            = "${local.issuer}/protocol/openid-connect/certs"
+    ZEITWIDE_AUTH_AUDIENCE                               = "zeitwide-api"
+    ZEITWIDE_CORS_ALLOWED_ORIGINS                        = var.web_origin
+    ZEITWIDE_MCP_RESOURCE_URL                            = "${trimsuffix(local.api_public_url, "/")}/mcp"
+    ZEITWIDE_SNAPSHOT_BUCKET                             = google_storage_bucket.snapshots.name
+    ZEITWIDE_OUTBOX_DRAIN_AUDIENCE                       = local.outbox_drain_audience
+    ZEITWIDE_OUTBOX_DRAIN_INVOKER                        = google_service_account.this["sched-drain"].email
+    ZEITWIDE_RECEIPT_KEY_ID                              = var.receipt_key_id
+    ZEITWIDE_RECEIPT_PUBLIC_KEYS_JSON                    = var.receipt_public_keys_json
     # Cloud Run's front end appends the client's address to X-Forwarded-For.
-    SETTLECAL_RATE_LIMITS_TRUSTED_PROXIES = "1"
+    ZEITWIDE_RATE_LIMITS_TRUSTED_PROXIES = "1"
   })
 
   api_secret_env = {
-    DB_HOST                       = "db-host"
-    DB_PORT                       = "db-port"
-    SPRING_DATASOURCE_PASSWORD    = "db-api-password" # gitleaks:allow - a Secret Manager secret name, not a value
-    SETTLECAL_RECEIPT_SIGNING_KEY = "receipt-signing-key"
-    OTEL_EXPORTER_OTLP_HEADERS    = "otlp-headers"
+    DB_HOST                         = "db-host"
+    DB_PORT                         = "db-port"
+    SPRING_DATASOURCE_PASSWORD      = "db-api-password" # gitleaks:allow - a Secret Manager secret name, not a value
+    ZEITWIDE_RECEIPT_SIGNING_KEY    = "receipt-signing-key"
+    ZEITWIDE_WEBHOOK_ENCRYPTION_KEY = "webhook-encryption-key"
+    OTEL_EXPORTER_OTLP_HEADERS      = "otlp-headers"
   }
 
   web_env = merge(local.otel_env, {
-    OTEL_SERVICE_NAME    = "settlecal-web"
-    SETTLECAL_API_URL    = local.api_url
+    OTEL_SERVICE_NAME    = "zeitwide-web"
+    ZEITWIDE_API_URL     = local.api_url
     AUTH_URL             = var.web_origin
     AUTH_TRUST_HOST      = "true"
     AUTH_KEYCLOAK_ISSUER = local.issuer
-    AUTH_KEYCLOAK_ID     = "settlecal-web"
+    AUTH_KEYCLOAK_ID     = "zeitwide-web"
   })
 
   web_secret_env = {
@@ -44,16 +50,20 @@ locals {
   # Always pin the public URL: with strict hostname checks off, Keycloak would build
   # links (password resets, issuer) from a client-supplied X-Forwarded-Host.
   keycloak_env = {
-    KC_HOSTNAME                 = local.auth_url
-    KC_DB                       = "postgres"
-    KC_DB_URL_DATABASE          = local.db.keycloak_database
-    KC_DB_URL_PROPERTIES        = "?${local.db_jdbc_params}"
-    KC_DB_USERNAME              = local.db.keycloak_user
-    KC_DB_POOL_INITIAL_SIZE     = "1"
-    KC_DB_POOL_MIN_SIZE         = "0"
-    KC_DB_POOL_MAX_SIZE         = tostring(local.db.keycloak_pool_max)
-    KC_HTTP_ENABLED             = "true"
-    KC_PROXY_HEADERS            = "xforwarded"
+    KC_HOSTNAME             = local.auth_url
+    KC_DB                   = "postgres"
+    KC_DB_URL_DATABASE      = local.db.keycloak_database
+    KC_DB_URL_PROPERTIES    = "?${local.db_jdbc_params}"
+    KC_DB_USERNAME          = local.db.keycloak_user
+    KC_DB_POOL_INITIAL_SIZE = "1"
+    KC_DB_POOL_MIN_SIZE     = "0"
+    KC_DB_POOL_MAX_SIZE     = tostring(local.db.keycloak_pool_max)
+    GOOGLE_CLIENT_ID        = var.google_client_id
+    MICROSOFT_CLIENT_ID     = var.microsoft_client_id
+    GITHUB_CLIENT_ID        = var.github_client_id
+    ZEITWIDE_WEB_ORIGIN     = var.web_origin
+    KC_HTTP_ENABLED         = "true"
+    KC_PROXY_HEADERS        = "xforwarded"
     # One instance, and Cloud Run instances can't reach each other, so no cluster: the
     # default JDBC_PING stack would also need a pool of at least 4.
     KC_CACHE                    = "local"
@@ -66,31 +76,34 @@ locals {
     KC_DB_URL_PORT              = "db-port"
     KC_DB_PASSWORD              = "db-keycloak-password" # gitleaks:allow - a Secret Manager secret name, not a value
     KC_BOOTSTRAP_ADMIN_PASSWORD = "keycloak-admin-password"
+    GOOGLE_CLIENT_SECRET        = "google-oauth-client-secret"
+    MICROSOFT_CLIENT_SECRET     = "microsoft-oauth-client-secret"
+    GITHUB_CLIENT_SECRET        = "github-oauth-client-secret"
   }
 
   # libpq variables, so psycopg and pg_dump both pick them up with no extra config.
   pipeline_env = merge(local.otel_env, {
-    OTEL_SERVICE_NAME            = "settlecal-pipeline"
-    PGUSER                       = local.db.pipeline_user
-    PGDATABASE                   = local.db.settlecal_database
-    PGSSLMODE                    = "verify-full"
-    PGSSLROOTCERT                = local.db_ca_file
-    SETTLECAL_DB_POOL_MAX_SIZE   = tostring(local.db.pipeline_pool_max)
-    SETTLECAL_BOT_CONTACT_URL    = var.bot_contact_url
-    SETTLECAL_SNAPSHOT_BUCKET    = google_storage_bucket.snapshots.name
-    SETTLECAL_BACKUP_BUCKET      = google_storage_bucket.backups.name
-    SETTLECAL_BACKUP_DB_USER     = local.db.backup_user
-    SETTLECAL_BACKUP_DATABASES   = "${local.db.settlecal_database},${local.db.keycloak_database}"
-    SETTLECAL_DATASET_REPOSITORY = var.dataset_repository
+    OTEL_SERVICE_NAME           = "zeitwide-pipeline"
+    PGUSER                      = local.db.pipeline_user
+    PGDATABASE                  = local.db.zeitwide_database
+    PGSSLMODE                   = "verify-full"
+    PGSSLROOTCERT               = local.db_ca_file
+    ZEITWIDE_DB_POOL_MAX_SIZE   = tostring(local.db.pipeline_pool_max)
+    ZEITWIDE_BOT_CONTACT_URL    = var.bot_contact_url
+    ZEITWIDE_SNAPSHOT_BUCKET    = google_storage_bucket.snapshots.name
+    ZEITWIDE_BACKUP_BUCKET      = google_storage_bucket.backups.name
+    ZEITWIDE_BACKUP_DB_USER     = local.db.backup_user
+    ZEITWIDE_BACKUP_DATABASES   = "${local.db.zeitwide_database},${local.db.keycloak_database}"
+    ZEITWIDE_DATASET_REPOSITORY = var.dataset_repository
   })
 
   pipeline_secret_env = {
-    PGHOST                       = "db-host"
-    PGPORT                       = "db-port"
-    PGPASSWORD                   = "db-pipeline-password" # gitleaks:allow - a Secret Manager secret name, not a value
-    SETTLECAL_BACKUP_DB_PASSWORD = "db-backup-password"   # gitleaks:allow - a Secret Manager secret name, not a value
-    GITHUB_TOKEN                 = "github-release-token"
-    OTEL_EXPORTER_OTLP_HEADERS   = "otlp-headers"
+    PGHOST                      = "db-host"
+    PGPORT                      = "db-port"
+    PGPASSWORD                  = "db-pipeline-password" # gitleaks:allow - a Secret Manager secret name, not a value
+    ZEITWIDE_BACKUP_DB_PASSWORD = "db-backup-password"   # gitleaks:allow - a Secret Manager secret name, not a value
+    GITHUB_TOKEN                = "github-release-token"
+    OTEL_EXPORTER_OTLP_HEADERS  = "otlp-headers"
   }
 }
 
@@ -278,7 +291,7 @@ resource "google_cloud_run_v2_service" "keycloak" {
     containers {
       image = var.bootstrap_service_image
       # The image is pre-built with `kc.sh build` (README), so start skips the build.
-      # --import-realm creates the settlecal realm on first start and then skips it.
+      # --import-realm creates the zeitwide realm on first start and then skips it.
       args = ["start", "--optimized", "--import-realm"]
 
       resources {

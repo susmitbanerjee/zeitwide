@@ -32,5 +32,5 @@ COPY --from=build /app/.venv /app/.venv
 ENV PATH=/app/.venv/bin:$PATH \
     PYTHONUNBUFFERED=1
 USER 10001
-ENTRYPOINT ["settlecal-pipeline"]
+ENTRYPOINT ["zeitwide-pipeline"]
 CMD ["run-due"]

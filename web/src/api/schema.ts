@@ -118,10 +118,295 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List published calendar changes using keyset pagination */
+        get: operations["listChanges"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/receipts/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verify a receipt against the configured public key history */
+        post: operations["verifyReceipt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/.well-known/zeitwide-keys.json": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Ed25519 verification keys and validity intervals */
+        get: operations["getReceiptKeys"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/.well-known/oauth-protected-resource/mcp": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** OAuth protected resource metadata for the MCP endpoint */
+        get: operations["getMcpProtectedResourceMetadata"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/account/api-keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List API keys for the authenticated account */
+        get: operations["listApiKeys"];
+        put?: never;
+        /** Create an API key and return its value once */
+        post: operations["createApiKey"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/account/api-keys/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Revoke one API key belonging to the authenticated account */
+        delete: operations["revokeApiKey"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/account/webhooks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List webhook subscriptions without their signing secrets */
+        get: operations["listWebhooks"];
+        put?: never;
+        /** Create a webhook and return its signing secret once */
+        post: operations["createWebhook"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/account/webhooks/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update a webhook URL and event filter */
+        put: operations["updateWebhook"];
+        post?: never;
+        /** Disable a webhook and abandon its pending deliveries */
+        delete: operations["deleteWebhook"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/account/webhooks/{id}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send a signed test event to a webhook */
+        post: operations["sendWebhookTestEvent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/internal/outbox/drain": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Fan out and deliver due webhook events */
+        post: operations["drainOutbox"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        CreatedApiKey: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            prefix: string;
+            key: string;
+            /** Format: date-time */
+            created_at: string;
+        };
+        WebhookConfiguration: {
+            /**
+             * Format: uri
+             * @description HTTPS URL on a public host using port 443.
+             */
+            url: string;
+            events: components["schemas"]["ChangeType"][];
+        };
+        CreatedWebhook: components["schemas"]["WebhookSubscription"] & {
+            secret: string;
+        };
+        WebhookSubscription: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uri */
+            url: string;
+            events: components["schemas"]["ChangeType"][];
+            /** Format: date-time */
+            created_at: string;
+        };
+        WebhookTestResult: {
+            succeeded: boolean;
+            response_status: number | null;
+        };
+        OutboxDrainResult: {
+            outbox_events: number;
+            claimed: number;
+            succeeded: number;
+            retried: number;
+            failed: number;
+        };
+        ApiKeySummary: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            prefix: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            last_used_at?: string | null;
+            /** Format: date-time */
+            revoked_at?: string | null;
+        };
+        ReceiptPayload: {
+            request: {
+                [key: string]: unknown;
+            };
+            answer: {
+                [key: string]: unknown;
+            };
+            dataset_release: components["schemas"]["DatasetRelease"];
+            calendar_revisions: components["schemas"]["CalendarRevisions"];
+            /** Format: date-time */
+            issued_at: string;
+        };
+        Receipt: {
+            id: string;
+            payload: components["schemas"]["ReceiptPayload"];
+            payload_hash: string;
+            key_id: string;
+            signature: string;
+        };
+        ReceiptVerification: {
+            valid: boolean;
+        };
+        ReceiptKeySet: {
+            keys: components["schemas"]["ReceiptPublicKey"][];
+        };
+        ReceiptPublicKey: {
+            key_id: string;
+            /** @description PEM-encoded Ed25519 SubjectPublicKeyInfo. */
+            public_key: string;
+            /** Format: date-time */
+            valid_from: string;
+            /** Format: date-time */
+            valid_to: string | null;
+        };
+        /** @enum {string} */
+        ChangeType: "closure_added" | "closure_removed" | "closure_changed" | "basis_changed";
+        ChangePage: {
+            changes: components["schemas"]["Change"][];
+            next_cursor: string | null;
+            /** Format: date-time */
+            since: string;
+            limit: number;
+        };
+        Change: {
+            /** Format: int64 */
+            id: number;
+            type: components["schemas"]["ChangeType"];
+            calendar_id: components["schemas"]["CalendarId"];
+            /** Format: date */
+            entry_date: string;
+            before?: {
+                [key: string]: unknown;
+            } | null;
+            after: {
+                [key: string]: unknown;
+            };
+            notice_days: number;
+            /** Format: date-time */
+            published_at: string;
+        };
         /** @example US-FEDWIRE */
         CalendarId: string;
         /** @example 2026.10.28.1 */
@@ -133,7 +418,7 @@ export interface components {
          */
         Combine: "all_open" | "any_open";
         /**
-         * @description `published` by the operator, or `projected` by SettleCal from other sources.
+         * @description `published` by the operator, or `projected` by Zeitwide from other sources.
          * @enum {string}
          */
         Basis: "published" | "projected";
@@ -195,6 +480,7 @@ export interface components {
             as_of: string;
             dataset_release: components["schemas"]["DatasetRelease"];
             calendar_revisions: components["schemas"]["CalendarRevisions"];
+            receipt: components["schemas"]["Receipt"];
         };
         SkippedDay: {
             /** Format: date */
@@ -219,6 +505,7 @@ export interface components {
             as_of: string;
             dataset_release: components["schemas"]["DatasetRelease"];
             calendar_revisions: components["schemas"]["CalendarRevisions"];
+            receipt: components["schemas"]["Receipt"];
         };
         Closure: {
             /** Format: date */
@@ -241,6 +528,8 @@ export interface components {
             as_of: string;
             dataset_release: components["schemas"]["DatasetRelease"];
             calendar_revision: number;
+            calendar_revisions: components["schemas"]["CalendarRevisions"];
+            receipt: components["schemas"]["Receipt"];
         };
         /**
          * @description The dates the calendar can answer for. `years`: from `from` to `to`, both
@@ -278,6 +567,8 @@ export interface components {
             /** Format: date-time */
             as_of: string;
             dataset_release: components["schemas"]["DatasetRelease"];
+            calendar_revisions: components["schemas"]["CalendarRevisions"];
+            receipt: components["schemas"]["Receipt"];
         };
         /** @description RFC 9457 problem details. */
         Problem: {
@@ -289,7 +580,7 @@ export interface components {
             /** Format: uri-reference */
             instance?: string;
             /** @enum {string} */
-            code: "validation_failed" | "invalid_api_key" | "unknown_calendar" | "out_of_range" | "rate_limited" | "dataset_unavailable" | "not_found" | "internal_error";
+            code: "validation_failed" | "invalid_api_key" | "unauthorized" | "forbidden" | "length_required" | "payload_too_large" | "api_key_limit_reached" | "idempotency_key_reused" | "webhook_limit_reached" | "unknown_calendar" | "out_of_range" | "rate_limited" | "dataset_unavailable" | "not_found" | "internal_error";
         };
     };
     responses: {
@@ -304,6 +595,33 @@ export interface components {
         };
         /** @description `invalid_api_key`: the key is unknown, malformed or revoked. */
         InvalidApiKey: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description `unauthorized`: authentication is required. */
+        Unauthorized: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description `not_found`: no active resource has this ID. */
+        NotFound: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description `idempotency_key_reused`: this key was already used. */
+        IdempotencyConflict: {
             headers: {
                 [name: string]: unknown;
             };
@@ -351,7 +669,7 @@ export interface components {
     };
     parameters: {
         CalendarIdPath: components["schemas"]["CalendarId"];
-        /** @description Answer with what SettleCal had recorded at this instant. Default now. */
+        /** @description Answer with what Zeitwide had recorded at this instant. Default now. */
         AsOf: string;
     };
     requestBodies: never;
@@ -374,7 +692,7 @@ export interface operations {
     listCalendars: {
         parameters: {
             query?: {
-                /** @description Answer with what SettleCal had recorded at this instant. Default now. */
+                /** @description Answer with what Zeitwide had recorded at this instant. Default now. */
                 as_of?: components["parameters"]["AsOf"];
             };
             header?: never;
@@ -386,8 +704,8 @@ export interface operations {
             /** @description The calendars in the dataset release. */
             200: {
                 headers: {
-                    "SettleCal-Dataset-Release": components["headers"]["DatasetRelease"];
-                    "SettleCal-As-Of": components["headers"]["AsOf"];
+                    "Zeitwide-Dataset-Release": components["headers"]["DatasetRelease"];
+                    "Zeitwide-As-Of": components["headers"]["AsOf"];
                     "RateLimit-Limit": components["headers"]["RateLimitLimit"];
                     "RateLimit-Remaining": components["headers"]["RateLimitRemaining"];
                     [name: string]: unknown;
@@ -405,7 +723,7 @@ export interface operations {
     getDay: {
         parameters: {
             query?: {
-                /** @description Answer with what SettleCal had recorded at this instant. Default now. */
+                /** @description Answer with what Zeitwide had recorded at this instant. Default now. */
                 as_of?: components["parameters"]["AsOf"];
             };
             header?: never;
@@ -420,9 +738,9 @@ export interface operations {
             /** @description The answer and the entry or rule that decided it. */
             200: {
                 headers: {
-                    "SettleCal-Dataset-Release": components["headers"]["DatasetRelease"];
-                    "SettleCal-Calendar-Revision": components["headers"]["CalendarRevision"];
-                    "SettleCal-As-Of": components["headers"]["AsOf"];
+                    "Zeitwide-Dataset-Release": components["headers"]["DatasetRelease"];
+                    "Zeitwide-Calendar-Revision": components["headers"]["CalendarRevision"];
+                    "Zeitwide-As-Of": components["headers"]["AsOf"];
                     "RateLimit-Limit": components["headers"]["RateLimitLimit"];
                     "RateLimit-Remaining": components["headers"]["RateLimitRemaining"];
                     [name: string]: unknown;
@@ -445,7 +763,7 @@ export interface operations {
                 from: string;
                 /** @description Inclusive; on or after `from`. */
                 to: string;
-                /** @description Answer with what SettleCal had recorded at this instant. Default now. */
+                /** @description Answer with what Zeitwide had recorded at this instant. Default now. */
                 as_of?: components["parameters"]["AsOf"];
             };
             header?: never;
@@ -459,9 +777,9 @@ export interface operations {
             /** @description The closures in date order. */
             200: {
                 headers: {
-                    "SettleCal-Dataset-Release": components["headers"]["DatasetRelease"];
-                    "SettleCal-Calendar-Revision": components["headers"]["CalendarRevision"];
-                    "SettleCal-As-Of": components["headers"]["AsOf"];
+                    "Zeitwide-Dataset-Release": components["headers"]["DatasetRelease"];
+                    "Zeitwide-Calendar-Revision": components["headers"]["CalendarRevision"];
+                    "Zeitwide-As-Of": components["headers"]["AsOf"];
                     "RateLimit-Limit": components["headers"]["RateLimitLimit"];
                     "RateLimit-Remaining": components["headers"]["RateLimitRemaining"];
                     [name: string]: unknown;
@@ -480,7 +798,10 @@ export interface operations {
     };
     checkBusinessDay: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Answer with what Zeitwide had recorded at this instant. Default now. */
+                as_of?: components["parameters"]["AsOf"];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -494,9 +815,9 @@ export interface operations {
             /** @description The combined answer, with each calendar's answer as evidence. */
             200: {
                 headers: {
-                    "SettleCal-Dataset-Release": components["headers"]["DatasetRelease"];
-                    "SettleCal-Calendar-Revision": components["headers"]["CalendarRevision"];
-                    "SettleCal-As-Of": components["headers"]["AsOf"];
+                    "Zeitwide-Dataset-Release": components["headers"]["DatasetRelease"];
+                    "Zeitwide-Calendar-Revision": components["headers"]["CalendarRevision"];
+                    "Zeitwide-As-Of": components["headers"]["AsOf"];
                     "RateLimit-Limit": components["headers"]["RateLimitLimit"];
                     "RateLimit-Remaining": components["headers"]["RateLimitRemaining"];
                     [name: string]: unknown;
@@ -515,7 +836,10 @@ export interface operations {
     };
     addBusinessDays: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Answer with what Zeitwide had recorded at this instant. Default now. */
+                as_of?: components["parameters"]["AsOf"];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -529,9 +853,9 @@ export interface operations {
             /** @description Where the move landed. */
             200: {
                 headers: {
-                    "SettleCal-Dataset-Release": components["headers"]["DatasetRelease"];
-                    "SettleCal-Calendar-Revision": components["headers"]["CalendarRevision"];
-                    "SettleCal-As-Of": components["headers"]["AsOf"];
+                    "Zeitwide-Dataset-Release": components["headers"]["DatasetRelease"];
+                    "Zeitwide-Calendar-Revision": components["headers"]["CalendarRevision"];
+                    "Zeitwide-As-Of": components["headers"]["AsOf"];
                     "RateLimit-Limit": components["headers"]["RateLimitLimit"];
                     "RateLimit-Remaining": components["headers"]["RateLimitRemaining"];
                     [name: string]: unknown;
@@ -550,7 +874,10 @@ export interface operations {
     };
     nextBusinessDay: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Answer with what Zeitwide had recorded at this instant. Default now. */
+                as_of?: components["parameters"]["AsOf"];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -564,9 +891,9 @@ export interface operations {
             /** @description The next business day. */
             200: {
                 headers: {
-                    "SettleCal-Dataset-Release": components["headers"]["DatasetRelease"];
-                    "SettleCal-Calendar-Revision": components["headers"]["CalendarRevision"];
-                    "SettleCal-As-Of": components["headers"]["AsOf"];
+                    "Zeitwide-Dataset-Release": components["headers"]["DatasetRelease"];
+                    "Zeitwide-Calendar-Revision": components["headers"]["CalendarRevision"];
+                    "Zeitwide-As-Of": components["headers"]["AsOf"];
                     "RateLimit-Limit": components["headers"]["RateLimitLimit"];
                     "RateLimit-Remaining": components["headers"]["RateLimitRemaining"];
                     [name: string]: unknown;
@@ -581,6 +908,333 @@ export interface operations {
             422: components["responses"]["OutOfRange"];
             429: components["responses"]["RateLimited"];
             503: components["responses"]["DatasetUnavailable"];
+        };
+    };
+    listChanges: {
+        parameters: {
+            query: {
+                /** @description Up to 10 calendar IDs; omit to include all calendars. */
+                calendars?: components["schemas"]["CalendarId"][];
+                since: string;
+                /** @description Change types to include; omit to include all types. */
+                types?: components["schemas"]["ChangeType"][];
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Changes ordered by publication instant and stable event ID. */
+            200: {
+                headers: {
+                    "RateLimit-Limit": components["headers"]["RateLimitLimit"];
+                    "RateLimit-Remaining": components["headers"]["RateLimitRemaining"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangePage"];
+                };
+            };
+            400: components["responses"]["ValidationFailed"];
+            429: components["responses"]["RateLimited"];
+        };
+    };
+    verifyReceipt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Receipt"];
+            };
+        };
+        responses: {
+            /** @description `valid` is false for a modified payload, signature, ID or unknown key. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceiptVerification"];
+                };
+            };
+            400: components["responses"]["ValidationFailed"];
+        };
+    };
+    getReceiptKeys: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Current and retained historical public keys. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceiptKeySet"];
+                };
+            };
+        };
+    };
+    getMcpProtectedResourceMetadata: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MCP resource identifier, authorization server, and supported bearer method. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** Format: uri */
+                        resource: string;
+                        authorization_servers: string[];
+                        bearer_methods_supported: "header"[];
+                    };
+                };
+            };
+        };
+    };
+    listApiKeys: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Up to 100 key metadata rows. Secret values are never returned by this operation. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKeySummary"][];
+                };
+            };
+            401: components["responses"]["InvalidApiKey"];
+        };
+    };
+    createApiKey: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description A 16–128 character key. Reuse is rejected so a retry cannot create another secret. */
+                "Idempotency-Key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The key value is present only in this response. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatedApiKey"];
+                };
+            };
+            400: components["responses"]["ValidationFailed"];
+            401: components["responses"]["InvalidApiKey"];
+            /** @description API key account limit reached or this idempotency key was already used. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    revokeApiKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The key was revoked or was already absent. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["InvalidApiKey"];
+        };
+    };
+    listWebhooks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Up to 100 active subscriptions for the authenticated account. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookSubscription"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    createWebhook: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WebhookConfiguration"];
+            };
+        };
+        responses: {
+            /** @description The generated signing secret is returned only in this response. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatedWebhook"];
+                };
+            };
+            400: components["responses"]["ValidationFailed"];
+            401: components["responses"]["Unauthorized"];
+            409: components["responses"]["IdempotencyConflict"];
+            429: components["responses"]["RateLimited"];
+        };
+    };
+    updateWebhook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WebhookConfiguration"];
+            };
+        };
+        responses: {
+            /** @description The updated subscription; its signing secret remains hidden. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookSubscription"];
+                };
+            };
+            400: components["responses"]["ValidationFailed"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    deleteWebhook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The subscription was disabled or was already absent. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    sendWebhookTestEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Test event delivery result; receiver response bodies are discarded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookTestResult"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    drainOutbox: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Counts for this drain invocation. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OutboxDrainResult"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
         };
     };
 }

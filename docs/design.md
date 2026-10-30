@@ -1,10 +1,10 @@
-# SettleCal MVP — System Design
+# Zeitwide MVP — System Design
 
 Oct 28, 2026 · @Susmit Banerjee
 
 ## Summary
 
-The SettleCal MVP has three parts: Python ingests and verifies calendar data, PostgreSQL stores every version of every date, and Java serves answers through the REST API, the hosted MCP server and webhooks. One versioned dataset, checked by a shared test suite, keeps the Java and Python code giving the same answers. Everything is free in the MVP, but each account already has a plan field, so billing can be added later without changing the schema.
+The Zeitwide MVP has three parts: Python ingests and verifies calendar data, PostgreSQL stores every version of every date, and Java serves answers through the REST API, the hosted MCP server and webhooks. One versioned dataset, checked by a shared test suite, keeps the Java and Python code giving the same answers. Everything is free in the MVP, but each account already has a plan field, so billing can be added later without changing the schema.
 
 | Area | Decision | Why |
 | --- | --- | --- |
@@ -25,7 +25,7 @@ The split follows one rule: Python owns everything that **writes** calendar data
 
 &#91;embedded content: MVP architecture · Python writes, Postgres remembers, Java serves\]
 
-The release builder also exports each dataset release to GitHub and bundles it into the open Python library and local MCP server. Start each language as **one deployable** (a modular monolith), not microservices: `settlecal-api` (Java) and `settlecal-pipeline` (Python workers), plus the Next.js web app.
+The release builder also exports each dataset release to GitHub and bundles it into the open Python library and local MCP server. Start each language as **one deployable** (a modular monolith), not microservices: `zeitwide-api` (Java) and `zeitwide-pipeline` (Python workers), plus the Next.js web app.
 
 **Keeping two languages honest.** Java (the API) and Python (the open library) both compute business days. To stop them drifting:
 
@@ -49,7 +49,7 @@ If a source page fails to fetch or parse three times in a row, the job stops and
 
 ## Database
 
-Use PostgreSQL 18 as the single system of record, with **bitemporal** calendar entries. Every entry row has two time ranges: the date it describes, and when SettleCal believed it (`recorded_during`). Rows are never updated in place; a change closes the old row's `recorded_during` and inserts a new one. An as-of query is then one indexed lookup:
+Use PostgreSQL 18 as the single system of record, with **bitemporal** calendar entries. Every entry row has two time ranges: the date it describes, and when Zeitwide believed it (`recorded_during`). Rows are never updated in place; a change closes the old row's `recorded_during` and inserts a new one. An as-of query is then one indexed lookup:
 
 ```sql
 SELECT * FROM calendar_entry
@@ -75,20 +75,19 @@ A GiST exclusion constraint on `(calendar_id, entry_date, recorded_during)` stop
 | `account`, `app_user` | Organization, members, Keycloak subject ID, `plan` = `free` | Java |
 | `api_key` | Prefix, SHA-256 of the secret, scopes, last used, revoked at | Java |
 | `webhook_subscription`, `webhook_delivery` | Endpoint, secret, event filter; attempts and responses | Java |
-| `receipt` | ID, request hash, answer hash, release, key ID, signature | Java |
 | `entitlement` | Plan to feature limits (empty checks in MVP) | Java |
 
-Raw snapshots go to Cloud Storage, keyed by hash, kept forever. They are the evidence behind every answer. Cached answers live in each API instance's memory (Caffeine) and rate-limit counters in Postgres, so there is no cache server to run or pay for. Back up Postgres with point-in-time recovery from day one, because the change history can't be rebuilt.
+Receipts are stateless and are never written to Postgres: their payload and signature travel with the answer. Raw snapshots go to Cloud Storage, keyed by hash, kept forever. They are the evidence behind every answer. Cached answers live in each API instance's memory (Caffeine) and rate-limit counters in Postgres, so there is no cache server to run or pay for. Back up Postgres with point-in-time recovery from day one, because the change history can't be rebuilt.
 
 ## API, MCP and webhooks
 
 All three surfaces in the mockups (REST, MCP and webhooks) live in one Spring Boot service and call the same `AnswerEngine` class, so a person and an agent can never get different dates.
 
-- **REST API (v1).** The endpoints from the C3 and C4 mockups: check a date, add business days, list closures, changes, verify a receipt. Spring MVC on virtual threads (Java 21). Define the contract in OpenAPI and generate the Python and TypeScript clients from it.
-- **Hosted MCP server.** The six tools from the C2 mockup, built on the official MCP Java SDK (Spring AI MCP server) over Streamable HTTP. Each tool is a thin wrapper over `AnswerEngine` with a strict JSON schema.
-- **Local MCP server.** Shipped in Python inside the open library and run with `uvx settlecal-mcp --offline` on the bundled dataset. *This changes the mockup, which showed `npx`, to keep the stack to Java and Python.*
-- **Webhooks.** Cloud Scheduler calls an internal endpoint every minute that drains the `outbox` table (`FOR UPDATE SKIP LOCKED`), signs each body with HMAC-SHA256, and retries with exponential backoff for 24 hours. Each delivery is logged in `webhook_delivery`.
-- **Receipts.** Every answer gets a receipt: the canonical JSON of request and answer, signed with Ed25519. Keep the private key in GCP Secret Manager, never in the database; move to Cloud KMS if a customer asks for HSM-backed keys. Publish public keys at `/.well-known/settlecal-keys.json`, and rotate them yearly with key IDs like `sc-2026-10`.
+- **REST API (v1).** Check a date, add business days, list calendars and closures, page through changes, and verify receipts. Answer routes accept `as_of`; their responses carry the effective instant, dataset release, per-calendar revisions and a receipt. `GET /v1/changes` filters by calendars, `since` and event types, and uses an opaque keyset cursor. Spring MVC on virtual threads (Java 21). Define the contract in OpenAPI and generate the Python and TypeScript clients from it.
+- **Hosted MCP server.** The six tools from the C2 mockup, built on the official MCP Java SDK (Spring AI MCP server) over Streamable HTTP at `/mcp`. Each tool is a thin wrapper over `AnswerEngine` with a strict JSON schema and returns the same structured answer, sources and receipt as REST. MCP clients can use an API key or Keycloak OAuth 2.1 bearer token; path-specific protected-resource metadata points to Keycloak. Server instructions tell agents to use source citations, retain receipts and check `get_changes` before acting on old dates.
+- **Local MCP server.** Shipped in Python inside the open library and run with `uvx zeitwide-mcp --offline` on the bundled dataset. *This changes the mockup, which showed `npx`, to keep the stack to Java and Python.*
+- **Webhooks.** Authenticated accounts manage subscriptions with `GET/POST /v1/account/webhooks`, `PUT/DELETE /v1/account/webhooks/{id}`, and `POST /v1/account/webhooks/{id}/test`. A create response shows the signing secret once; the database keeps only its AES-GCM ciphertext under a key from Secret Manager. Accept HTTPS URLs only, resolve every address before saving and before delivery, reject private, loopback, link-local and metadata ranges, and pin that validated DNS answer for the request. The HTTP client follows no redirects and uses a five-second timeout. Cloud Scheduler calls `POST /internal/outbox/drain` every minute. It claims rows with `FOR UPDATE SKIP LOCKED`, fans out only to matching event and calendar subscriptions, sends stable event IDs and a timestamped HMAC-SHA256 `Zeitwide-Signature` header, and records every attempt in `webhook_delivery`. Failed deliveries use exponential backoff for up to 24 hours, then become terminal failures. A receiver can deduplicate retries by event ID.
+- **Receipts.** Every answer gets a self-contained receipt over RFC 8785 canonical JSON for `{request, answer, dataset_release, calendar_revisions, issued_at}`. Its SHA-256 payload hash and Ed25519 signature are returned with the payload; `POST /v1/receipts/verify` checks it without a receipt lookup or database row. Keep the PKCS#8 private key in GCP Secret Manager, never in Postgres. `GET /.well-known/zeitwide-keys.json` publishes the SPKI public key ring with each key's validity interval. On rotation, deploy the new active key and keep prior public keys in the ring so older receipts still verify. The JDK's built-in Ed25519 provider signs and verifies receipts.
 - **Determinism.** Each response carries `dataset_release` and calendar revisions in its body and headers. Cache answers by `(request, release)`, because a release never changes once cut.
 - **Public pages without a key.** Anonymous requests are allowed at a low rate limit, so answer pages and casual users work without signing up.
 
@@ -98,7 +97,7 @@ Use **Keycloak**, self-hosted. It's open source (Apache 2.0) and a CNCF project,
 
 | Need | How Keycloak covers it |
 | --- | --- |
-| Google, Microsoft, GitHub login | Built-in identity providers; users click a button, no SettleCal password |
+| Google, Microsoft, GitHub login | Built-in identity providers; users click a button, no Zeitwide password |
 | Enterprise SSO | Per-customer OIDC or SAML identity provider, mapped to that customer's account by email domain |
 | Web app sessions | Next.js uses OIDC with PKCE; Spring Boot validates the access token as a resource server |
 | MCP clients | Keycloak acts as the OAuth 2.1 authorization server that the MCP spec expects, with dynamic client registration |
@@ -110,7 +109,7 @@ Alternatives, if Keycloak feels heavy to run: **Zitadel** (lighter, built for mu
 
 ## Frontend
 
-Build one Next.js app (React 19, TypeScript) with three areas. A plain single-page React app would hide the answer pages from search engines, and those pages are the main way people find SettleCal (M8).
+Build one Next.js app (React 19, TypeScript) with three areas. A plain single-page React app would hide the answer pages from search engines, and those pages are the main way people find Zeitwide (M8).
 
 | Area | Screens from the mockups | Rendering | Auth |
 | --- | --- | --- | --- |
@@ -163,7 +162,7 @@ In the MVP every account is on the `free` plan and gets everything: as-of histor
 Keep everything in one monorepo so a schema change, the API and the conformance cases move together in one pull request.
 
 ```
-settlecal/
+zeitwide/
   api/            Java 21, Spring Boot: REST, MCP, webhooks, receipts, Flyway migrations
   pipeline/       Python: monitors, parsers, review CLI, release builder
   lib-python/     open library (MIT) + local MCP server

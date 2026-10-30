@@ -5,9 +5,9 @@ from pathlib import Path
 
 import pytest
 
-from settlecal_pipeline.models import Observation, SnapshotMeta
-from settlecal_pipeline.sources import ParseError, parse_snapshot
 from support.fixture_source import HolidayTableParser, holiday_page
+from zeitwide_pipeline.models import Observation, SnapshotMeta
+from zeitwide_pipeline.sources import ParseError, parse_snapshot
 
 FIXTURES = Path(__file__).parent / "fixtures" / "fixture-holidays"
 META = SnapshotMeta(

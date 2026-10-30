@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Creates SettleCal's logins and databases on Aiven and stores Aiven's CA certificate.
+# Creates Zeitwide's logins and databases on Aiven and stores Aiven's CA certificate.
 #
 #   bash deploy/gcp/aiven/setup.sh path/to/ca.pem
 #
@@ -18,7 +18,7 @@ CA_FILE="${1:?Usage: setup.sh path/to/ca.pem (Aiven console > Overview > CA cert
 if command -v gcloud.cmd >/dev/null 2>&1; then GCLOUD=gcloud.cmd; else GCLOUD=gcloud; fi
 
 secret() {
-  "$GCLOUD" secrets versions access latest --secret "settlecal-$ENVIRONMENT-$1" --project "$PROJECT"
+  "$GCLOUD" secrets versions access latest --secret "zeitwide-$ENVIRONMENT-$1" --project "$PROJECT"
 }
 
 [ -s "$CA_FILE" ] || { echo "No CA certificate at $CA_FILE" >&2; exit 1; }
@@ -51,10 +51,10 @@ docker run --rm -i \
 unset PGPASSWORD API_PASSWORD PIPELINE_PASSWORD BACKUP_PASSWORD KEYCLOAK_PASSWORD
 
 # The connection above already proved this CA verifies Aiven's certificate and hostname.
-if "$GCLOUD" secrets versions list "settlecal-$ENVIRONMENT-db-ca-cert" --project "$PROJECT" \
+if "$GCLOUD" secrets versions list "zeitwide-$ENVIRONMENT-db-ca-cert" --project "$PROJECT" \
     --filter="state=ENABLED" --format="value(name)" | grep -q .; then
-  echo "settlecal-$ENVIRONMENT-db-ca-cert already has a version; left as it is."
+  echo "zeitwide-$ENVIRONMENT-db-ca-cert already has a version; left as it is."
 else
-  "$GCLOUD" secrets versions add "settlecal-$ENVIRONMENT-db-ca-cert" --data-file="$CA_FILE" --project "$PROJECT"
+  "$GCLOUD" secrets versions add "zeitwide-$ENVIRONMENT-db-ca-cert" --data-file="$CA_FILE" --project "$PROJECT"
 fi
 echo "Done. You can delete $CA_FILE; it is in Secret Manager."

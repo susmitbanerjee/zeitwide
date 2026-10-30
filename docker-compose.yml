@@ -1,14 +1,14 @@
 # Local development stack. Ports bind to 127.0.0.1 only; credentials are local-only defaults.
-name: settlecal
+name: zeitwide
 
 services:
   postgres:
-    # Same version as the Aiven service SettleCal runs on.
+    # Same version as the Aiven service Zeitwide runs on.
     image: postgres:18.6-alpine
     environment:
-      POSTGRES_USER: settlecal
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-settlecal}
-      POSTGRES_DB: settlecal
+      POSTGRES_USER: zeitwide
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-zeitwide}
+      POSTGRES_DB: zeitwide
       KEYCLOAK_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-keycloak}
     ports:
       - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
@@ -18,7 +18,7 @@ services:
       - postgres18-data:/var/lib/postgresql
       - ./deploy/postgres/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U settlecal -d settlecal"]
+      test: ["CMD-SHELL", "pg_isready -U zeitwide -d zeitwide"]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -32,12 +32,20 @@ services:
       KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-keycloak}
       KC_HEALTH_ENABLED: "true"
+      KC_DB_POOL_MAX_SIZE: "3"
+      ZEITWIDE_WEB_ORIGIN: ${ZEITWIDE_WEB_ORIGIN:-http://localhost:3000}
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID:-}
+      MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET:-}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
     ports:
       - "127.0.0.1:${KEYCLOAK_PORT:-8180}:8080"
     volumes:
-      - ./deploy/keycloak/settlecal-realm.json:/opt/keycloak/data/import/settlecal-realm.json:ro
+      - ./deploy/keycloak/realm.json:/opt/keycloak/data/import/realm.json:ro
     depends_on:
       postgres:
         condition: service_healthy

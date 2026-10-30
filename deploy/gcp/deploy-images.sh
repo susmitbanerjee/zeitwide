@@ -13,7 +13,7 @@ set -euo pipefail
 PROJECT="${PROJECT:-project-6eaae4e0-3164-4e31-bc4}"
 ENVIRONMENT="${ENVIRONMENT:-dev}"
 REGION="${REGION:-us-central1}"
-REPOSITORY="$REGION-docker.pkg.dev/$PROJECT/settlecal-$ENVIRONMENT"
+REPOSITORY="$REGION-docker.pkg.dev/$PROJECT/zeitwide-$ENVIRONMENT"
 
 ROOT="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 # A -dirty suffix marks images built from uncommitted changes.
@@ -40,9 +40,9 @@ roll_out() {
   local name="$1" image="$REPOSITORY/$1:$TAG"
   echo "==> $name: deploying"
   case "$name" in
-    api | web) gcloud_run services update "settlecal-$name-$ENVIRONMENT" --image="$image" ;;
+    api | web) gcloud_run services update "zeitwide-$name-$ENVIRONMENT" --image="$image" ;;
     keycloak) gcloud_run services update "keycloak-$ENVIRONMENT" --image="$image" ;;
-    pipeline) gcloud_run jobs update "settlecal-pipeline-$ENVIRONMENT" --image="$image" ;;
+    pipeline) gcloud_run jobs update "zeitwide-pipeline-$ENVIRONMENT" --image="$image" ;;
   esac
 }
 

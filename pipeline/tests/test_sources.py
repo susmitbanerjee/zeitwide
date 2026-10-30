@@ -4,10 +4,11 @@ from datetime import date
 
 import pytest
 
-from settlecal_pipeline.calendars import load_catalog
-from settlecal_pipeline.models import Observation
-from settlecal_pipeline.sources import ParseError, builtin_registry, parse_snapshot
-from settlecal_pipeline.sources.catalog import (
+from support.goldens import Golden, goldens
+from zeitwide_pipeline.calendars import load_catalog
+from zeitwide_pipeline.models import Observation
+from zeitwide_pipeline.sources import ParseError, builtin_registry, parse_snapshot
+from zeitwide_pipeline.sources.catalog import (
     bundesbank_holidays,
     ecb_public_holidays,
     federalreserve_k8,
@@ -15,8 +16,7 @@ from settlecal_pipeline.sources.catalog import (
     govuk_bank_holidays,
     opm_federal_holidays,
 )
-from settlecal_pipeline.sources.pdf_text import pdf_lines
-from support.goldens import Golden, goldens
+from zeitwide_pipeline.sources.pdf_text import pdf_lines
 
 REGISTRY = builtin_registry()
 GOLDENS = goldens({source.id for source in REGISTRY})

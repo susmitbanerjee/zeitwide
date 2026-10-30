@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://settlecal.com/schemas/dataset-release.json",
-  "title": "SettleCal dataset release",
-  "description": "Every calendar's rules and every version of its entries that SettleCal had recorded at as_of. Immutable once cut. The business-day rules that read it are in dataset/README.md.",
+  "$id": "https://zeitwide.com/schemas/dataset-release.json",
+  "title": "Zeitwide dataset release",
+  "description": "Every calendar's rules and every version of its entries that Zeitwide had recorded at as_of. Immutable once cut. The business-day rules that read it are in dataset/README.md.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "release", "as_of", "license", "calendars"],
@@ -70,7 +70,7 @@
       }
     },
     "entry": {
-      "description": "One version of what SettleCal recorded about a date: a closure, or an open day that overrides the weekend rule.",
+      "description": "One version of what Zeitwide recorded about a date: a closure, or an open day that overrides the weekend rule.",
       "type": "object",
       "additionalProperties": false,
       "required": [

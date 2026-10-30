@@ -9,7 +9,7 @@ release builder and mirrored to the public data repository. Published under
 A release is one JSON file matching [`schema/release.schema.json`](schema/release.schema.json)
 (`schema_version` 2). It holds each calendar's rules (weekend days, whether it closes on
 holidays, observance and operating hours) and **every version** of every entry that
-SettleCal had recorded at the release's `as_of`. Each version keeps when it was believed
+Zeitwide had recorded at the release's `as_of`. Each version keeps when it was believed
 (`recorded_from` up to `recorded_to`, null while current) and the source snapshots
 behind it, so the open library can answer "as of" questions offline, just like the API.
 
@@ -23,7 +23,7 @@ library still reads it, as if every entry were current.
 ## How a release answers
 
 These rules are the contract. The Java engine (`api/.../answers/domain`) and the Python
-engine (`lib-python/src/settlecal/engine.py`) both implement exactly this, and the
+engine (`lib-python/src/zeitwide/engine.py`) both implement exactly this, and the
 conformance suite checks both against the same cases.
 
 **One calendar, one date `D`, as of instant `T`** (default: the release's `as_of`):

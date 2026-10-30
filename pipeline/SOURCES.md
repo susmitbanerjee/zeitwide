@@ -1,10 +1,10 @@
 # Sources
 
 What each source is, what its robots.txt and terms allow, and how the pipeline uses it.
-Checked on 2026-10-28 with the `SettleCalBot` User-Agent. Re-check before adding a
+Checked on 2026-10-28 with the `ZeitwideBot` User-Agent. Re-check before adding a
 source and once a year.
 
-**How SettleCal uses every source.** It stores facts (a date is open or closed, and why)
+**How Zeitwide uses every source.** It stores facts (a date is open or closed, and why)
 and a link to the page, never copied page text, in anything it publishes. It keeps raw
 snapshots privately as evidence, in the snapshots bucket and as test fixtures. It
 fetches at most once a day per source, with conditional requests, at least one second
@@ -35,7 +35,7 @@ apart per host or longer when robots.txt asks.
   material" that may not be reproduced, published or redistributed "except as expressly
   authorized". It also prohibits using the site "for reasons other than its intended
   purposes" and using the Banks' names commercially.
-  - Holiday dates are facts, so SettleCal stores the dates and links to the page.
+  - Holiday dates are facts, so Zeitwide stores the dates and links to the page.
   - It never republishes the page or uses the Banks' names in marketing.
   - The admin review screen shows snapshots to reviewers only.
 - **Content:** one table, with a row per holiday and a column per year (five years),
@@ -151,7 +151,7 @@ apart per host or longer when robots.txt asks.
 ## Rule sources (not monitored)
 
 These pages state rules rather than list dates. Their facts are in the calendar catalog
-(`src/settlecal_pipeline/calendars/catalog/`), each with a `provenance` entry. They are
+(`src/zeitwide_pipeline/calendars/catalog/`), each with a `provenance` entry. They are
 not yet monitored for changes.
 
 | Page | Used for | robots.txt | Terms |
@@ -164,7 +164,7 @@ not yet monitored for changes.
 **Bank of England terms:** <https://www.bankofengland.co.uk/legal>. Content may be used
 "for personal use or internal use within an individual organisation for non-commercial
 purposes"; commercial reuse needs permission (enquiries@bankofengland.co.uk). The rule
-is a fact, so SettleCal states it and links to the page. Monitoring the page would mean
+is a fact, so Zeitwide states it and links to the page. Monitoring the page would mean
 storing copies of it, which these terms don't clearly allow for a commercial service.
 
 **Decision (2026-10-28): GB-CHAPS dates come from GOV.UK only.** The Bank of England
@@ -179,19 +179,19 @@ independent source for England and Wales bank holidays appears.
 ## Adding a source
 
 1. Check robots.txt and the terms; add a section here.
-2. Add the module in `src/settlecal_pipeline/sources/catalog/` and any new calendar in
-   `src/settlecal_pipeline/calendars/catalog/`.
+2. Add the module in `src/zeitwide_pipeline/sources/catalog/` and any new calendar in
+   `src/zeitwide_pipeline/calendars/catalog/`.
 3. Save two real snapshots: the live page, and an older one, for example an Internet
    Archive `id_` capture, to catch layout drift.
 
    ```bash
-   uv run settlecal-pipeline save-fixture <source-id> live-YYYY-MM-DD
+   uv run zeitwide-pipeline save-fixture <source-id> live-YYYY-MM-DD
    ```
 
    ```bash
-   uv run settlecal-pipeline save-fixture <source-id> archive-YYYY-MM --url "https://web.archive.org/web/YYYYMMDD000000id_/<page url>"
+   uv run zeitwide-pipeline save-fixture <source-id> archive-YYYY-MM --url "https://web.archive.org/web/YYYYMMDD000000id_/<page url>"
    ```
 
 4. Write `<name>.expected.json` from the parser's output only after checking the dates by
    hand. `tests/test_sources.py` then runs them as goldens.
-5. Run `uv run settlecal-pipeline dry-run <source-id>` against the live site.
+5. Run `uv run zeitwide-pipeline dry-run <source-id>` against the live site.

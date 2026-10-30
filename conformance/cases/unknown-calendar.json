@@ -1,6 +1,6 @@
 {
   "id": "unknown-calendar",
-  "description": "XX-NOWHERE is not a SettleCal calendar.",
+  "description": "XX-NOWHERE is not a Zeitwide calendar.",
   "dataset_release": "2026.10.29.0",
   "input": {
     "operation": "is_business_day",

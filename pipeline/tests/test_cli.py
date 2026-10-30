@@ -1,6 +1,6 @@
 from typer.testing import CliRunner
 
-from settlecal_pipeline.cli import app
+from zeitwide_pipeline.cli import app
 
 CLI_USAGE_ERROR = 2
 

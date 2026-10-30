@@ -12,17 +12,23 @@ bucket4j = "8.21.0"
 jib = "3.5.4"
 # Newer than Spring Boot 3.5 manages (11.7), for PostgreSQL 18 support; Aiven runs 18.
 flyway = "11.20.3"
+jcs = "1.1"
+spring-ai = "1.1.8"
 
 [libraries]
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web" }
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
 spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation" }
 spring-boot-starter-jdbc = { module = "org.springframework.boot:spring-boot-starter-jdbc" }
+spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security" }
+spring-boot-starter-oauth2-resource-server = { module = "org.springframework.boot:spring-boot-starter-oauth2-resource-server" }
+spring-context-support = { module = "org.springframework:spring-context-support" }
 spring-boot-docker-compose = { module = "org.springframework.boot:spring-boot-docker-compose" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-database-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
 postgresql = { module = "org.postgresql:postgresql" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+spring-security-test = { module = "org.springframework.security:spring-security-test" }
 spring-boot-testcontainers = { module = "org.springframework.boot:spring-boot-testcontainers" }
 testcontainers-postgresql = { module = "org.testcontainers:postgresql" }
 testcontainers-junit-jupiter = { module = "org.testcontainers:junit-jupiter" }
@@ -32,6 +38,9 @@ archunit-junit5 = { module = "com.tngtech.archunit:archunit-junit5", version.ref
 jqwik = { module = "net.jqwik:jqwik", version.ref = "jqwik" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine" }
 bucket4j-postgresql = { module = "com.bucket4j:bucket4j_jdk17-postgresql", version.ref = "bucket4j" }
+java-json-canonicalization = { module = "io.github.erdtman:java-json-canonicalization", version.ref = "jcs" }
+apache-httpclient5 = { module = "org.apache.httpcomponents.client5:httpclient5" }
+spring-ai-starter-mcp-server-webmvc = { module = "org.springframework.ai:spring-ai-starter-mcp-server-webmvc" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }

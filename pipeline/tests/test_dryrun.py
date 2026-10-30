@@ -8,11 +8,11 @@ import pytest
 import respx
 from tenacity import wait_none
 
-from settlecal_pipeline.dryrun import archive_capture_time, dry_run, save_fixture
-from settlecal_pipeline.fetch import Fetcher, HostThrottle, new_client
-from settlecal_pipeline.sources.catalog import govuk_bank_holidays
 from support.doubles import START, FakeClock
 from support.goldens import goldens
+from zeitwide_pipeline.dryrun import archive_capture_time, dry_run, save_fixture
+from zeitwide_pipeline.fetch import Fetcher, HostThrottle, new_client
+from zeitwide_pipeline.sources.catalog import govuk_bank_holidays
 
 SOURCE = govuk_bank_holidays.SOURCE
 GOLDEN = goldens({SOURCE.id})[-1]

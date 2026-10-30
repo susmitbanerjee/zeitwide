@@ -1,7 +1,7 @@
 from importlib.metadata import version
 
-import settlecal
+import zeitwide
 
 
 def test_version_matches_distribution_metadata() -> None:
-    assert settlecal.__version__ == version("settlecal")
+    assert zeitwide.__version__ == version("zeitwide")
