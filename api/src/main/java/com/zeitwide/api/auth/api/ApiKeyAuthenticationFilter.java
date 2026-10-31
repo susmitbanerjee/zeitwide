@@ -3,6 +3,7 @@ package com.zeitwide.api.auth.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zeitwide.api.auth.app.ApiKeyAuthenticator;
 import com.zeitwide.api.auth.domain.ApiKeyToken;
+import com.zeitwide.api.auth.domain.Caller;
 import com.zeitwide.api.mcp.app.McpProperties;
 import com.zeitwide.api.web.ProblemCode;
 import com.zeitwide.api.web.Problems;
@@ -12,14 +13,20 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /** Recognizes the API-key form of Bearer authentication before OAuth JWT processing. */
 public final class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
 
+  private static final Logger log = LoggerFactory.getLogger(ApiKeyAuthenticationFilter.class);
   private static final String BEARER = "Bearer ";
   private final ApiKeyAuthenticator authenticator;
   private final ObjectMapper json;
@@ -46,7 +53,15 @@ public final class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
       chain.doFilter(request, response);
       return;
     }
-    var authenticated = authenticator.authenticate(token);
+    Optional<Caller.Keyed> authenticated;
+    try {
+      authenticated = authenticator.authenticate(token);
+    } catch (DataAccessException unavailable) {
+      // A database hiccup is our fault, not a bad key: never answer it with a 401.
+      log.atError().setCause(unavailable).log("API key check failed");
+      writeProblem(response, Problems.of(ProblemCode.INTERNAL_ERROR, "Try again shortly"));
+      return;
+    }
     if (authenticated.isEmpty()) {
       String path = request.getRequestURI().substring(request.getContextPath().length());
       if (path.equals("/mcp")) {
@@ -54,10 +69,7 @@ public final class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
             HttpHeaders.WWW_AUTHENTICATE,
             "Bearer resource_metadata=\"" + mcpProperties.protectedResourceMetadataUrl() + "\"");
       }
-      var problem = Problems.of(ProblemCode.INVALID_API_KEY, "The API key is not valid");
-      response.setStatus(problem.getStatus());
-      response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
-      json.writeValue(response.getOutputStream(), problem);
+      writeProblem(response, Problems.of(ProblemCode.INVALID_API_KEY, "The API key is not valid"));
       return;
     }
     var key = authenticated.get();
@@ -66,5 +78,12 @@ public final class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
     var authentication = new AccountAuthenticationToken(principal, List.of());
     SecurityContextHolder.getContext().setAuthentication(authentication);
     chain.doFilter(request, response);
+  }
+
+  private void writeProblem(HttpServletResponse response, ProblemDetail problem)
+      throws IOException {
+    response.setStatus(problem.getStatus());
+    response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+    json.writeValue(response.getOutputStream(), problem);
   }
 }

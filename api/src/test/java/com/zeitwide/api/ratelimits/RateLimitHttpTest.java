@@ -9,7 +9,13 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -71,6 +77,26 @@ class RateLimitHttpTest {
       assertThat(statusOf(key, null)).isEqualTo(UNAVAILABLE);
     }
     assertThat(statusOf(key, null)).isEqualTo(TOO_MANY);
+  }
+
+  @Test
+  void shouldKeepABusyKeysLimitExactWithoutStarvingThePool() throws Exception {
+    String key = createKey();
+    List<Callable<Integer>> calls = new ArrayList<>();
+    for (int i = 0; i < 40; i++) {
+      calls.add(() -> statusOf(key, null));
+    }
+    List<Integer> statuses = new ArrayList<>();
+    try (ExecutorService pool = Executors.newFixedThreadPool(20)) {
+      for (Future<Integer> status : pool.invokeAll(calls)) {
+        statuses.add(status.get());
+      }
+    }
+
+    // Concurrent calls on one key merge into one database call: no 500s, and still exactly
+    // the key's three requests get through.
+    assertThat(statuses).containsOnly(UNAVAILABLE, TOO_MANY);
+    assertThat(statuses.stream().filter(status -> status == UNAVAILABLE)).hasSize(3);
   }
 
   @Test
