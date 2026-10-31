@@ -360,8 +360,10 @@ recreated by an apply, but the data has to move first, in this order:
    `tofu import 'google_secret_manager_secret.this["db-host"]' projects/<project>/secrets/zeitwide-dev-db-host`,
    for every secret in `locals.secret_readers`. Every secret Keycloak reads needs a value
    before the apply, including the three OAuth client secrets.
-5. **Apply** (step 7). It replaces the services, job, Scheduler jobs and service
-   accounts under their new names; the services start on the bootstrap image.
+5. **Apply** (step 7) with the real images. It replaces the services, job, Scheduler jobs
+   and service accounts under their new names, and the startup probes need the real apps:
+   push the images first (step 9), then
+   `tofu apply -var-file=envs/dev.tfvars -var 'initial_images={api="…/api:TAG",web="…/web:TAG",pipeline="…/pipeline:TAG"}'`.
 6. **Deploy all four images** (step 9), then point Firebase Hosting's rewrite at
    `zeitwide-web-dev` and deploy Hosting again (step 10).
 7. **Check, then clean up.** Once the new API answers, delete what OpenTofu no longer

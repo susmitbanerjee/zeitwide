@@ -151,3 +151,18 @@ variable "bootstrap_job_image" {
   type        = string
   default     = "us-docker.pkg.dev/cloudrun/container/job"
 }
+
+# The API's and web app's startup probes call their health endpoints, which the bootstrap
+# image doesn't serve, so a service created from it never becomes ready. Pass the real
+# images when a service or the job is (re)created, for example
+# -var 'initial_images={api="…/api:TAG",web="…/web:TAG",keycloak="…",pipeline="…"}'.
+variable "initial_images" {
+  description = "Images by component (api, web, keycloak, pipeline), used only at creation; missing ones fall back to the bootstrap images."
+  type        = map(string)
+  default     = {}
+
+  validation {
+    condition     = alltrue([for name in keys(var.initial_images) : contains(["api", "web", "keycloak", "pipeline"], name)])
+    error_message = "initial_images keys are api, web, keycloak and pipeline."
+  }
+}

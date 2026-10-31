@@ -134,7 +134,7 @@ resource "google_cloud_run_v2_service" "api" {
     }
 
     containers {
-      image = var.bootstrap_service_image
+      image = lookup(var.initial_images, "api", var.bootstrap_service_image)
 
       resources {
         limits = {
@@ -212,7 +212,7 @@ resource "google_cloud_run_v2_service" "web" {
     }
 
     containers {
-      image = var.bootstrap_service_image
+      image = lookup(var.initial_images, "web", var.bootstrap_service_image)
 
       resources {
         limits = {
@@ -289,7 +289,7 @@ resource "google_cloud_run_v2_service" "keycloak" {
     }
 
     containers {
-      image = var.bootstrap_service_image
+      image = lookup(var.initial_images, "keycloak", var.bootstrap_service_image)
       # The image is pre-built with `kc.sh build` (README), so start skips the build.
       # --import-realm creates the zeitwide realm on first start and then skips it.
       args = ["start", "--optimized", "--import-realm"]
@@ -375,7 +375,7 @@ resource "google_cloud_run_v2_job" "pipeline" {
       }
 
       containers {
-        image = var.bootstrap_job_image
+        image = lookup(var.initial_images, "pipeline", var.bootstrap_job_image)
         args  = ["run-due"]
 
         resources {
