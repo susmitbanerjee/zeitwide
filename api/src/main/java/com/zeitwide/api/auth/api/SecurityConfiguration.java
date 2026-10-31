@@ -145,10 +145,12 @@ public class SecurityConfiguration {
                 authorization
                     .requestMatchers(HttpMethod.OPTIONS, "/**")
                     .permitAll()
+                    // Answers need an API key or a Keycloak token: no anonymous use, so
+                    // every caller has an account with its own limit and can be cut off.
                     .requestMatchers("/v1/calendars/**", "/v1/business-days/**")
-                    .permitAll()
+                    .authenticated()
                     .requestMatchers("/v1/changes", "/v1/receipts/verify")
-                    .permitAll()
+                    .authenticated()
                     .requestMatchers(
                         HttpMethod.GET,
                         "/.well-known/zeitwide-keys.json",
@@ -161,6 +163,8 @@ public class SecurityConfiguration {
                     .permitAll()
                     .requestMatchers("/actuator/health", "/actuator/health/**")
                     .permitAll()
+                    .requestMatchers("/v1/admin/**")
+                    .hasRole("reviewer")
                     .requestMatchers("/v1/account/**")
                     .authenticated()
                     .requestMatchers("/mcp")

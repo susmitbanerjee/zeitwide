@@ -39,10 +39,19 @@ class JdbcOutboxPreparationRepository implements OutboxPreparationRepository {
             JOIN change_event AS event ON event.id = event_outbox.change_event_id
             JOIN webhook_subscription AS subscription
               ON subscription.disabled_at IS NULL
-             AND event.event_type::text = ANY(subscription.event_types::text[])
+             AND event.change_type::text = ANY(subscription.event_types::text[])
              AND (subscription.calendar_ids IS NULL
                   OR event.calendar_id = ANY(subscription.calendar_ids))
-            WHERE event_outbox.id IN (:ids)
+            -- An account with alert rules hears only what a rule matches (AlertRuleSettings).
+            WHERE (NOT EXISTS (SELECT 1 FROM alert_rule AS rule
+                               WHERE rule.account_id = subscription.account_id)
+                   OR EXISTS (SELECT 1 FROM alert_rule AS rule
+                              WHERE rule.account_id = subscription.account_id
+                                AND event.calendar_id = ANY(rule.calendar_ids)
+                                AND event.change_type::text = ANY(rule.event_types::text[])
+                                AND (rule.max_notice_days IS NULL
+                                     OR event.notice_days <= rule.max_notice_days)))
+              AND event_outbox.id IN (:ids)
             ON CONFLICT (subscription_id, outbox_id) DO NOTHING
             """)
         .param("ids", outboxIds)

@@ -132,6 +132,29 @@ class SkippedDay(TypedDict):
     calendars: list[CalendarDay]
 
 
+class RangeDay(TypedDict):
+    date: str
+    is_open: bool
+    decided_by: Literal['entry', 'weekend_rule']
+    reason: NotRequired[str]
+    """
+    Only when an entry decided.
+    """
+    basis: NotRequired[Basis]
+    sources: list[Source]
+    """
+    The snapshots behind the entry; empty when the weekend rule decided.
+    """
+    next_business_day: NotRequired[str]
+    """
+    The first business day after `date`; absent if it is past coverage.
+    """
+    previous_business_day: NotRequired[str]
+    """
+    The last business day before `date`; absent if it is before coverage.
+    """
+
+
 class Closure(TypedDict):
     date: str
     reason: str
@@ -162,6 +185,142 @@ class Calendar(TypedDict):
     coverage: Coverage
 
 
+class AlertRuleConfiguration(TypedDict):
+    name: str
+    calendars: list[CalendarId]
+    events: list[ChangeType]
+    max_notice_days: NotRequired[int | None]
+    """
+    Only changes announced this many days or fewer ahead; null for any notice.
+    """
+
+
+class AlertRule(TypedDict):
+    id: str
+    name: str
+    calendars: list[CalendarId]
+    events: list[ChangeType]
+    max_notice_days: int | None
+    created_at: str
+
+
+type CandidateStatus = Literal['pending', 'approved', 'rejected', 'published']
+
+
+type Corroboration = Literal['single_source', 'corroborated']
+"""
+`corroborated`: a second, independent source agrees.
+"""
+
+
+class EntryState(TypedDict):
+    is_open: bool
+    reason: str
+    basis: NotRequired[Basis]
+
+
+class Candidate(TypedDict):
+    id: int
+    calendar_id: CalendarId
+    entry_date: str
+    before: EntryState | None
+    """
+    The published state when the candidate was opened; null for a new date.
+    """
+    after: EntryState
+    corroboration: Corroboration
+    source_count: int
+    notice_days: int
+    """
+    Days from today (UTC) to the date; negative once it has passed.
+    """
+    urgent: bool
+    """
+    Under 14 days' notice.
+    """
+    status: CandidateStatus
+    created_at: str
+
+
+class CandidateList(TypedDict):
+    candidates: list[Candidate]
+
+
+class CandidateSnapshot(TypedDict):
+    """
+    One source snapshot that supports the candidate, and what the parser read from it.
+    """
+
+    source: str
+    """
+    The source's slug.
+    """
+    publisher: str
+    url: str
+    role: Literal['primary', 'corroborating']
+    fetched_at: str
+    snapshot_sha256: str
+    http_status: int
+    content_type: str | None
+    byte_size: int
+    is_open: bool
+    reason: str
+    parser_version: str
+
+
+class CandidateDetail(TypedDict):
+    candidate: Candidate
+    current: EntryState | None
+    """
+    The entry published now, if any.
+    """
+    snapshots: list[CandidateSnapshot]
+    reviewer: str | None
+    review_reason: str | None
+    reviewed_at: str | None
+
+
+class CandidateDecision(TypedDict):
+    decision: Literal['approve', 'reject']
+    reason: str
+
+
+class SourceHealth(TypedDict):
+    source: str
+    publisher: str
+    url: str
+    role: Literal['primary', 'corroborating']
+    schedule: str
+    enabled: bool
+    health: Literal['healthy', 'failing', 'suspended', 'disabled', 'never_checked']
+    """
+    `failing`: the last check failed; `suspended`: stopped after repeated failures.
+    """
+    consecutive_failures: int
+    last_checked_at: str | None
+    last_success_at: str | None
+    last_snapshot_at: str | None
+    last_snapshot_sha256: str | None
+    last_error: str | None
+    suspended_at: str | None
+
+
+class SourceHealthList(TypedDict):
+    sources: list[SourceHealth]
+
+
+class Release(TypedDict):
+    id: DatasetRelease
+    as_of: str
+    calendar_revisions: CalendarRevisions
+    export_sha256: str
+    created_at: str
+
+
+class ReleaseList(TypedDict):
+    releases: list[Release]
+
+
 class Problem(TypedDict):
     """
     RFC 9457 problem details.
@@ -172,7 +331,7 @@ class Problem(TypedDict):
     status: int
     detail: NotRequired[str]
     instance: NotRequired[str]
-    code: Literal['validation_failed', 'invalid_api_key', 'unauthorized', 'forbidden', 'length_required', 'payload_too_large', 'api_key_limit_reached', 'idempotency_key_reused', 'webhook_limit_reached', 'unknown_calendar', 'out_of_range', 'rate_limited', 'dataset_unavailable', 'not_found', 'internal_error']
+    code: Literal['validation_failed', 'invalid_api_key', 'unauthorized', 'forbidden', 'length_required', 'payload_too_large', 'api_key_limit_reached', 'idempotency_key_reused', 'webhook_limit_reached', 'alert_rule_limit_reached', 'candidate_not_pending', 'unknown_calendar', 'out_of_range', 'rate_limited', 'dataset_unavailable', 'not_found', 'internal_error']
 
 
 class WebhookConfiguration(TypedDict):
@@ -252,6 +411,22 @@ class Shifted(TypedDict):
     dataset_release: DatasetRelease
     calendar_revisions: CalendarRevisions
     receipt: Receipt
+
+
+DayRange = TypedDict(
+    'DayRange',
+    {
+        'calendar_id': CalendarId,
+        'today': str,
+        'from': str,
+        'to': str,
+        'days': list[RangeDay],
+        'as_of': str,
+        'dataset_release': DatasetRelease,
+        'calendar_revisions': CalendarRevisions,
+        'receipt': Receipt,
+    },
+)
 
 
 ClosureList = TypedDict(

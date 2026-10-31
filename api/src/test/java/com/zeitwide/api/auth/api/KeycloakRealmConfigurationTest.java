@@ -36,10 +36,11 @@ class KeycloakRealmConfigurationTest {
             "${GOOGLE_CLIENT_SECRET}",
             "${GITHUB_CLIENT_ID}",
             "${GITHUB_CLIENT_SECRET}");
+    // On the web client, not in a realm client scope: listing clientScopes in an import would
+    // replace Keycloak's built-in profile, email and roles scopes.
+    assertThat(realm.has("clientScopes")).isFalse();
     assertThat(
-            realm
-                .path("clientScopes")
-                .get(0)
+            client(realm, "zeitwide-web")
                 .path("protocolMappers")
                 .get(0)
                 .path("config")

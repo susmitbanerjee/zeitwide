@@ -12,7 +12,7 @@ public interface ApiKeyRepository {
   /** The key with this prefix, unless it doesn't exist or was revoked. */
   Optional<StoredApiKey> findActiveByPrefix(String prefix);
 
-  /** Atomically updates last_used_at only while the key remains active. */
+  /** Whether the key is still active; notes its use (last_used_at, at most once a minute). */
   boolean recordUse(UUID id);
 
   /** Serializes account-level key creation while the lifetime limit is checked and updated. */

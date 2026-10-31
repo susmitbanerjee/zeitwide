@@ -76,8 +76,11 @@ class AuthRoutesHttpTest {
   }
 
   @Test
-  void publicAnswersAreAnonymousAndRateLimitedAndDocsArePublic() throws Exception {
+  void answersNeedAnIdentityAndAreRateLimitedAndDocsArePublic() throws Exception {
     mvc.perform(get(ANSWER_PROBE))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.code").value("unauthorized"));
+    mvc.perform(get(ANSWER_PROBE).with(accountAuthentication()))
         .andExpect(status().isOk())
         .andExpect(header().exists("RateLimit-Limit"));
     mvc.perform(get(DOCS_PROBE)).andExpect(status().isOk());

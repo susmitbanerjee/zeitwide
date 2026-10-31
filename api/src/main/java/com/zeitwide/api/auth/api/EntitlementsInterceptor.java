@@ -19,7 +19,7 @@ public final class EntitlementsInterceptor implements HandlerInterceptor {
       HttpServletRequest request, HttpServletResponse response, Object handler) {
     String path = request.getRequestURI().substring(request.getContextPath().length());
     Entitlements.Feature feature =
-        path.startsWith("/admin/")
+        path.startsWith("/admin/") || path.startsWith("/v1/admin/")
             ? Entitlements.Feature.ADMIN
             : path.startsWith("/v1/account/")
                 ? Entitlements.Feature.ACCOUNT

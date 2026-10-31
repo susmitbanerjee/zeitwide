@@ -2,6 +2,7 @@ package com.zeitwide.api.answers.api;
 
 import com.zeitwide.api.answers.app.Answered;
 import com.zeitwide.api.answers.app.CalendarSummary;
+import com.zeitwide.api.answers.app.DayRange;
 import com.zeitwide.api.answers.domain.CalendarDay;
 import com.zeitwide.api.answers.domain.Combine;
 import com.zeitwide.api.answers.domain.Coverage;
@@ -32,6 +33,34 @@ final class AnswerMapper {
         answer.businessDay(),
         combine.code(),
         calendarDays(answer),
+        answered.asOf(),
+        answered.release().value(),
+        revisions(answered),
+        null);
+  }
+
+  static AnswerDtos.DayRange days(Answered<DayRange> answered, String calendarId) {
+    DayRange range = answered.answer();
+    return new AnswerDtos.DayRange(
+        calendarId,
+        range.today(),
+        range.from(),
+        range.to(),
+        range.days().stream()
+            .map(
+                rangeDay -> {
+                  AnswerDtos.CalendarDay day = calendarDays(rangeDay.answer()).getFirst();
+                  return new AnswerDtos.RangeDay(
+                      rangeDay.answer().date(),
+                      day.isOpen(),
+                      day.decidedBy(),
+                      day.reason(),
+                      day.basis(),
+                      day.sources(),
+                      rangeDay.nextBusinessDay(),
+                      rangeDay.previousBusinessDay());
+                })
+            .toList(),
         answered.asOf(),
         answered.release().value(),
         revisions(answered),

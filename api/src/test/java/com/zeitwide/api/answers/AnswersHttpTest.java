@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.zeitwide.api.PostgresTestcontainer;
+import com.zeitwide.api.TestApiKeys;
 import com.zeitwide.api.answers.domain.ConformanceRunner;
 import java.io.IOException;
 import java.net.URI;
@@ -38,8 +39,8 @@ import org.springframework.jdbc.core.simple.JdbcClient;
  */
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    // Hundreds of requests from one address; the limits have their own test.
-    properties = "zeitwide.rate-limits.anonymous.capacity=1000000")
+    // Hundreds of requests on one key; the limits have their own test.
+    properties = "zeitwide.rate-limits.keyed.capacity=1000000")
 @Import(PostgresTestcontainer.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AnswersHttpTest {
@@ -57,9 +58,12 @@ class AnswersHttpTest {
   @LocalServerPort private int port;
   @Autowired private JdbcClient jdbc;
 
+  private String apiKey;
+
   @BeforeAll
   void loadGoldenDataset() {
     GoldenDatabase.load(jdbc);
+    apiKey = TestApiKeys.create(jdbc);
   }
 
   @TestFactory
@@ -136,6 +140,7 @@ class AnswersHttpTest {
                       + "/days/"
                       + input.path("date").asText()
                       + query))
+          .header("Authorization", TestApiKeys.bearer(apiKey))
           .GET()
           .build();
     }
@@ -154,6 +159,7 @@ class AnswersHttpTest {
           default -> "add";
         };
     return HttpRequest.newBuilder(uri("/v1/business-days/" + endpoint))
+        .header("Authorization", TestApiKeys.bearer(apiKey))
         .header("Content-Type", "application/json")
         .POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(body)))
         .build();

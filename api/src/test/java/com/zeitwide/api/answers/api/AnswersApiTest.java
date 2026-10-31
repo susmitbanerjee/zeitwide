@@ -21,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.zeitwide.api.accounts.app.AccountProvisioner;
+import com.zeitwide.api.alerts.app.AlertRuleService;
 import com.zeitwide.api.answers.app.DatasetSource;
 import com.zeitwide.api.answers.domain.ReleaseStamp;
 import com.zeitwide.api.auth.app.AccountJwtAuthenticationConverter;
@@ -31,10 +32,12 @@ import com.zeitwide.api.auth.domain.ApiKeyToken;
 import com.zeitwide.api.auth.domain.StoredApiKey;
 import com.zeitwide.api.changes.app.ChangeRepository;
 import com.zeitwide.api.mcp.app.McpProperties;
+import com.zeitwide.api.operations.app.OperationsService;
 import com.zeitwide.api.ratelimits.app.RateLimiter;
 import com.zeitwide.api.ratelimits.domain.Allowance;
 import com.zeitwide.api.ratelimits.domain.Limit;
 import com.zeitwide.api.receipts.ReceiptTestConfiguration;
+import com.zeitwide.api.review.app.ReviewService;
 import com.zeitwide.api.webhooks.app.OutboxDrainService;
 import com.zeitwide.api.webhooks.app.WebhookSubscriptionService;
 import java.io.Reader;
@@ -138,6 +141,9 @@ class AnswersApiTest {
   @MockitoBean private AccountJwtAuthenticationConverter accountJwtAuthenticationConverter;
   @MockitoBean private WebhookSubscriptionService webhookSubscriptionService;
   @MockitoBean private OutboxDrainService outboxDrainService;
+  @MockitoBean private AlertRuleService alertRuleService;
+  @MockitoBean private ReviewService reviewService;
+  @MockitoBean private OperationsService operationsService;
 
   @BeforeEach
   void stubPorts() {
@@ -179,6 +185,53 @@ class AnswersApiTest {
         .andExpect(jsonPath("$.calendars[0].sources[0].snapshot_sha256").isString())
         .andExpect(jsonPath("$.calendars[0].sources[0].retrieved_at").isString())
         .andExpect(jsonPath("$.calendars[0].sources[0].url").value(startsWith("https://")));
+  }
+
+  @Test
+  void shouldAnswerEveryDayInARange() throws Exception {
+    mvc.perform(
+            get("/v1/calendars/GB-CHAPS/days")
+                .param("from", "2022-09-17")
+                .param("to", "2022-09-20"))
+        .andExpect(status().isOk())
+        .andExpect(header().string(ZeitwideHeaders.DATASET_RELEASE, "2026.10.29.0"))
+        .andExpect(jsonPath("$.from").value("2022-09-17"))
+        .andExpect(jsonPath("$.today").isString())
+        .andExpect(jsonPath("$.days", hasSize(4)))
+        .andExpect(jsonPath("$.days[0].decided_by").value("weekend_rule"))
+        .andExpect(jsonPath("$.days[2].date").value("2022-09-19"))
+        .andExpect(jsonPath("$.days[2].is_open").value(false))
+        .andExpect(jsonPath("$.days[2].decided_by").value("entry"))
+        .andExpect(jsonPath("$.days[2].sources[0].snapshot_sha256").isString())
+        .andExpect(jsonPath("$.days[2].next_business_day").value("2022-09-20"))
+        .andExpect(jsonPath("$.days[2].previous_business_day").value("2022-09-16"))
+        .andExpect(jsonPath("$.days[0].sources").isEmpty())
+        .andExpect(jsonPath("$.days[3].is_open").value(true))
+        .andExpect(jsonPath("$.receipt.id").isString());
+  }
+
+  @Test
+  void shouldLeaveOutDaysBeyondCoverageAndDefaultTheWindow() throws Exception {
+    mvc.perform(
+            get("/v1/calendars/GB-CHAPS/days")
+                .param("from", "2028-12-30")
+                .param("to", "2029-01-02"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.days", hasSize(2)));
+    mvc.perform(get("/v1/calendars/US-FEDNOW/days"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.from").value(org.hamcrest.Matchers.endsWith("-01-01")))
+        .andExpect(
+            jsonPath(
+                "$.days", org.hamcrest.Matchers.hasSize(org.hamcrest.Matchers.greaterThan(90))));
+    problem(
+        mvc.perform(
+            get("/v1/calendars/GB-CHAPS/days")
+                .param("from", "2022-01-01")
+                .param("to", "2024-01-01")),
+        400,
+        "validation_failed");
+    problem(mvc.perform(get("/v1/calendars/XX-NONE/days")), 404, "unknown_calendar");
   }
 
   @Test

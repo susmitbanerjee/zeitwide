@@ -26,7 +26,11 @@ public class RateLimits {
           limiter.tryConsume(
               bucketId("anonymous:" + anonymous.clientAddress()), properties.anonymous());
       case Caller.Keyed keyed ->
-          limiter.tryConsume(bucketId("key:" + keyed.apiKeyId()), properties.keyed());
+          limiter.tryConsume(
+              bucketId("key:" + keyed.apiKeyId()),
+              properties.firstPartyKeyIds().contains(keyed.apiKeyId())
+                  ? properties.firstParty()
+                  : properties.keyed());
       case Caller.Authenticated authenticated ->
           limiter.tryConsume(bucketId("account:" + authenticated.accountId()), properties.keyed());
     };

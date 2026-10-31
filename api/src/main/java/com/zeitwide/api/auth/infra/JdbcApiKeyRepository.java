@@ -43,9 +43,23 @@ class JdbcApiKeyRepository implements ApiKeyRepository {
 
   @Override
   public boolean recordUse(UUID id) {
-    return jdbc.sql("UPDATE api_key SET last_used_at = now() WHERE id = :id AND revoked_at IS NULL")
+    // Every request checks the key is still active; last_used_at is written at most once a
+    // minute, so a busy key doesn't turn every answer into a database write.
+    return jdbc.sql(
+                """
+                WITH active AS (
+                    SELECT id FROM api_key WHERE id = :id AND revoked_at IS NULL
+                ), touched AS (
+                    UPDATE api_key SET last_used_at = now()
+                    WHERE id IN (SELECT id FROM active)
+                      AND (last_used_at IS NULL OR last_used_at < now() - interval '1 minute')
+                    RETURNING id
+                )
+                SELECT count(*) FROM active
+                """)
             .param("id", id)
-            .update()
+            .query(Long.class)
+            .single()
         == 1;
   }
 

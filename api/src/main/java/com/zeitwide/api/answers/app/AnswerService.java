@@ -12,9 +12,12 @@ import com.zeitwide.api.answers.domain.DayAnswer;
 import com.zeitwide.api.answers.domain.EntryVersion;
 import com.zeitwide.api.answers.domain.Shifted;
 import com.zeitwide.api.calendars.domain.CalendarId;
+import com.zeitwide.api.web.RequestValidationException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
@@ -29,6 +32,12 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class AnswerService {
+
+  /** The default window ends this many days after today. */
+  public static final int DEFAULT_DAYS_AHEAD = 90;
+
+  /** Covers the default window (up to 456 days) with room to spare. */
+  public static final int MAX_RANGE_DAYS = 500;
 
   private final AnswerEngine engine;
   private final CurrentDataset current;
@@ -99,6 +108,29 @@ public class AnswerService {
         List.of(calendar, from, to),
         asOf,
         (dataset, at) -> engine.closures(dataset, calendar, from, to, at),
+        dataset -> List.of(calendar));
+  }
+
+  /**
+   * One calendar's days from {@code from} to {@code to}. Either may be null: {@code from} then
+   * defaults to 1 January of the current year and {@code to} to {@value #DEFAULT_DAYS_AHEAD} days
+   * from today, both in the calendar's time zone.
+   */
+  public Answered<DayRange> days(CalendarId calendar, LocalDate from, LocalDate to, AsOf asOf) {
+    ZoneId zone = current.get().calendar(calendar).rules().timezone();
+    LocalDate today = LocalDate.now(clock.withZone(zone));
+    LocalDate start = from == null ? today.withDayOfYear(1) : from;
+    LocalDate end = to == null ? today.plusDays(DEFAULT_DAYS_AHEAD) : to;
+    if (end.isBefore(start) || ChronoUnit.DAYS.between(start, end) >= MAX_RANGE_DAYS) {
+      throw new RequestValidationException(
+          "to must be on or after from, at most " + MAX_RANGE_DAYS + " days in all");
+    }
+    return answer(
+        "days",
+        List.of(calendar, start, end, today),
+        asOf,
+        (dataset, at) ->
+            new DayRange(today, start, end, engine.days(dataset, calendar, start, end, at)),
         dataset -> List.of(calendar));
   }
 

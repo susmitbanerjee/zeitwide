@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.zeitwide.api.PostgresTestcontainer;
+import com.zeitwide.api.TestApiKeys;
 import com.zeitwide.api.answers.GoldenDatabase;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -31,9 +32,12 @@ class ChangeFeedHttpTest {
   private OffsetDateTime published;
   private String since;
 
+  private String apiKey;
+
   @BeforeEach
   void writeEvents() {
     GoldenDatabase.load(jdbc);
+    apiKey = TestApiKeys.create(jdbc);
     Instant now = Instant.now();
     published = now.atOffset(ZoneOffset.UTC);
     since = now.minusSeconds(1).toString();
@@ -52,6 +56,7 @@ class ChangeFeedHttpTest {
     var first =
         mvc.perform(
                 get("/v1/changes")
+                    .header("Authorization", TestApiKeys.bearer(apiKey))
                     .param("calendars", "GB-CHAPS")
                     .param("since", since)
                     .param("limit", "1"))
@@ -70,6 +75,7 @@ class ChangeFeedHttpTest {
 
     mvc.perform(
             get("/v1/changes")
+                .header("Authorization", TestApiKeys.bearer(apiKey))
                 .param("calendars", "GB-CHAPS")
                 .param("since", since)
                 .param("limit", "1")
@@ -80,7 +86,11 @@ class ChangeFeedHttpTest {
         .andExpect(jsonPath("$.changes[0].type").value("closure_changed"))
         .andExpect(jsonPath("$.next_cursor").doesNotExist());
 
-    mvc.perform(get("/v1/changes").param("since", since).param("types", "closure_added"))
+    mvc.perform(
+            get("/v1/changes")
+                .header("Authorization", TestApiKeys.bearer(apiKey))
+                .param("since", since)
+                .param("types", "closure_added"))
         .andExpect(status().isOk())
         .andExpect(
             jsonPath("$.changes[*].type").value(org.hamcrest.Matchers.contains("closure_added")));
@@ -91,6 +101,7 @@ class ChangeFeedHttpTest {
     String cursor =
         mvc.perform(
                 get("/v1/changes")
+                    .header("Authorization", TestApiKeys.bearer(apiKey))
                     .param("calendars", "GB-CHAPS")
                     .param("since", since)
                     .param("limit", "1"))
@@ -105,6 +116,7 @@ class ChangeFeedHttpTest {
 
     mvc.perform(
             get("/v1/changes")
+                .header("Authorization", TestApiKeys.bearer(apiKey))
                 .param("calendars", "US-FEDWIRE")
                 .param("since", since)
                 .param("limit", "1")

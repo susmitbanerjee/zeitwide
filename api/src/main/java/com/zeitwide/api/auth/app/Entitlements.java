@@ -16,6 +16,7 @@ public class Entitlements {
     ACCOUNT,
     API_KEYS,
     WEBHOOKS,
+    ALERTS,
     ADMIN
   }
 }

@@ -1,5 +1,8 @@
 package com.zeitwide.api.web;
 
+import com.zeitwide.api.alerts.app.AlertRuleLimitExceededException;
+import com.zeitwide.api.alerts.app.AlertRuleNotFoundException;
+import com.zeitwide.api.alerts.app.InvalidAlertRuleException;
 import com.zeitwide.api.answers.app.DatasetUnavailableException;
 import com.zeitwide.api.answers.domain.OutOfRangeException;
 import com.zeitwide.api.answers.domain.UnknownCalendarException;
@@ -8,6 +11,9 @@ import com.zeitwide.api.auth.app.IdempotencyKeyConflictException;
 import com.zeitwide.api.auth.app.InvalidIdempotencyKeyException;
 import com.zeitwide.api.changes.app.InvalidChangeCursorException;
 import com.zeitwide.api.changes.app.InvalidChangeTypeException;
+import com.zeitwide.api.review.app.CandidateNotFoundException;
+import com.zeitwide.api.review.app.CandidateNotPendingException;
+import com.zeitwide.api.review.app.InvalidReviewException;
 import com.zeitwide.api.webhooks.app.InvalidWebhookRequestException;
 import com.zeitwide.api.webhooks.app.WebhookLimitExceededException;
 import com.zeitwide.api.webhooks.app.WebhookNotFoundException;
@@ -83,6 +89,26 @@ class ApiExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(WebhookLimitExceededException.class)
   ProblemDetail webhookLimitReached(WebhookLimitExceededException e) {
     return Problems.of(ProblemCode.WEBHOOK_LIMIT_REACHED, e.getMessage());
+  }
+
+  @ExceptionHandler({AlertRuleNotFoundException.class, CandidateNotFoundException.class})
+  ProblemDetail notFound(RuntimeException e) {
+    return Problems.of(ProblemCode.NOT_FOUND, e.getMessage());
+  }
+
+  @ExceptionHandler(AlertRuleLimitExceededException.class)
+  ProblemDetail alertRuleLimitReached(AlertRuleLimitExceededException e) {
+    return Problems.of(ProblemCode.ALERT_RULE_LIMIT_REACHED, e.getMessage());
+  }
+
+  @ExceptionHandler({InvalidAlertRuleException.class, InvalidReviewException.class})
+  ProblemDetail invalidRequest(RuntimeException e) {
+    return Problems.of(ProblemCode.VALIDATION_FAILED, e.getMessage());
+  }
+
+  @ExceptionHandler(CandidateNotPendingException.class)
+  ProblemDetail candidateNotPending(CandidateNotPendingException e) {
+    return Problems.of(ProblemCode.CANDIDATE_NOT_PENDING, e.getMessage());
   }
 
   @ExceptionHandler({InvalidChangeCursorException.class, InvalidChangeTypeException.class})

@@ -83,4 +83,9 @@ zeitwide:
     keyed:
       capacity: 10000
       period: P1D
+    # The web app's own key, which prerenders and refreshes every answer page.
+    first-party:
+      capacity: 500000
+      period: P1D
+    first-party-key-ids: ${ZEITWIDE_RATE_LIMITS_FIRST_PARTY_KEY_IDS:}
     trusted-proxies: 0

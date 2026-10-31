@@ -155,6 +155,7 @@ class McpHttpTest {
       throws Exception {
     HttpRequest request =
         HttpRequest.newBuilder(uri(path))
+            .header("Authorization", "Bearer " + API_KEY)
             .header("Content-Type", "application/json")
             .POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(restBody)))
             .build();
@@ -164,7 +165,14 @@ class McpHttpTest {
   private void assertGetMatchesRest(
       McpSyncClient client, String tool, Map<String, Object> arguments, String path)
       throws Exception {
-    assertMatches(client, tool, arguments, HttpRequest.newBuilder(uri(path)).GET().build());
+    assertMatches(
+        client,
+        tool,
+        arguments,
+        HttpRequest.newBuilder(uri(path))
+            .header("Authorization", "Bearer " + API_KEY)
+            .GET()
+            .build());
   }
 
   private void assertMatches(

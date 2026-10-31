@@ -40,7 +40,10 @@ public final class AnswerEngine {
    * be within coverage.
    */
   public Shifted addBusinessDays(Dataset dataset, AnswerQuery query, LocalDate start, int days) {
-    View view = View.of(dataset, query);
+    return shift(View.of(dataset, query), start, days);
+  }
+
+  private static Shifted shift(View view, LocalDate start, int days) {
     DayAnswer current = view.answer(start);
     int step = days >= 0 ? 1 : -1;
     int remaining = Math.abs(days);
@@ -60,6 +63,37 @@ public final class AnswerEngine {
       }
     }
     return new Shifted(current, skipped);
+  }
+
+  /**
+   * Every date from {@code from} to {@code to} (both inclusive) that one calendar covers at {@code
+   * asOf}, each answered as {@link #isBusinessDay} would. Dates outside coverage are left out,
+   * never guessed.
+   */
+  public List<RangeDay> days(
+      Dataset dataset, CalendarId calendarId, LocalDate from, LocalDate to, Instant asOf) {
+    if (to.isBefore(from)) {
+      throw new IllegalArgumentException("to must not be before from");
+    }
+    Coverage coverage = dataset.calendar(calendarId).coverageAt(asOf);
+    View view = View.of(dataset, new AnswerQuery(List.of(calendarId), Combine.ALL_OPEN, asOf));
+    List<RangeDay> days = new ArrayList<>();
+    for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
+      if (coverage.contains(date)) {
+        days.add(
+            new RangeDay(view.answer(date), neighbour(view, date, 1), neighbour(view, date, -1)));
+      }
+    }
+    return days;
+  }
+
+  /** The nearest business day after (step 1) or before (step -1); null past coverage. */
+  private static LocalDate neighbour(View view, LocalDate date, int step) {
+    try {
+      return shift(view, date, step).date();
+    } catch (OutOfRangeException beyondCoverage) {
+      return null;
+    }
   }
 
   /**

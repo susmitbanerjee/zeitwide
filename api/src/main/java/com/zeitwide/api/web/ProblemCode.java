@@ -14,6 +14,10 @@ public enum ProblemCode {
       "api_key_limit_reached", HttpStatus.CONFLICT, "The API key limit was reached"),
   WEBHOOK_LIMIT_REACHED(
       "webhook_limit_reached", HttpStatus.CONFLICT, "The webhook subscription limit was reached"),
+  ALERT_RULE_LIMIT_REACHED(
+      "alert_rule_limit_reached", HttpStatus.CONFLICT, "The alert rule limit was reached"),
+  CANDIDATE_NOT_PENDING(
+      "candidate_not_pending", HttpStatus.CONFLICT, "The candidate was already reviewed"),
   IDEMPOTENCY_KEY_REUSED(
       "idempotency_key_reused", HttpStatus.CONFLICT, "The idempotency key was already used"),
   UNKNOWN_CALENDAR("unknown_calendar", HttpStatus.NOT_FOUND, "No calendar has this ID"),

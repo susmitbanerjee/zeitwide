@@ -73,6 +73,34 @@ final class AnswerDtos {
   record SkippedDay(LocalDate date, List<CalendarDay> calendars) {}
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
+  record RangeDay(
+      LocalDate date,
+      boolean isOpen,
+      String decidedBy,
+      String reason,
+      String basis,
+      List<Source> sources,
+      LocalDate nextBusinessDay,
+      LocalDate previousBusinessDay) {}
+
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  record DayRange(
+      String calendarId,
+      LocalDate today,
+      LocalDate from,
+      LocalDate to,
+      List<RangeDay> days,
+      Instant asOf,
+      String datasetRelease,
+      Map<String, Long> calendarRevisions,
+      ReceiptDtos.Receipt receipt) {
+    DayRange withReceipt(ReceiptDtos.Receipt value) {
+      return new DayRange(
+          calendarId, today, from, to, days, asOf, datasetRelease, calendarRevisions, value);
+    }
+  }
+
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   record Shifted(
       LocalDate start,
       int days,

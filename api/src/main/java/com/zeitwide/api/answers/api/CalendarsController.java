@@ -2,6 +2,7 @@ package com.zeitwide.api.answers.api;
 
 import com.zeitwide.api.answers.app.AnswerService;
 import com.zeitwide.api.answers.app.Answered;
+import com.zeitwide.api.answers.app.DayRange;
 import com.zeitwide.api.answers.domain.Combine;
 import com.zeitwide.api.answers.domain.DayAnswer;
 import com.zeitwide.api.answers.domain.EntryVersion;
@@ -74,6 +75,33 @@ class CalendarsController {
                     "GET",
                     "/v1/calendars/" + id.value() + "/days/" + date,
                     AnswerRequestEvidence.query(java.util.Map.of(), asOf),
+                    null),
+                body,
+                answered));
+    return ResponseEntity.ok().headers(ZeitwideHeaders.of(answered)).body(body);
+  }
+
+  @GetMapping("/{id}/days")
+  ResponseEntity<AnswerDtos.DayRange> days(
+      @PathVariable CalendarId id,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+      @RequestParam(name = "as_of", required = false)
+          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+          OffsetDateTime asOf) {
+    Answered<DayRange> answered = answers.days(id, from, to, Requests.asOf(asOf));
+    AnswerDtos.DayRange body = AnswerMapper.days(answered, id.value());
+    java.util.Map<String, Object> query = new java.util.LinkedHashMap<>();
+    query.put("from", answered.answer().from());
+    query.put("to", answered.answer().to());
+    body =
+        body.withReceipt(
+            AnswerReceipts.issue(
+                receipts,
+                new AnswerRequestEvidence(
+                    "GET",
+                    "/v1/calendars/" + id.value() + "/days",
+                    AnswerRequestEvidence.query(query, asOf),
                     null),
                 body,
                 answered));
