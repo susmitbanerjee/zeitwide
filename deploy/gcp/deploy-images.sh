@@ -29,7 +29,16 @@ build_and_push() {
   case "$name" in
     api) (cd "$ROOT/api" && ./gradlew --quiet jibDockerBuild --image="$image") ;;
     pipeline) docker build --platform linux/amd64 -t "$image" "$ROOT/pipeline" ;;
-    web) docker build --platform linux/amd64 -t "$image" "$ROOT/web" ;;
+    web)
+      # Answer pages prerender from the API with the web app's own key, passed as a BuildKit
+      # secret so it never lands in an image layer (deploy/firebase/README.md).
+      local api_url key_file
+      api_url="${ZEITWIDE_API_URL:-$(gcloud_run services describe "zeitwide-api-$ENVIRONMENT" --format='value(status.url)')}"
+      key_file="$(mktemp)"
+      "$GCLOUD" secrets versions access latest --secret "zeitwide-$ENVIRONMENT-web-api-key"         --project "$PROJECT" > "$key_file"
+      DOCKER_BUILDKIT=1 docker build --platform linux/amd64 -t "$image"         --build-arg ZEITWIDE_API_URL="$api_url"         --build-arg SITE_URL="${SITE_URL:?set SITE_URL to the public web origin}"         --secret id=zeitwide_api_key,src="$key_file"         "$ROOT/web" || { rm -f "$key_file"; exit 1; }
+      rm -f "$key_file"
+      ;;
     keycloak) docker build --platform linux/amd64 -t "$image" "$ROOT/deploy/keycloak" ;;
     *) echo "Unknown component: $name (api, pipeline, web or keycloak)" >&2; exit 1 ;;
   esac

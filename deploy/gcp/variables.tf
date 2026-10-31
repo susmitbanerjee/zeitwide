@@ -72,6 +72,44 @@ variable "web_origin" {
   }
 }
 
+variable "web_app_origin" {
+  description = <<-EOT
+    Origin for the signed-in web pages (/app, /admin, sign-in), served straight from Cloud Run
+    because Firebase Hosting forwards no cookie but __session. Null uses the web service's
+    run.app URL; set it once a domain such as app.example.com is mapped to the service.
+  EOT
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.web_app_origin == null || can(regex("^https://[^/]+$", var.web_app_origin))
+    error_message = "web_app_origin must be an https origin with no path or trailing slash."
+  }
+}
+
+variable "first_party_api_key_ids" {
+  description = "IDs (not secrets) of Zeitwide's own API keys, which get the first-party rate limit: the web app's key from create-web-api-key.sh."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = alltrue([for id in var.first_party_api_key_ids : can(regex("^[0-9a-f-]{36}$", id))])
+    error_message = "first_party_api_key_ids are API key UUIDs."
+  }
+}
+
+variable "api_domain" {
+  description = "Domain to map straight to the API service, such as api.zeitwide.com. Null maps nothing; set api_base_url to match once DNS points at it."
+  type        = string
+  default     = null
+}
+
+variable "web_app_domain" {
+  description = "Domain to map straight to the web service for signed-in pages, such as app.dev.example.com. Null maps nothing."
+  type        = string
+  default     = null
+}
+
 variable "api_base_url" {
   description = "Public base URL of the API once a custom domain is mapped. Null uses the run.app URL."
   type        = string

@@ -34,6 +34,13 @@ check-lib-python:
 check-web:
 	cd web && npm ci --no-audit --no-fund && npm run check
 
+# Playwright (with axe) and Lighthouse against a production build, the fake API in
+# web/e2e/mock-api and the local Keycloak. Needs `make up` first.
+e2e-web:
+	cd web && npx playwright install chromium
+	cd web && npm run e2e:build
+	cd web && npm run e2e && npm run lighthouse
+
 fmt:
 	cd api && $(GRADLEW) --console=plain spotlessApply
 	cd pipeline && $(PY) ruff format . && $(PY) ruff check --fix .

@@ -13,13 +13,15 @@ locals {
     SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES  = "zeitwide-api"
     ZEITWIDE_AUTH_JWK_SET_URI                            = "${local.issuer}/protocol/openid-connect/certs"
     ZEITWIDE_AUTH_AUDIENCE                               = "zeitwide-api"
-    ZEITWIDE_CORS_ALLOWED_ORIGINS                        = var.web_origin
-    ZEITWIDE_MCP_RESOURCE_URL                            = "${trimsuffix(local.api_public_url, "/")}/mcp"
-    ZEITWIDE_SNAPSHOT_BUCKET                             = google_storage_bucket.snapshots.name
-    ZEITWIDE_OUTBOX_DRAIN_AUDIENCE                       = local.outbox_drain_audience
-    ZEITWIDE_OUTBOX_DRAIN_INVOKER                        = google_service_account.this["sched-drain"].email
-    ZEITWIDE_RECEIPT_KEY_ID                              = var.receipt_key_id
-    ZEITWIDE_RECEIPT_PUBLIC_KEYS_JSON                    = var.receipt_public_keys_json
+    ZEITWIDE_CORS_ALLOWED_ORIGINS                        = join(",", distinct([var.web_origin, local.web_app_origin]))
+    # The web app's key gets the first-party daily limit (create-web-api-key.sh prints its ID).
+    ZEITWIDE_RATE_LIMITS_FIRST_PARTY_KEY_IDS = join(",", var.first_party_api_key_ids)
+    ZEITWIDE_MCP_RESOURCE_URL                = "${trimsuffix(local.api_public_url, "/")}/mcp"
+    ZEITWIDE_SNAPSHOT_BUCKET                 = google_storage_bucket.snapshots.name
+    ZEITWIDE_OUTBOX_DRAIN_AUDIENCE           = local.outbox_drain_audience
+    ZEITWIDE_OUTBOX_DRAIN_INVOKER            = google_service_account.this["sched-drain"].email
+    ZEITWIDE_RECEIPT_KEY_ID                  = var.receipt_key_id
+    ZEITWIDE_RECEIPT_PUBLIC_KEYS_JSON        = var.receipt_public_keys_json
     # Cloud Run's front end appends the client's address to X-Forwarded-For.
     ZEITWIDE_RATE_LIMITS_TRUSTED_PROXIES = "1"
   })
@@ -34,9 +36,13 @@ locals {
   }
 
   web_env = merge(local.otel_env, {
-    OTEL_SERVICE_NAME    = "zeitwide-web"
-    ZEITWIDE_API_URL     = local.api_url
-    AUTH_URL             = var.web_origin
+    OTEL_SERVICE_NAME = "zeitwide-web"
+    # Server to server on the run.app URL: it works before any custom domain does.
+    ZEITWIDE_API_URL     = google_cloud_run_v2_service.api.uri
+    ZEITWIDE_MCP_URL     = "${local.api_public_url}/mcp"
+    SITE_URL             = var.web_origin
+    APP_URL              = local.web_app_origin
+    AUTH_URL             = local.web_app_origin
     AUTH_TRUST_HOST      = "true"
     AUTH_KEYCLOAK_ISSUER = local.issuer
     AUTH_KEYCLOAK_ID     = "zeitwide-web"
@@ -44,6 +50,7 @@ locals {
 
   web_secret_env = {
     AUTH_SECRET                = "web-auth-secret"
+    ZEITWIDE_API_KEY           = "web-api-key"
     OTEL_EXPORTER_OTLP_HEADERS = "otlp-headers"
   }
 
@@ -61,9 +68,10 @@ locals {
     GOOGLE_CLIENT_ID        = var.google_client_id
     MICROSOFT_CLIENT_ID     = var.microsoft_client_id
     GITHUB_CLIENT_ID        = var.github_client_id
-    ZEITWIDE_WEB_ORIGIN     = var.web_origin
-    KC_HTTP_ENABLED         = "true"
-    KC_PROXY_HEADERS        = "xforwarded"
+    # Sign-in callbacks land on the app host, not the CDN host.
+    ZEITWIDE_WEB_ORIGIN = local.web_app_origin
+    KC_HTTP_ENABLED     = "true"
+    KC_PROXY_HEADERS    = "xforwarded"
     # One instance, and Cloud Run instances can't reach each other, so no cluster: the
     # default JDBC_PING stack would also need a pool of at least 4.
     KC_CACHE                    = "local"
@@ -428,4 +436,36 @@ resource "google_cloud_run_v2_job" "pipeline" {
   }
 
   depends_on = [google_secret_manager_secret_iam_member.readers]
+}
+
+# Signed-in pages on their own domain, straight to Cloud Run (see web_app_origin).
+resource "google_cloud_run_domain_mapping" "web_app" {
+  count    = var.web_app_domain == null ? 0 : 1
+  name     = var.web_app_domain
+  location = var.region
+
+  metadata {
+    namespace = var.project_id
+    labels    = local.labels
+  }
+
+  spec {
+    route_name = google_cloud_run_v2_service.web.name
+  }
+}
+
+# The public API on its own domain (verified in Search Console first; README, step 11).
+resource "google_cloud_run_domain_mapping" "api" {
+  count    = var.api_domain == null ? 0 : 1
+  name     = var.api_domain
+  location = var.region
+
+  metadata {
+    namespace = var.project_id
+    labels    = local.labels
+  }
+
+  spec {
+    route_name = google_cloud_run_v2_service.api.name
+  }
 }

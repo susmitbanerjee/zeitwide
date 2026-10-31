@@ -1,0 +1,22 @@
+{
+  "hosting": [
+    {
+      "target": "dev",
+      "public": "public",
+      "cleanUrls": false,
+      "trailingSlash": false,
+      "rewrites": [
+        { "source": "**", "run": { "serviceId": "zeitwide-web-dev", "region": "us-central1" } }
+      ]
+    },
+    {
+      "target": "prod",
+      "public": "public",
+      "cleanUrls": false,
+      "trailingSlash": false,
+      "rewrites": [
+        { "source": "**", "run": { "serviceId": "zeitwide-web-prod", "region": "us-central1" } }
+      ]
+    }
+  ]
+}

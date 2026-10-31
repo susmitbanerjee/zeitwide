@@ -285,24 +285,14 @@ The images need:
 1. In the [Firebase console](https://console.firebase.google.com), add Firebase to the
    GCP project, then create a Hosting site (for example `zeitwide-dev`). The site ID
    gives `https://<site-id>.web.app`; make sure `web_origin` matches.
-2. Add a `firebase.json` that sends every request to the web service:
+2. `deploy/firebase/firebase.json` sends every request to the web service. Map its target
+   to your site and deploy it as `deploy/firebase/README.md` describes. The deployer
+   account has `roles/firebasehosting.admin`.
 
-   ```json
-   {
-     "hosting": {
-       "site": "zeitwide-dev",
-       "public": "public",
-       "rewrites": [{ "source": "**", "run": { "serviceId": "zeitwide-web-dev", "region": "us-central1" } }]
-     }
-   }
-   ```
-
-3. Deploy it from CI with `firebase deploy --only hosting`. The deployer account has
-   `roles/firebasehosting.admin`.
-
-Firebase Hosting strips every cookie except one named `__session` before it forwards a
-request to Cloud Run. The web app's session cookie must use that name, or sign-in won't
-work behind Hosting.
+Firebase Hosting forwards no cookie except `__session` to Cloud Run, so Hosting serves only
+the public pages. Signed-in pages (`/app`, `/admin`, sign-in) use `web_app_origin`, the web
+service's own URL (or a domain mapped to it with `web_app_domain`); Keycloak's redirect
+URIs and `AUTH_URL` point there.
 
 ### 11. DNS and custom domains
 

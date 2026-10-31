@@ -62,8 +62,10 @@ locals {
     "webhook-encryption-key"        = ["api"]
     "receipt-signing-key"           = ["api"]
     "web-auth-secret"               = ["web"]
-    "otlp-headers"                  = ["api", "pipeline", "web"]
-    "github-release-token"          = ["pipeline"]
+    # The web app's own API key (create-web-api-key.sh), for prerendering answer pages.
+    "web-api-key"          = ["web"]
+    "otlp-headers"         = ["api", "pipeline", "web"]
+    "github-release-token" = ["pipeline"]
   }
 
   secret_access = merge([
@@ -83,6 +85,11 @@ locals {
   keycloak_run_url = "https://keycloak-${local.env}-${data.google_project.this.number}.${var.region}.run.app"
   auth_url         = coalesce(var.auth_base_url, local.keycloak_run_url)
   issuer           = "${local.auth_url}/realms/${local.realm}"
+
+  # Public pages go through Firebase Hosting (web_origin); signed-in pages need cookies, so
+  # they're served from the web service's own URL, known before the service exists.
+  web_run_url    = "https://${local.prefix}-web-${data.google_project.this.number}.${var.region}.run.app"
+  web_app_origin = coalesce(var.web_app_origin, local.web_run_url)
 
   # A fixed audience avoids a cycle: the API can't reference its own URL.
   outbox_drain_audience = "${local.prefix}-outbox-drain"
