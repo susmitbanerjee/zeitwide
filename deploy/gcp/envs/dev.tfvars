@@ -2,7 +2,7 @@
 project_id      = "project-6eaae4e0-3164-4e31-bc4"
 billing_account = "01D9BB-5B0C19-F66CB0"
 
-github_repository    = "susmitbanerjee/Zeit"
+github_repository    = "susmitbanerjee/zeitwide"
 github_repository_id = "1436841628"
 
 receipt_key_id = "sc-2026-10"

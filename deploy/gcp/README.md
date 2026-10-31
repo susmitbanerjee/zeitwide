@@ -337,6 +337,38 @@ work behind Hosting.
    client through a secret store. The registration endpoint is
    `/realms/zeitwide/clients-registrations/openid-connect`.
 
+## Moving an environment from SettleCal to Zeitwide
+
+Environments set up before the rename have `settlecal-*` resources and a `settlecal`
+database. The configuration now names everything `zeitwide-*`. Most resources are
+recreated by an apply, but the data has to move first, in this order:
+
+1. **Stop the writers.** Pause the old Scheduler jobs, so the old pipeline stops writing
+   snapshots and backups:
+   `gcloud scheduler jobs pause settlecal-dev-pipeline-due --location us-central1`
+   (and `-pipeline-daily`, `-outbox-drain`).
+2. **Copy the evidence.** Snapshots are kept forever; copy what the new buckets lack:
+   `gcloud storage rsync -r gs://<project>-settlecal-dev-snapshots gs://<project>-zeitwide-dev-snapshots`
+   (and the same for `-backups`).
+3. **Rename the database in place.** `bash deploy/gcp/aiven/rename-from-settlecal.sh`
+   renames the `settlecal_*` logins and the `settlecal` database, so all history comes
+   along. Run it **before** `setup.sh`, which would create an empty `zeitwide` database.
+4. **Point state at the new secrets.** Copy each `settlecal-dev-*` secret's value into
+   `zeitwide-dev-*` (step 6), then make OpenTofu forget the old ones instead of deleting
+   them, and adopt the new ones:
+   `tofu state rm 'google_secret_manager_secret.this["db-host"]'`, then
+   `tofu import 'google_secret_manager_secret.this["db-host"]' projects/<project>/secrets/zeitwide-dev-db-host`,
+   for every secret in `locals.secret_readers`. Every secret Keycloak reads needs a value
+   before the apply, including the three OAuth client secrets.
+5. **Apply** (step 7). It replaces the services, job, Scheduler jobs and service
+   accounts under their new names; the services start on the bootstrap image.
+6. **Deploy all four images** (step 9), then point Firebase Hosting's rewrite at
+   `zeitwide-web-dev` and deploy Hosting again (step 10).
+7. **Check, then clean up.** Once the new API answers, delete what OpenTofu no longer
+   tracks: the `settlecal-dev-*` secrets, the `settlecal-dev-*` buckets and the
+   `settlecal-dev` Artifact Registry repository. Keycloak keeps the old `settlecal` realm
+   next to the new `zeitwide` one; delete it in the admin console.
+
 ## What the application code must do
 
 This configuration hands these settings to the apps. The apps must use them as follows:
