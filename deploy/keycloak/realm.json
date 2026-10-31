@@ -92,7 +92,7 @@
       "displayName": "Microsoft",
       "providerId": "microsoft",
       "enabled": true,
-      "trustEmail": true,
+      "trustEmail": false,
       "storeToken": false,
       "config": {
         "clientId": "${MICROSOFT_CLIENT_ID}",
