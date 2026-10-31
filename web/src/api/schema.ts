@@ -38,6 +38,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/calendars/{id}/days": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Answer every date in a range for one calendar
+         * @description Each covered date from `from` to `to` (both inclusive, at most 500 days), answered as
+         *     `GET /v1/calendars/{id}/days/{date}` would, with the nearest business days either
+         *     side. Dates outside the
+         *     calendar's coverage are left out. With no `from`, the range starts on 1 January of the
+         *     current year; with no `to`, it ends 90 days after today. Both use the calendar's time
+         *     zone, and `today` is the calendar's date now.
+         */
+        get: operations["listDays"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/calendars/{id}/closures": {
         parameters: {
             query?: never;
@@ -268,6 +293,141 @@ export interface paths {
         put?: never;
         /** Send a signed test event to a webhook */
         post: operations["sendWebhookTestEvent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/account/alert-rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the account's alert rules
+         * @description Alert rules say which published changes matter to the account. While an account has
+         *     at least one rule, its webhooks receive only changes that match a rule (and the
+         *     webhook's own event filter); with no rules, webhooks receive every change.
+         */
+        get: operations["listAlertRules"];
+        put?: never;
+        /** Create an alert rule */
+        post: operations["createAlertRule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/account/alert-rules/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Replace an alert rule */
+        put: operations["updateAlertRule"];
+        post?: never;
+        /** Delete an alert rule */
+        delete: operations["deleteAlertRule"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List candidate changes for review, urgent first
+         * @description Pending candidates sort urgent first (under 14 days' notice), then by date. Requires
+         *     the Keycloak role `reviewer`.
+         */
+        get: operations["listCandidates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/candidates/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One candidate with the current entry and every supporting snapshot */
+        get: operations["getCandidate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/candidates/{id}/decision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve or reject a pending candidate
+         * @description Records the reviewer (the token's subject), the reason and the time. The pipeline
+         *     publishes an approved candidate on its next run, in one transaction; no answer
+         *     changes before then.
+         */
+        post: operations["decideCandidate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Freshness and failures for every source */
+        get: operations["listSourceHealth"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/releases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Dataset releases, newest first */
+        get: operations["listReleases"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -507,6 +667,46 @@ export interface components {
             calendar_revisions: components["schemas"]["CalendarRevisions"];
             receipt: components["schemas"]["Receipt"];
         };
+        RangeDay: {
+            /** Format: date */
+            date: string;
+            is_open: boolean;
+            /** @enum {string} */
+            decided_by: "entry" | "weekend_rule";
+            /** @description Only when an entry decided. */
+            reason?: string;
+            basis?: components["schemas"]["Basis"];
+            /** @description The snapshots behind the entry; empty when the weekend rule decided. */
+            sources: components["schemas"]["Source"][];
+            /**
+             * Format: date
+             * @description The first business day after `date`; absent if it is past coverage.
+             */
+            next_business_day?: string;
+            /**
+             * Format: date
+             * @description The last business day before `date`; absent if it is before coverage.
+             */
+            previous_business_day?: string;
+        };
+        DayRange: {
+            calendar_id: components["schemas"]["CalendarId"];
+            /**
+             * Format: date
+             * @description The calendar's date now
+             */
+            today: string;
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            days: components["schemas"]["RangeDay"][];
+            /** Format: date-time */
+            as_of: string;
+            dataset_release: components["schemas"]["DatasetRelease"];
+            calendar_revisions: components["schemas"]["CalendarRevisions"];
+            receipt: components["schemas"]["Receipt"];
+        };
         Closure: {
             /** Format: date */
             date: string;
@@ -570,6 +770,135 @@ export interface components {
             calendar_revisions: components["schemas"]["CalendarRevisions"];
             receipt: components["schemas"]["Receipt"];
         };
+        AlertRuleConfiguration: {
+            name: string;
+            calendars: components["schemas"]["CalendarId"][];
+            events: components["schemas"]["ChangeType"][];
+            /** @description Only changes announced this many days or fewer ahead; null for any notice. */
+            max_notice_days?: number | null;
+        };
+        AlertRule: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            calendars: components["schemas"]["CalendarId"][];
+            events: components["schemas"]["ChangeType"][];
+            max_notice_days: number | null;
+            /** Format: date-time */
+            created_at: string;
+        };
+        /**
+         * @default pending
+         * @enum {string}
+         */
+        CandidateStatus: "pending" | "approved" | "rejected" | "published";
+        /**
+         * @description `corroborated`: a second, independent source agrees.
+         * @enum {string}
+         */
+        Corroboration: "single_source" | "corroborated";
+        EntryState: {
+            is_open: boolean;
+            reason: string;
+            basis?: components["schemas"]["Basis"];
+        };
+        Candidate: {
+            /** Format: int64 */
+            id: number;
+            calendar_id: components["schemas"]["CalendarId"];
+            /** Format: date */
+            entry_date: string;
+            /** @description The published state when the candidate was opened; null for a new date. */
+            before: components["schemas"]["EntryState"] | null;
+            after: components["schemas"]["EntryState"];
+            corroboration: components["schemas"]["Corroboration"];
+            source_count: number;
+            /** @description Days from today (UTC) to the date; negative once it has passed. */
+            notice_days: number;
+            /** @description Under 14 days' notice. */
+            urgent: boolean;
+            status: components["schemas"]["CandidateStatus"];
+            /** Format: date-time */
+            created_at: string;
+        };
+        CandidateList: {
+            candidates: components["schemas"]["Candidate"][];
+        };
+        /** @description One source snapshot that supports the candidate, and what the parser read from it. */
+        CandidateSnapshot: {
+            /** @description The source's slug. */
+            source: string;
+            publisher: string;
+            /** Format: uri */
+            url: string;
+            /** @enum {string} */
+            role: "primary" | "corroborating";
+            /** Format: date-time */
+            fetched_at: string;
+            snapshot_sha256: string;
+            http_status: number;
+            content_type: string | null;
+            byte_size: number;
+            is_open: boolean;
+            reason: string;
+            parser_version: string;
+        };
+        CandidateDetail: {
+            candidate: components["schemas"]["Candidate"];
+            /** @description The entry published now, if any. */
+            current: components["schemas"]["EntryState"] | null;
+            snapshots: components["schemas"]["CandidateSnapshot"][];
+            reviewer: string | null;
+            review_reason: string | null;
+            /** Format: date-time */
+            reviewed_at: string | null;
+        };
+        CandidateDecision: {
+            /** @enum {string} */
+            decision: "approve" | "reject";
+            reason: string;
+        };
+        SourceHealth: {
+            source: string;
+            publisher: string;
+            /** Format: uri */
+            url: string;
+            /** @enum {string} */
+            role: "primary" | "corroborating";
+            schedule: string;
+            enabled: boolean;
+            /**
+             * @description `failing`: the last check failed; `suspended`: stopped after repeated failures.
+             * @enum {string}
+             */
+            health: "healthy" | "failing" | "suspended" | "disabled" | "never_checked";
+            consecutive_failures: number;
+            /** Format: date-time */
+            last_checked_at: string | null;
+            /** Format: date-time */
+            last_success_at: string | null;
+            /** Format: date-time */
+            last_snapshot_at: string | null;
+            last_snapshot_sha256: string | null;
+            last_error: string | null;
+            /** Format: date-time */
+            suspended_at: string | null;
+        };
+        SourceHealthList: {
+            sources: components["schemas"]["SourceHealth"][];
+        };
+        Release: {
+            id: components["schemas"]["DatasetRelease"];
+            /** Format: date-time */
+            as_of: string;
+            calendar_revisions: components["schemas"]["CalendarRevisions"];
+            export_sha256: string;
+            /** Format: date-time */
+            created_at: string;
+        };
+        ReleaseList: {
+            releases: components["schemas"]["Release"][];
+        };
         /** @description RFC 9457 problem details. */
         Problem: {
             /** Format: uri-reference */
@@ -580,7 +909,7 @@ export interface components {
             /** Format: uri-reference */
             instance?: string;
             /** @enum {string} */
-            code: "validation_failed" | "invalid_api_key" | "unauthorized" | "forbidden" | "length_required" | "payload_too_large" | "api_key_limit_reached" | "idempotency_key_reused" | "webhook_limit_reached" | "unknown_calendar" | "out_of_range" | "rate_limited" | "dataset_unavailable" | "not_found" | "internal_error";
+            code: "validation_failed" | "invalid_api_key" | "unauthorized" | "forbidden" | "length_required" | "payload_too_large" | "api_key_limit_reached" | "idempotency_key_reused" | "webhook_limit_reached" | "alert_rule_limit_reached" | "candidate_not_pending" | "unknown_calendar" | "out_of_range" | "rate_limited" | "dataset_unavailable" | "not_found" | "internal_error";
         };
     };
     responses: {
@@ -613,6 +942,15 @@ export interface components {
         };
         /** @description `not_found`: no active resource has this ID. */
         NotFound: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description `forbidden`: the caller lacks the required role. */
+        Forbidden: {
             headers: {
                 [name: string]: unknown;
             };
@@ -753,6 +1091,40 @@ export interface operations {
             401: components["responses"]["InvalidApiKey"];
             404: components["responses"]["UnknownCalendar"];
             422: components["responses"]["OutOfRange"];
+            429: components["responses"]["RateLimited"];
+            503: components["responses"]["DatasetUnavailable"];
+        };
+    };
+    listDays: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                /** @description Answer with what Zeitwide had recorded at this instant. Default now. */
+                as_of?: components["parameters"]["AsOf"];
+            };
+            header?: never;
+            path: {
+                id: components["parameters"]["CalendarIdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The covered days in the range, in date order. */
+            200: {
+                headers: {
+                    "Zeitwide-Dataset-Release": components["headers"]["DatasetRelease"];
+                    "Zeitwide-Calendar-Revision": components["headers"]["CalendarRevision"];
+                    "Zeitwide-As-Of": components["headers"]["AsOf"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DayRange"];
+                };
+            };
+            400: components["responses"]["ValidationFailed"];
+            404: components["responses"]["UnknownCalendar"];
             429: components["responses"]["RateLimited"];
             503: components["responses"]["DatasetUnavailable"];
         };
@@ -1214,6 +1586,247 @@ export interface operations {
                 };
             };
             404: components["responses"]["NotFound"];
+        };
+    };
+    listAlertRules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Up to 50 rules, newest first. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertRule"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    createAlertRule: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AlertRuleConfiguration"];
+            };
+        };
+        responses: {
+            /** @description The created rule. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertRule"];
+                };
+            };
+            400: components["responses"]["ValidationFailed"];
+            401: components["responses"]["Unauthorized"];
+            /** @description `alert_rule_limit_reached` or `idempotency_key_reused`. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    updateAlertRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AlertRuleConfiguration"];
+            };
+        };
+        responses: {
+            /** @description The updated rule. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertRule"];
+                };
+            };
+            400: components["responses"]["ValidationFailed"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    deleteAlertRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The rule was deleted or was already absent. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    listCandidates: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["CandidateStatus"];
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Candidates with the requested status. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CandidateList"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    getCandidate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The candidate and its evidence. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CandidateDetail"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    decideCandidate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CandidateDecision"];
+            };
+        };
+        responses: {
+            /** @description The candidate after the decision. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CandidateDetail"];
+                };
+            };
+            400: components["responses"]["ValidationFailed"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            /** @description `candidate_not_pending`: someone already decided this candidate. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    listSourceHealth: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Every source with its check state. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceHealthList"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    listReleases: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The most recent releases. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReleaseList"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     drainOutbox: {

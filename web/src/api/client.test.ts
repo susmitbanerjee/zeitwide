@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createZeitwideClient, type DayAnswer } from "./client";
+import { ApiProblem, createZeitwideClient, unwrap, type DayAnswer } from "./client";
 
 const ANSWER: DayAnswer = {
   date: "2026-11-26",
@@ -94,5 +94,35 @@ describe("createZeitwideClient", () => {
 
     expect(data).toBeUndefined();
     expect(error?.code).toBe("out_of_range");
+  });
+});
+
+describe("unwrap", () => {
+  it("returns data or raises the API's problem", () => {
+    const ok = new Response(null, { status: 200 });
+    expect(unwrap({ data: 1, response: ok })).toBe(1);
+    const bad = new Response(null, { status: 422 });
+    const problem = {
+      title: "Out of range",
+      status: 422,
+      code: "out_of_range",
+      detail: "Too late",
+    };
+    expect(() => unwrap({ error: problem, response: bad })).toThrow("Too late");
+    try {
+      unwrap({ error: problem, response: bad });
+    } catch (error) {
+      expect(error).toBeInstanceOf(ApiProblem);
+      expect((error as ApiProblem).code).toBe("out_of_range");
+    }
+  });
+
+  it("names a non-problem failure by its status", () => {
+    const error = ApiProblem.from(new Response(null, { status: 502 }), "<html>");
+    expect(error.message).toBe("HTTP 502");
+    expect(error.code).toBe("internal_error");
+    expect(
+      ApiProblem.from(new Response(null, { status: 400 }), { code: "x", title: "T" }).message,
+    ).toBe("T");
   });
 });

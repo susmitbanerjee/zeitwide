@@ -1,0 +1,3337 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Zeitwide API",
+    "version": "1.0.0",
+    "summary": "Is this a business day, and what is the next one? Every answer with its evidence.",
+    "description": "Business-day answers for payment rails (Fedwire, FedACH, FedNow, T2, CHAPS) and public\nholiday calendars. The rules are in `dataset/README.md`; this API, the hosted MCP server\nand the open Python library all answer through the same engine and pass the same\nconformance suite.\n\n**Determinism.** Answers come from the latest dataset release. Every response names it\n(`dataset_release`, and the `Zeitwide-Dataset-Release` header) with the revision of each\ncalendar it used, so the same request against the same release always gives the same\nanswer.\n\n**As of.** `as_of` answers with what Zeitwide had recorded at that instant (the\ndefault is now). A release holds everything recorded up to its own `as_of`, so a later\n`as_of` is answered as of the release; the response's `as_of` says which instant was\nused.\n\n**Never a guess.** A calendar covers 1 January of the first year to 31 December of the\nlast year its sources published. A date outside that is `out_of_range`, never an answer\nfrom the weekend rule. Calendars that close on no holiday (FedNow) have no limit.\n\n**Access.** Every route needs an API key (`Authorization: Bearer zw_live_…`, free from\nthe Zeitwide app) or a Zeitwide sign-in token. Only the public receipt keys and the MCP\nprotected-resource metadata are open.\n\n**Limits.** 10,000 calls a day per key. Requests without a valid identity are also\nlimited per address before they are refused.\n\n**Errors** are RFC 9457 problem details with a stable `code`.\n",
+    "license": {
+      "name": "API terms of service; dataset under CC BY-NC 4.0",
+      "identifier": "CC-BY-NC-4.0"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.zeitwide.com"
+    },
+    {
+      "url": "http://localhost:8080",
+      "description": "Local development"
+    }
+  ],
+  "security": [
+    {
+      "apiKey": []
+    },
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "calendars"
+    },
+    {
+      "name": "business-days"
+    },
+    {
+      "name": "changes"
+    },
+    {
+      "name": "receipts"
+    },
+    {
+      "name": "account"
+    },
+    {
+      "name": "admin",
+      "description": "Reviewer-only routes for the admin screens (Keycloak role `reviewer`)."
+    }
+  ],
+  "paths": {
+    "/v1/calendars": {
+      "get": {
+        "operationId": "listCalendars",
+        "tags": [
+          "calendars"
+        ],
+        "summary": "Every calendar, with its rules, revision and coverage",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AsOf"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The calendars in the dataset release.",
+            "headers": {
+              "Zeitwide-Dataset-Release": {
+                "$ref": "#/components/headers/DatasetRelease"
+              },
+              "Zeitwide-As-Of": {
+                "$ref": "#/components/headers/AsOf"
+              },
+              "RateLimit-Limit": {
+                "$ref": "#/components/headers/RateLimitLimit"
+              },
+              "RateLimit-Remaining": {
+                "$ref": "#/components/headers/RateLimitRemaining"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidApiKey"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/DatasetUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/calendars/{id}/days/{date}": {
+      "get": {
+        "operationId": "getDay",
+        "tags": [
+          "calendars"
+        ],
+        "summary": "Whether a date is a business day on one calendar, and why",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CalendarIdPath"
+          },
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AsOf"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The answer and the entry or rule that decided it.",
+            "headers": {
+              "Zeitwide-Dataset-Release": {
+                "$ref": "#/components/headers/DatasetRelease"
+              },
+              "Zeitwide-Calendar-Revision": {
+                "$ref": "#/components/headers/CalendarRevision"
+              },
+              "Zeitwide-As-Of": {
+                "$ref": "#/components/headers/AsOf"
+              },
+              "RateLimit-Limit": {
+                "$ref": "#/components/headers/RateLimitLimit"
+              },
+              "RateLimit-Remaining": {
+                "$ref": "#/components/headers/RateLimitRemaining"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayAnswer"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidApiKey"
+          },
+          "404": {
+            "$ref": "#/components/responses/UnknownCalendar"
+          },
+          "422": {
+            "$ref": "#/components/responses/OutOfRange"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/DatasetUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/calendars/{id}/days": {
+      "get": {
+        "operationId": "listDays",
+        "tags": [
+          "calendars"
+        ],
+        "summary": "Answer every date in a range for one calendar",
+        "description": "Each covered date from `from` to `to` (both inclusive, at most 500 days), answered as\n`GET /v1/calendars/{id}/days/{date}` would, with the nearest business days either\nside. Dates outside the\ncalendar's coverage are left out. With no `from`, the range starts on 1 January of the\ncurrent year; with no `to`, it ends 90 days after today. Both use the calendar's time\nzone, and `today` is the calendar's date now.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CalendarIdPath"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AsOf"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The covered days in the range, in date order.",
+            "headers": {
+              "Zeitwide-Dataset-Release": {
+                "$ref": "#/components/headers/DatasetRelease"
+              },
+              "Zeitwide-Calendar-Revision": {
+                "$ref": "#/components/headers/CalendarRevision"
+              },
+              "Zeitwide-As-Of": {
+                "$ref": "#/components/headers/AsOf"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayRange"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "404": {
+            "$ref": "#/components/responses/UnknownCalendar"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/DatasetUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/calendars/{id}/closures": {
+      "get": {
+        "operationId": "listClosures",
+        "tags": [
+          "calendars"
+        ],
+        "summary": "The closures on one calendar between two dates",
+        "description": "Closures are the dates an entry closes (weekends aren't listed). The range is at most\n731 days, and all of it must be within the calendar's coverage.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CalendarIdPath"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "description": "Inclusive; on or after `from`.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AsOf"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The closures in date order.",
+            "headers": {
+              "Zeitwide-Dataset-Release": {
+                "$ref": "#/components/headers/DatasetRelease"
+              },
+              "Zeitwide-Calendar-Revision": {
+                "$ref": "#/components/headers/CalendarRevision"
+              },
+              "Zeitwide-As-Of": {
+                "$ref": "#/components/headers/AsOf"
+              },
+              "RateLimit-Limit": {
+                "$ref": "#/components/headers/RateLimitLimit"
+              },
+              "RateLimit-Remaining": {
+                "$ref": "#/components/headers/RateLimitRemaining"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosureList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidApiKey"
+          },
+          "404": {
+            "$ref": "#/components/responses/UnknownCalendar"
+          },
+          "422": {
+            "$ref": "#/components/responses/OutOfRange"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/DatasetUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/business-days/check": {
+      "post": {
+        "operationId": "checkBusinessDay",
+        "tags": [
+          "business-days"
+        ],
+        "summary": "Whether a date is a business day on several calendars combined",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AsOf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DayRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The combined answer, with each calendar's answer as evidence.",
+            "headers": {
+              "Zeitwide-Dataset-Release": {
+                "$ref": "#/components/headers/DatasetRelease"
+              },
+              "Zeitwide-Calendar-Revision": {
+                "$ref": "#/components/headers/CalendarRevision"
+              },
+              "Zeitwide-As-Of": {
+                "$ref": "#/components/headers/AsOf"
+              },
+              "RateLimit-Limit": {
+                "$ref": "#/components/headers/RateLimitLimit"
+              },
+              "RateLimit-Remaining": {
+                "$ref": "#/components/headers/RateLimitRemaining"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayAnswer"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidApiKey"
+          },
+          "404": {
+            "$ref": "#/components/responses/UnknownCalendar"
+          },
+          "422": {
+            "$ref": "#/components/responses/OutOfRange"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/DatasetUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/business-days/add": {
+      "post": {
+        "operationId": "addBusinessDays",
+        "tags": [
+          "business-days"
+        ],
+        "summary": "Move a number of business days from a date",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AsOf"
+          }
+        ],
+        "description": "Moves `days` business days from `date`, backwards when negative. `date` itself\ndoesn't count, and 0 returns `date`. Every day passed over is listed in `skipped`,\nin the order met, with why it isn't a business day.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Where the move landed.",
+            "headers": {
+              "Zeitwide-Dataset-Release": {
+                "$ref": "#/components/headers/DatasetRelease"
+              },
+              "Zeitwide-Calendar-Revision": {
+                "$ref": "#/components/headers/CalendarRevision"
+              },
+              "Zeitwide-As-Of": {
+                "$ref": "#/components/headers/AsOf"
+              },
+              "RateLimit-Limit": {
+                "$ref": "#/components/headers/RateLimitLimit"
+              },
+              "RateLimit-Remaining": {
+                "$ref": "#/components/headers/RateLimitRemaining"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Shifted"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidApiKey"
+          },
+          "404": {
+            "$ref": "#/components/responses/UnknownCalendar"
+          },
+          "422": {
+            "$ref": "#/components/responses/OutOfRange"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/DatasetUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/business-days/next": {
+      "post": {
+        "operationId": "nextBusinessDay",
+        "tags": [
+          "business-days"
+        ],
+        "summary": "The first business day after a date",
+        "description": "Never `date` itself; the same as adding one business day.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AsOf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DayRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The next business day.",
+            "headers": {
+              "Zeitwide-Dataset-Release": {
+                "$ref": "#/components/headers/DatasetRelease"
+              },
+              "Zeitwide-Calendar-Revision": {
+                "$ref": "#/components/headers/CalendarRevision"
+              },
+              "Zeitwide-As-Of": {
+                "$ref": "#/components/headers/AsOf"
+              },
+              "RateLimit-Limit": {
+                "$ref": "#/components/headers/RateLimitLimit"
+              },
+              "RateLimit-Remaining": {
+                "$ref": "#/components/headers/RateLimitRemaining"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Shifted"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidApiKey"
+          },
+          "404": {
+            "$ref": "#/components/responses/UnknownCalendar"
+          },
+          "422": {
+            "$ref": "#/components/responses/OutOfRange"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/DatasetUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/changes": {
+      "get": {
+        "operationId": "listChanges",
+        "tags": [
+          "changes"
+        ],
+        "summary": "List published calendar changes using keyset pagination",
+        "parameters": [
+          {
+            "name": "calendars",
+            "in": "query",
+            "required": false,
+            "description": "Up to 10 calendar IDs; omit to include all calendars.",
+            "schema": {
+              "type": "array",
+              "maxItems": 10,
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/components/schemas/CalendarId"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "types",
+            "in": "query",
+            "required": false,
+            "description": "Change types to include; omit to include all types.",
+            "schema": {
+              "type": "array",
+              "maxItems": 4,
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/components/schemas/ChangeType"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 256
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Changes ordered by publication instant and stable event ID.",
+            "headers": {
+              "RateLimit-Limit": {
+                "$ref": "#/components/headers/RateLimitLimit"
+              },
+              "RateLimit-Remaining": {
+                "$ref": "#/components/headers/RateLimitRemaining"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangePage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/receipts/verify": {
+      "post": {
+        "operationId": "verifyReceipt",
+        "tags": [
+          "receipts"
+        ],
+        "summary": "Verify a receipt against the configured public key history",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Receipt"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "`valid` is false for a modified payload, signature, ID or unknown key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceiptVerification"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          }
+        }
+      }
+    },
+    "/.well-known/zeitwide-keys.json": {
+      "get": {
+        "operationId": "getReceiptKeys",
+        "security": [],
+        "tags": [
+          "receipts"
+        ],
+        "summary": "Public Ed25519 verification keys and validity intervals",
+        "responses": {
+          "200": {
+            "description": "Current and retained historical public keys.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceiptKeySet"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.well-known/oauth-protected-resource/mcp": {
+      "get": {
+        "operationId": "getMcpProtectedResourceMetadata",
+        "security": [],
+        "tags": [
+          "mcp"
+        ],
+        "summary": "OAuth protected resource metadata for the MCP endpoint",
+        "responses": {
+          "200": {
+            "description": "MCP resource identifier, authorization server, and supported bearer method.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "resource",
+                    "authorization_servers",
+                    "bearer_methods_supported"
+                  ],
+                  "properties": {
+                    "resource": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "authorization_servers": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "uri"
+                      }
+                    },
+                    "bearer_methods_supported": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "header"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/account/api-keys": {
+      "get": {
+        "operationId": "listApiKeys",
+        "tags": [
+          "account"
+        ],
+        "summary": "List API keys for the authenticated account",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Up to 100 key metadata rows. Secret values are never returned by this operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApiKeySummary"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidApiKey"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createApiKey",
+        "tags": [
+          "account"
+        ],
+        "summary": "Create an API key and return its value once",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "A 16–128 character key. Reuse is rejected so a retry cannot create another secret.",
+            "schema": {
+              "type": "string",
+              "minLength": 16,
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The key value is present only in this response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedApiKey"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidApiKey"
+          },
+          "409": {
+            "description": "API key account limit reached or this idempotency key was already used.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/account/api-keys/{id}": {
+      "delete": {
+        "operationId": "revokeApiKey",
+        "tags": [
+          "account"
+        ],
+        "summary": "Revoke one API key belonging to the authenticated account",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The key was revoked or was already absent."
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidApiKey"
+          }
+        }
+      }
+    },
+    "/v1/account/webhooks": {
+      "get": {
+        "operationId": "listWebhooks",
+        "tags": [
+          "account"
+        ],
+        "summary": "List webhook subscriptions without their signing secrets",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Up to 100 active subscriptions for the authenticated account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "maxItems": 100,
+                  "items": {
+                    "$ref": "#/components/schemas/WebhookSubscription"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createWebhook",
+        "tags": [
+          "account"
+        ],
+        "summary": "Create a webhook and return its signing secret once",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 16,
+              "maxLength": 128
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookConfiguration"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The generated signing secret is returned only in this response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedWebhook"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "$ref": "#/components/responses/IdempotencyConflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/account/webhooks/{id}": {
+      "put": {
+        "operationId": "updateWebhook",
+        "tags": [
+          "account"
+        ],
+        "summary": "Update a webhook URL and event filter",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookConfiguration"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated subscription; its signing secret remains hidden.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookSubscription"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteWebhook",
+        "tags": [
+          "account"
+        ],
+        "summary": "Disable a webhook and abandon its pending deliveries",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The subscription was disabled or was already absent."
+          }
+        }
+      }
+    },
+    "/v1/account/webhooks/{id}/test": {
+      "post": {
+        "operationId": "sendWebhookTestEvent",
+        "tags": [
+          "account"
+        ],
+        "summary": "Send a signed test event to a webhook",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Test event delivery result; receiver response bodies are discarded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookTestResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/account/alert-rules": {
+      "get": {
+        "operationId": "listAlertRules",
+        "tags": [
+          "account"
+        ],
+        "summary": "List the account's alert rules",
+        "description": "Alert rules say which published changes matter to the account. While an account has\nat least one rule, its webhooks receive only changes that match a rule (and the\nwebhook's own event filter); with no rules, webhooks receive every change.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Up to 50 rules, newest first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "maxItems": 50,
+                  "items": {
+                    "$ref": "#/components/schemas/AlertRule"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createAlertRule",
+        "tags": [
+          "account"
+        ],
+        "summary": "Create an alert rule",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 16,
+              "maxLength": 128
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertRuleConfiguration"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created rule.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertRule"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "description": "`alert_rule_limit_reached` or `idempotency_key_reused`.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/account/alert-rules/{id}": {
+      "put": {
+        "operationId": "updateAlertRule",
+        "tags": [
+          "account"
+        ],
+        "summary": "Replace an alert rule",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertRuleConfiguration"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated rule.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertRule"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteAlertRule",
+        "tags": [
+          "account"
+        ],
+        "summary": "Delete an alert rule",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The rule was deleted or was already absent."
+          }
+        }
+      }
+    },
+    "/v1/admin/candidates": {
+      "get": {
+        "operationId": "listCandidates",
+        "tags": [
+          "admin"
+        ],
+        "summary": "List candidate changes for review, urgent first",
+        "description": "Pending candidates sort urgent first (under 14 days' notice), then by date. Requires\nthe Keycloak role `reviewer`.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/CandidateStatus"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Candidates with the requested status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CandidateList"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/admin/candidates/{id}": {
+      "get": {
+        "operationId": "getCandidate",
+        "tags": [
+          "admin"
+        ],
+        "summary": "One candidate with the current entry and every supporting snapshot",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The candidate and its evidence.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CandidateDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/admin/candidates/{id}/decision": {
+      "post": {
+        "operationId": "decideCandidate",
+        "tags": [
+          "admin"
+        ],
+        "summary": "Approve or reject a pending candidate",
+        "description": "Records the reviewer (the token's subject), the reason and the time. The pipeline\npublishes an approved candidate on its next run, in one transaction; no answer\nchanges before then.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CandidateDecision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The candidate after the decision.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CandidateDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "`candidate_not_pending`: someone already decided this candidate.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/sources": {
+      "get": {
+        "operationId": "listSourceHealth",
+        "tags": [
+          "admin"
+        ],
+        "summary": "Freshness and failures for every source",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Every source with its check state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceHealthList"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/admin/releases": {
+      "get": {
+        "operationId": "listReleases",
+        "tags": [
+          "admin"
+        ],
+        "summary": "Dataset releases, newest first",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The most recent releases.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReleaseList"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/internal/outbox/drain": {
+      "post": {
+        "operationId": "drainOutbox",
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Fan out and deliver due webhook events",
+        "security": [
+          {
+            "schedulerOidc": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Counts for this drain invocation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboxDrainResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Keycloak access token with issuer zeitwide and audience zeitwide-api."
+      },
+      "apiKey": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "An API key such as `zw_live_AbCd1234_…`, shown once when it is created."
+      },
+      "schedulerOidc": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Google-issued Cloud Scheduler OIDC token with the configured audience and service-account email."
+      }
+    },
+    "parameters": {
+      "CalendarIdPath": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/CalendarId"
+        }
+      },
+      "AsOf": {
+        "name": "as_of",
+        "in": "query",
+        "required": false,
+        "description": "Answer with what Zeitwide had recorded at this instant. Default now.",
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "headers": {
+      "DatasetRelease": {
+        "description": "The dataset release the answer came from.",
+        "schema": {
+          "$ref": "#/components/schemas/DatasetRelease"
+        }
+      },
+      "CalendarRevision": {
+        "description": "Each calendar's revision at `as_of`, such as `US-FEDWIRE=3, EU-T2=2`.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "AsOf": {
+        "description": "The instant the answer was read as of.",
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "RateLimitLimit": {
+        "description": "Requests allowed in the current window.",
+        "schema": {
+          "type": "integer"
+        }
+      },
+      "RateLimitRemaining": {
+        "description": "Requests left in the current window.",
+        "schema": {
+          "type": "integer"
+        }
+      }
+    },
+    "responses": {
+      "ValidationFailed": {
+        "description": "`validation_failed`: the request is malformed.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "InvalidApiKey": {
+        "description": "`invalid_api_key`: the key is unknown, malformed or revoked.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "`unauthorized`: authentication is required.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "`not_found`: no active resource has this ID.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "`forbidden`: the caller lacks the required role.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "IdempotencyConflict": {
+        "description": "`idempotency_key_reused`: this key was already used.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "UnknownCalendar": {
+        "description": "`unknown_calendar`: no calendar has this ID.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "OutOfRange": {
+        "description": "`out_of_range`: a date is outside a calendar's source coverage.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "RateLimited": {
+        "description": "`rate_limited`: too many requests; try again after `Retry-After` seconds.",
+        "headers": {
+          "Retry-After": {
+            "schema": {
+              "type": "integer"
+            }
+          }
+        },
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "DatasetUnavailable": {
+        "description": "`dataset_unavailable`: no dataset release has been cut yet.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "CreatedApiKey": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "prefix",
+          "key",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "prefix": {
+            "type": "string",
+            "pattern": "^zw_live_[A-Za-z0-9]{8}$"
+          },
+          "key": {
+            "type": "string",
+            "pattern": "^zw_live_[A-Za-z0-9]{8}_[A-Za-z0-9]{43}$"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WebhookConfiguration": {
+        "type": "object",
+        "required": [
+          "url",
+          "events"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2048,
+            "description": "HTTPS URL on a public host using port 443."
+          },
+          "events": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 16,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/components/schemas/ChangeType"
+            }
+          }
+        }
+      },
+      "CreatedWebhook": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WebhookSubscription"
+          },
+          {
+            "type": "object",
+            "required": [
+              "secret"
+            ],
+            "properties": {
+              "secret": {
+                "type": "string",
+                "pattern": "^whsec_[A-Za-z0-9_-]{43}$"
+              }
+            }
+          }
+        ]
+      },
+      "WebhookSubscription": {
+        "type": "object",
+        "required": [
+          "id",
+          "url",
+          "events",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChangeType"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WebhookTestResult": {
+        "type": "object",
+        "required": [
+          "succeeded",
+          "response_status"
+        ],
+        "properties": {
+          "succeeded": {
+            "type": "boolean"
+          },
+          "response_status": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 100,
+            "maximum": 599
+          }
+        }
+      },
+      "OutboxDrainResult": {
+        "type": "object",
+        "required": [
+          "outbox_events",
+          "claimed",
+          "succeeded",
+          "retried",
+          "failed"
+        ],
+        "properties": {
+          "outbox_events": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "claimed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "succeeded": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "retried": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "failed": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "ApiKeySummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "prefix",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "prefix": {
+            "type": "string",
+            "pattern": "^zw_live_[A-Za-z0-9]{8}$"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_used_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "revoked_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "ReceiptPayload": {
+        "type": "object",
+        "required": [
+          "request",
+          "answer",
+          "dataset_release",
+          "calendar_revisions",
+          "issued_at"
+        ],
+        "properties": {
+          "request": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "answer": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "dataset_release": {
+            "$ref": "#/components/schemas/DatasetRelease"
+          },
+          "calendar_revisions": {
+            "$ref": "#/components/schemas/CalendarRevisions"
+          },
+          "issued_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Receipt": {
+        "type": "object",
+        "required": [
+          "id",
+          "payload",
+          "payload_hash",
+          "key_id",
+          "signature"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^rcpt_[0-9a-f]{32}$"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/ReceiptPayload"
+          },
+          "payload_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "key_id": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "signature": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{86}$"
+          }
+        }
+      },
+      "ReceiptVerification": {
+        "type": "object",
+        "required": [
+          "valid"
+        ],
+        "properties": {
+          "valid": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ReceiptKeySet": {
+        "type": "object",
+        "required": [
+          "keys"
+        ],
+        "properties": {
+          "keys": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReceiptPublicKey"
+            }
+          }
+        }
+      },
+      "ReceiptPublicKey": {
+        "type": "object",
+        "required": [
+          "key_id",
+          "public_key",
+          "valid_from",
+          "valid_to"
+        ],
+        "properties": {
+          "key_id": {
+            "type": "string"
+          },
+          "public_key": {
+            "type": "string",
+            "description": "PEM-encoded Ed25519 SubjectPublicKeyInfo."
+          },
+          "valid_from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "valid_to": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "ChangeType": {
+        "type": "string",
+        "enum": [
+          "closure_added",
+          "closure_removed",
+          "closure_changed",
+          "basis_changed"
+        ]
+      },
+      "ChangePage": {
+        "type": "object",
+        "required": [
+          "changes",
+          "next_cursor",
+          "since",
+          "limit"
+        ],
+        "properties": {
+          "changes": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/Change"
+            }
+          },
+          "next_cursor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 256
+          },
+          "since": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        }
+      },
+      "Change": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "calendar_id",
+          "entry_date",
+          "after",
+          "notice_days",
+          "published_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "type": {
+            "$ref": "#/components/schemas/ChangeType"
+          },
+          "calendar_id": {
+            "$ref": "#/components/schemas/CalendarId"
+          },
+          "entry_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "before": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": true
+          },
+          "after": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "notice_days": {
+            "type": "integer"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CalendarId": {
+        "type": "string",
+        "pattern": "^[A-Z0-9]+(-[A-Z0-9]+)*$",
+        "maxLength": 64,
+        "examples": [
+          "US-FEDWIRE"
+        ]
+      },
+      "DatasetRelease": {
+        "type": "string",
+        "pattern": "^\\d{4}\\.\\d{2}\\.\\d{2}\\.\\d+$",
+        "examples": [
+          "2026.10.28.1"
+        ]
+      },
+      "Combine": {
+        "type": "string",
+        "enum": [
+          "all_open",
+          "any_open"
+        ],
+        "default": "all_open",
+        "description": "`all_open`: every calendar is open. `any_open`: at least one is."
+      },
+      "Basis": {
+        "type": "string",
+        "enum": [
+          "published",
+          "projected"
+        ],
+        "description": "`published` by the operator, or `projected` by Zeitwide from other sources."
+      },
+      "CalendarRevisions": {
+        "type": "object",
+        "description": "Each calendar's revision at `as_of`, by calendar ID.",
+        "additionalProperties": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "DayRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "calendars",
+          "date"
+        ],
+        "properties": {
+          "calendars": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/components/schemas/CalendarId"
+            }
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "combine": {
+            "$ref": "#/components/schemas/Combine"
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AddRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "calendars",
+          "date",
+          "days"
+        ],
+        "properties": {
+          "calendars": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/components/schemas/CalendarId"
+            }
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "days": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 1000
+          },
+          "combine": {
+            "$ref": "#/components/schemas/Combine"
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Source": {
+        "type": "object",
+        "description": "A snapshot of an official source that backs an entry.",
+        "required": [
+          "publisher",
+          "url",
+          "retrieved_at",
+          "snapshot_sha256"
+        ],
+        "properties": {
+          "publisher": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "retrieved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "snapshot_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      },
+      "CalendarDay": {
+        "type": "object",
+        "description": "One calendar's answer for one date, and what decided it.",
+        "required": [
+          "calendar_id",
+          "is_open",
+          "decided_by",
+          "sources"
+        ],
+        "properties": {
+          "calendar_id": {
+            "$ref": "#/components/schemas/CalendarId"
+          },
+          "is_open": {
+            "type": "boolean"
+          },
+          "decided_by": {
+            "type": "string",
+            "enum": [
+              "entry",
+              "weekend_rule"
+            ],
+            "description": "An entry (with its reason, basis and sources), or the weekend rule."
+          },
+          "reason": {
+            "type": "string",
+            "description": "Only when an entry decided."
+          },
+          "basis": {
+            "$ref": "#/components/schemas/Basis"
+          },
+          "revision": {
+            "type": "integer",
+            "description": "The calendar revision that published the entry."
+          },
+          "recorded_from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Source"
+            }
+          }
+        }
+      },
+      "DayAnswer": {
+        "type": "object",
+        "required": [
+          "date",
+          "is_business_day",
+          "combine",
+          "calendars",
+          "as_of",
+          "dataset_release",
+          "calendar_revisions",
+          "receipt"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "is_business_day": {
+            "type": "boolean"
+          },
+          "combine": {
+            "$ref": "#/components/schemas/Combine"
+          },
+          "calendars": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CalendarDay"
+            }
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dataset_release": {
+            "$ref": "#/components/schemas/DatasetRelease"
+          },
+          "calendar_revisions": {
+            "$ref": "#/components/schemas/CalendarRevisions"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/Receipt"
+          }
+        }
+      },
+      "SkippedDay": {
+        "type": "object",
+        "required": [
+          "date",
+          "calendars"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "calendars": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CalendarDay"
+            }
+          }
+        }
+      },
+      "Shifted": {
+        "type": "object",
+        "required": [
+          "start",
+          "days",
+          "date",
+          "combine",
+          "calendars",
+          "skipped",
+          "as_of",
+          "dataset_release",
+          "calendar_revisions",
+          "receipt"
+        ],
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date"
+          },
+          "days": {
+            "type": "integer"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "Where the move landed."
+          },
+          "combine": {
+            "$ref": "#/components/schemas/Combine"
+          },
+          "calendars": {
+            "type": "array",
+            "description": "Each calendar's answer for `date`.",
+            "items": {
+              "$ref": "#/components/schemas/CalendarDay"
+            }
+          },
+          "skipped": {
+            "type": "array",
+            "description": "Days passed over because they weren't business days, in the order met.",
+            "items": {
+              "$ref": "#/components/schemas/SkippedDay"
+            }
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dataset_release": {
+            "$ref": "#/components/schemas/DatasetRelease"
+          },
+          "calendar_revisions": {
+            "$ref": "#/components/schemas/CalendarRevisions"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/Receipt"
+          }
+        }
+      },
+      "RangeDay": {
+        "type": "object",
+        "required": [
+          "date",
+          "is_open",
+          "decided_by",
+          "sources"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "is_open": {
+            "type": "boolean"
+          },
+          "decided_by": {
+            "type": "string",
+            "enum": [
+              "entry",
+              "weekend_rule"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "description": "Only when an entry decided."
+          },
+          "basis": {
+            "$ref": "#/components/schemas/Basis"
+          },
+          "sources": {
+            "type": "array",
+            "description": "The snapshots behind the entry; empty when the weekend rule decided.",
+            "items": {
+              "$ref": "#/components/schemas/Source"
+            }
+          },
+          "next_business_day": {
+            "type": "string",
+            "format": "date",
+            "description": "The first business day after `date`; absent if it is past coverage."
+          },
+          "previous_business_day": {
+            "type": "string",
+            "format": "date",
+            "description": "The last business day before `date`; absent if it is before coverage."
+          }
+        }
+      },
+      "DayRange": {
+        "type": "object",
+        "required": [
+          "calendar_id",
+          "today",
+          "from",
+          "to",
+          "days",
+          "as_of",
+          "dataset_release",
+          "calendar_revisions",
+          "receipt"
+        ],
+        "properties": {
+          "calendar_id": {
+            "$ref": "#/components/schemas/CalendarId"
+          },
+          "today": {
+            "type": "string",
+            "format": "date",
+            "description": "The calendar's date now",
+            "in its time zone.": null
+          },
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "days": {
+            "type": "array",
+            "maxItems": 500,
+            "items": {
+              "$ref": "#/components/schemas/RangeDay"
+            }
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dataset_release": {
+            "$ref": "#/components/schemas/DatasetRelease"
+          },
+          "calendar_revisions": {
+            "$ref": "#/components/schemas/CalendarRevisions"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/Receipt"
+          }
+        }
+      },
+      "Closure": {
+        "type": "object",
+        "required": [
+          "date",
+          "reason",
+          "basis",
+          "revision",
+          "recorded_from",
+          "sources"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "basis": {
+            "$ref": "#/components/schemas/Basis"
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "recorded_from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Source"
+            }
+          }
+        }
+      },
+      "ClosureList": {
+        "type": "object",
+        "required": [
+          "calendar_id",
+          "from",
+          "to",
+          "closures",
+          "as_of",
+          "dataset_release",
+          "calendar_revision",
+          "calendar_revisions",
+          "receipt"
+        ],
+        "properties": {
+          "calendar_id": {
+            "$ref": "#/components/schemas/CalendarId"
+          },
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "closures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Closure"
+            }
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dataset_release": {
+            "$ref": "#/components/schemas/DatasetRelease"
+          },
+          "calendar_revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "calendar_revisions": {
+            "$ref": "#/components/schemas/CalendarRevisions"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/Receipt"
+          }
+        }
+      },
+      "Coverage": {
+        "type": "object",
+        "description": "The dates the calendar can answer for. `years`: from `from` to `to`, both\ninclusive. `unlimited`: any date (the calendar closes on no holiday). `none`: nothing\nrecorded yet, so no date.\n",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "years",
+              "unlimited",
+              "none"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "format": "date",
+            "description": "Only for `years`."
+          },
+          "to": {
+            "type": "string",
+            "format": "date",
+            "description": "Only for `years`."
+          }
+        }
+      },
+      "Calendar": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "timezone",
+          "weekend",
+          "closes_on_holidays",
+          "revision",
+          "coverage"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/CalendarId"
+          },
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "rail",
+              "public",
+              "exchange"
+            ]
+          },
+          "timezone": {
+            "type": "string",
+            "examples": [
+              "America/New_York"
+            ]
+          },
+          "weekend": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday",
+                "sunday"
+              ]
+            }
+          },
+          "closes_on_holidays": {
+            "type": "boolean"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/Coverage"
+          }
+        }
+      },
+      "CalendarList": {
+        "type": "object",
+        "required": [
+          "calendars",
+          "as_of",
+          "dataset_release",
+          "calendar_revisions",
+          "receipt"
+        ],
+        "properties": {
+          "calendars": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Calendar"
+            }
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dataset_release": {
+            "$ref": "#/components/schemas/DatasetRelease"
+          },
+          "calendar_revisions": {
+            "$ref": "#/components/schemas/CalendarRevisions"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/Receipt"
+          }
+        }
+      },
+      "AlertRuleConfiguration": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "calendars",
+          "events"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "calendars": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/components/schemas/CalendarId"
+            }
+          },
+          "events": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 4,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/components/schemas/ChangeType"
+            }
+          },
+          "max_notice_days": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 3650,
+            "description": "Only changes announced this many days or fewer ahead; null for any notice."
+          }
+        }
+      },
+      "AlertRule": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "calendars",
+          "events",
+          "max_notice_days",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "calendars": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CalendarId"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChangeType"
+            }
+          },
+          "max_notice_days": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CandidateStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "approved",
+          "rejected",
+          "published"
+        ],
+        "default": "pending"
+      },
+      "Corroboration": {
+        "type": "string",
+        "enum": [
+          "single_source",
+          "corroborated"
+        ],
+        "description": "`corroborated`: a second, independent source agrees."
+      },
+      "EntryState": {
+        "type": "object",
+        "required": [
+          "is_open",
+          "reason"
+        ],
+        "properties": {
+          "is_open": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "basis": {
+            "$ref": "#/components/schemas/Basis"
+          }
+        }
+      },
+      "Candidate": {
+        "type": "object",
+        "required": [
+          "id",
+          "calendar_id",
+          "entry_date",
+          "before",
+          "after",
+          "corroboration",
+          "source_count",
+          "notice_days",
+          "urgent",
+          "status",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "calendar_id": {
+            "$ref": "#/components/schemas/CalendarId"
+          },
+          "entry_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "before": {
+            "description": "The published state when the candidate was opened; null for a new date.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/EntryState"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "after": {
+            "$ref": "#/components/schemas/EntryState"
+          },
+          "corroboration": {
+            "$ref": "#/components/schemas/Corroboration"
+          },
+          "source_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "notice_days": {
+            "type": "integer",
+            "description": "Days from today (UTC) to the date; negative once it has passed."
+          },
+          "urgent": {
+            "type": "boolean",
+            "description": "Under 14 days' notice."
+          },
+          "status": {
+            "$ref": "#/components/schemas/CandidateStatus"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CandidateList": {
+        "type": "object",
+        "required": [
+          "candidates"
+        ],
+        "properties": {
+          "candidates": {
+            "type": "array",
+            "maxItems": 200,
+            "items": {
+              "$ref": "#/components/schemas/Candidate"
+            }
+          }
+        }
+      },
+      "CandidateSnapshot": {
+        "type": "object",
+        "description": "One source snapshot that supports the candidate, and what the parser read from it.",
+        "required": [
+          "source",
+          "publisher",
+          "url",
+          "role",
+          "fetched_at",
+          "snapshot_sha256",
+          "http_status",
+          "content_type",
+          "byte_size",
+          "is_open",
+          "reason",
+          "parser_version"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "The source's slug."
+          },
+          "publisher": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "primary",
+              "corroborating"
+            ]
+          },
+          "fetched_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "snapshot_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "http_status": {
+            "type": "integer"
+          },
+          "content_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "byte_size": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "is_open": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "parser_version": {
+            "type": "string"
+          }
+        }
+      },
+      "CandidateDetail": {
+        "type": "object",
+        "required": [
+          "candidate",
+          "current",
+          "snapshots",
+          "reviewer",
+          "review_reason",
+          "reviewed_at"
+        ],
+        "properties": {
+          "candidate": {
+            "$ref": "#/components/schemas/Candidate"
+          },
+          "current": {
+            "description": "The entry published now, if any.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/EntryState"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "snapshots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CandidateSnapshot"
+            }
+          },
+          "reviewer": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "review_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reviewed_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "CandidateDecision": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "decision",
+          "reason"
+        ],
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "approve",
+              "reject"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        }
+      },
+      "SourceHealth": {
+        "type": "object",
+        "required": [
+          "source",
+          "publisher",
+          "url",
+          "role",
+          "schedule",
+          "enabled",
+          "health",
+          "consecutive_failures",
+          "last_checked_at",
+          "last_success_at",
+          "last_snapshot_at",
+          "last_snapshot_sha256",
+          "last_error",
+          "suspended_at"
+        ],
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "publisher": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "primary",
+              "corroborating"
+            ]
+          },
+          "schedule": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "health": {
+            "type": "string",
+            "enum": [
+              "healthy",
+              "failing",
+              "suspended",
+              "disabled",
+              "never_checked"
+            ],
+            "description": "`failing`: the last check failed; `suspended`: stopped after repeated failures."
+          },
+          "consecutive_failures": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "last_checked_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "last_success_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "last_snapshot_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "last_snapshot_sha256": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "last_error": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "suspended_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "SourceHealthList": {
+        "type": "object",
+        "required": [
+          "sources"
+        ],
+        "properties": {
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceHealth"
+            }
+          }
+        }
+      },
+      "Release": {
+        "type": "object",
+        "required": [
+          "id",
+          "as_of",
+          "calendar_revisions",
+          "export_sha256",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/DatasetRelease"
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "calendar_revisions": {
+            "$ref": "#/components/schemas/CalendarRevisions"
+          },
+          "export_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ReleaseList": {
+        "type": "object",
+        "required": [
+          "releases"
+        ],
+        "properties": {
+          "releases": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/Release"
+            }
+          }
+        }
+      },
+      "Problem": {
+        "type": "object",
+        "description": "RFC 9457 problem details.",
+        "required": [
+          "title",
+          "status",
+          "code"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri-reference"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "instance": {
+            "type": "string",
+            "format": "uri-reference"
+          },
+          "code": {
+            "type": "string",
+            "enum": [
+              "validation_failed",
+              "invalid_api_key",
+              "unauthorized",
+              "forbidden",
+              "length_required",
+              "payload_too_large",
+              "api_key_limit_reached",
+              "idempotency_key_reused",
+              "webhook_limit_reached",
+              "alert_rule_limit_reached",
+              "candidate_not_pending",
+              "unknown_calendar",
+              "out_of_range",
+              "rate_limited",
+              "dataset_unavailable",
+              "not_found",
+              "internal_error"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

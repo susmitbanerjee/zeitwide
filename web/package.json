@@ -6,22 +6,37 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "generate:api": "openapi-typescript ../api/openapi.yaml -o src/api/schema.ts",
+    "generate:api": "openapi-typescript ../api/openapi.yaml -o src/api/schema.ts && node scripts/openapi-json.mjs",
     "lint": "eslint --max-warnings=0 .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run --coverage",
-    "check": "npm run lint && npm run format:check && npm run typecheck && npm run test"
+    "check": "npm run lint && npm run format:check && npm run typecheck && npm run test",
+    "e2e": "playwright test",
+    "mock-api": "node e2e/mock-api/server.mjs",
+    "lighthouse": "node e2e/lighthouse.mjs",
+    "e2e:build": "node scripts/build-with-mock-api.mjs"
   },
   "dependencies": {
+    "@tanstack/react-query": "5.104.3",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "lucide-react": "1.58.0",
     "next": "16.4.1",
+    "next-auth": "5.0.0-beta.32",
     "openapi-fetch": "0.17.0",
+    "radix-ui": "1.8.1",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "server-only": "0.0.1",
+    "tailwind-merge": "3.7.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@playwright/test": "1.64.1",
     "@tailwindcss/turbopack": "^4",
+    "@testing-library/react": "16.3.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -29,11 +44,15 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.1",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "jsdom": "27.0.0",
+    "lighthouse": "13.5.0",
     "openapi-typescript": "7.13.0",
     "prettier": "^3.9.10",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^4.1.12"
+    "vitest": "^4.1.12",
+    "yaml": "2.9.1"
   },
   "engines": {
     "node": ">=22"
