@@ -31,15 +31,20 @@ WHERE EXISTS (SELECT 1 FROM pg_roles WHERE rolname = roles.old)
   AND NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = roles.new)
 \gexec
 
--- Renaming needs the owner's rights plus CREATEDB, which zeitwide_api lacks: avnadmin
--- owns it for the moment, shuts out the old API and pipeline, renames it and hands it back.
-ALTER DATABASE settlecal OWNER TO avnadmin;
+-- Renaming needs the owner's rights plus CREATEDB. avnadmin may act as the owner (setup.sql
+-- granted SET) but doesn't inherit ownership, so the owner gets CREATEDB for the rename
+-- only. As the owner, shut out new connections and close the old API's, then rename.
+-- The pipeline must be idle (its Scheduler jobs paused): its sessions can't be closed here.
+ALTER ROLE zeitwide_api CREATEDB;
+SET ROLE zeitwide_api;
 ALTER DATABASE settlecal WITH ALLOW_CONNECTIONS false;
 SELECT count(pg_terminate_backend(pid)) AS closed_connections
-FROM pg_stat_activity WHERE datname = 'settlecal' AND pid <> pg_backend_pid();
+FROM pg_stat_activity
+WHERE datname = 'settlecal' AND usename = current_user AND pid <> pg_backend_pid();
 ALTER DATABASE settlecal RENAME TO zeitwide;
 ALTER DATABASE zeitwide WITH ALLOW_CONNECTIONS true;
-ALTER DATABASE zeitwide OWNER TO zeitwide_api;
+RESET ROLE;
+ALTER ROLE zeitwide_api NOCREATEDB;
 
 SELECT rolname FROM pg_roles WHERE rolname LIKE 'zeitwide\_%' OR rolname LIKE 'settlecal\_%'
 ORDER BY rolname;

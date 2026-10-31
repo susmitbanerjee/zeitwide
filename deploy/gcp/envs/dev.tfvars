@@ -5,8 +5,8 @@ billing_account = "01D9BB-5B0C19-F66CB0"
 github_repository    = "susmitbanerjee/zeitwide"
 github_repository_id = "1436841628"
 
-receipt_key_id = "sc-2026-10"
-receipt_public_keys_json = "[{\"key_id\":\"sc-2026-10\",\"public_key\":\"-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAN591c3SENCQArrPMxqG6p9lOf/s39awzcUwcXSSxrgE=\\n-----END PUBLIC KEY-----\\n\",\"valid_from\":\"2026-10-28T09:28:06.69439Z\",\"valid_to\":null}]"
+receipt_key_id = "zw-2026-10"
+receipt_public_keys_json = "[{\"key_id\":\"sc-2026-10\",\"public_key\":\"-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAN591c3SENCQArrPMxqG6p9lOf/s39awzcUwcXSSxrgE=\\n-----END PUBLIC KEY-----\\n\",\"valid_from\":\"2026-10-28T09:28:06.69439Z\",\"valid_to\":\"2026-10-31T04:38:22Z\"},{\"key_id\":\"zw-2026-10\",\"public_key\":\"-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAzAEoGKvCz40el8o02+sLdX6VOMot8YHcD+nN4KmlyHs=\\n-----END PUBLIC KEY-----\\n\",\"valid_from\":\"2026-10-31T04:38:22Z\",\"valid_to\":null}]"
 
 web_origin         = "https://zeit-dev-6eaae4e0.web.app"
 dataset_repository = "susmitbanerjee/zeit-dataset"
