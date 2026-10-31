@@ -24,7 +24,7 @@ info:
     from the weekend rule. Calendars that close on no holiday (FedNow) have no limit.
 
     **Limits.** Without a key: 60 requests an hour per IP address. With a key
-    (`Authorization: Bearer sc_live_…`): 10,000 a day.
+    (`Authorization: Bearer zw_live_…`): 10,000 a day.
 
     **Errors** are RFC 9457 problem details with a stable `code`.
   license:
@@ -541,7 +541,7 @@ components:
     apiKey:
       type: http
       scheme: bearer
-      description: An API key such as `sc_live_AbCd1234_…`, shown once when it is created.
+      description: An API key such as `zw_live_AbCd1234_…`, shown once when it is created.
     schedulerOidc:
       type: http
       scheme: bearer
@@ -635,8 +635,8 @@ components:
       properties:
         id: { type: string, format: uuid }
         name: { type: string }
-        prefix: { type: string, pattern: "^sc_live_[A-Za-z0-9]{8}$" }
-        key: { type: string, pattern: "^sc_live_[A-Za-z0-9]{8}_[A-Za-z0-9]{43}$" }
+        prefix: { type: string, pattern: "^zw_live_[A-Za-z0-9]{8}$" }
+        key: { type: string, pattern: "^zw_live_[A-Za-z0-9]{8}_[A-Za-z0-9]{43}$" }
         created_at: { type: string, format: date-time }
     WebhookConfiguration:
       type: object
@@ -687,7 +687,7 @@ components:
       properties:
         id: { type: string, format: uuid }
         name: { type: string }
-        prefix: { type: string, pattern: "^sc_live_[A-Za-z0-9]{8}$" }
+        prefix: { type: string, pattern: "^zw_live_[A-Za-z0-9]{8}$" }
         created_at: { type: string, format: date-time }
         last_used_at: { type: [string, "null"], format: date-time }
         revoked_at: { type: [string, "null"], format: date-time }

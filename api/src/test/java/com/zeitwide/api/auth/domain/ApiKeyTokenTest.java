@@ -10,22 +10,27 @@ class ApiKeyTokenTest {
 
   @Test
   void shouldSplitAKeyIntoPrefixAndSecret() {
-    assertThat(ApiKeyToken.parse("sc_live_AbCd1234_" + SECRET))
-        .contains(new ApiKeyToken("sc_live_AbCd1234", SECRET));
+    assertThat(ApiKeyToken.parse("zw_live_AbCd1234_" + SECRET))
+        .contains(new ApiKeyToken("zw_live_AbCd1234", SECRET));
   }
 
   @Test
   void shouldRejectMalformedKeys() {
-    assertThat(ApiKeyToken.parse("sc_prod_AbCd1234_" + SECRET)).isEmpty();
-    assertThat(ApiKeyToken.parse("sc_live_AbCd123_" + SECRET)).isEmpty();
-    assertThat(ApiKeyToken.parse("sc_live_AbCd1234_short")).isEmpty();
+    assertThat(ApiKeyToken.parse("zw_prod_AbCd1234_" + SECRET)).isEmpty();
+    assertThat(ApiKeyToken.parse("zw_live_AbCd123_" + SECRET)).isEmpty();
+    assertThat(ApiKeyToken.parse("zw_live_AbCd1234_short")).isEmpty();
     assertThat(ApiKeyToken.parse("")).isEmpty();
   }
 
   @Test
-  void shouldNeverPrintTheSecret() {
-    ApiKeyToken token = ApiKeyToken.parse("sc_live_AbCd1234_" + SECRET).orElseThrow();
+  void shouldRejectKeysWithTheOldSettleCalPrefix() {
+    assertThat(ApiKeyToken.parse("sc_live_AbCd1234_" + SECRET)).isEmpty();
+  }
 
-    assertThat(token.toString()).contains("sc_live_AbCd1234").doesNotContain(SECRET);
+  @Test
+  void shouldNeverPrintTheSecret() {
+    ApiKeyToken token = ApiKeyToken.parse("zw_live_AbCd1234_" + SECRET).orElseThrow();
+
+    assertThat(token.toString()).contains("zw_live_AbCd1234").doesNotContain(SECRET);
   }
 }

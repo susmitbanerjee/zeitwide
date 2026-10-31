@@ -2,6 +2,7 @@ package com.zeitwide.api.auth.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zeitwide.api.auth.app.ApiKeyAuthenticator;
+import com.zeitwide.api.auth.domain.ApiKeyToken;
 import com.zeitwide.api.mcp.app.McpProperties;
 import com.zeitwide.api.web.ProblemCode;
 import com.zeitwide.api.web.Problems;
@@ -41,7 +42,7 @@ public final class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
     String token = authorization.substring(BEARER.length()).trim();
-    if (!token.startsWith("sc_")) {
+    if (!token.startsWith(ApiKeyToken.SCHEME)) {
       chain.doFilter(request, response);
       return;
     }

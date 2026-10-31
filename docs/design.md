@@ -103,7 +103,7 @@ Use **Keycloak**, self-hosted. It's open source (Apache 2.0) and a CNCF project,
 | MCP clients | Keycloak acts as the OAuth 2.1 authorization server that the MCP spec expects, with dynamic client registration |
 | Admin review screen | A Keycloak role `reviewer`, required by the admin routes |
 
-API keys stay outside Keycloak because they are for machines, not people. Keys look like `sc_live_…`. Store only the prefix and a SHA-256 hash of the secret, and show the full key once. The API accepts either a Keycloak token or an API key, and both resolve to the same account.
+API keys stay outside Keycloak because they are for machines, not people. Keys look like `zw_live_…`. Store only the prefix and a SHA-256 hash of the secret, and show the full key once. The API accepts either a Keycloak token or an API key, and both resolve to the same account.
 
 Alternatives, if Keycloak feels heavy to run: **Zitadel** (lighter, built for multi-tenant SaaS) or **Authentik** (simpler admin UI). Both cover the same logins and SSO. Avoid building login yourself or tying the MVP to a paid identity service you would have to move off later.
 

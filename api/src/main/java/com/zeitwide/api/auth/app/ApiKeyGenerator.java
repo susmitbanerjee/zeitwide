@@ -24,7 +24,7 @@ public final class ApiKeyGenerator {
   }
 
   public ApiKeyToken generate() {
-    return new ApiKeyToken("sc_live_" + randomBase62(8), randomBase62Secret());
+    return new ApiKeyToken(ApiKeyToken.LIVE + randomBase62(8), randomBase62Secret());
   }
 
   private String randomBase62(int length) {

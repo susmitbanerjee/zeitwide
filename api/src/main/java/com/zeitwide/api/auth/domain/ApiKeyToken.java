@@ -9,13 +9,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * An API key as a caller presents it: {@code sc_live_AbCd1234_<secret>}. The prefix finds the
+ * An API key as a caller presents it: {@code zw_live_AbCd1234_<secret>}. The prefix finds the
  * stored key; only the SHA-256 of the secret is ever stored.
  */
 public record ApiKeyToken(String prefix, String secret) {
 
+  /** Every API key starts with this; a bearer token without it is not an API key. */
+  public static final String SCHEME = "zw_";
+
+  /** The start of every key issued today. */
+  public static final String LIVE = SCHEME + "live_";
+
   private static final Pattern FORMAT =
-      Pattern.compile("(sc_live_[A-Za-z0-9]{8})_([A-Za-z0-9]{43})");
+      Pattern.compile("(" + LIVE + "[A-Za-z0-9]{8})_([A-Za-z0-9]{43})");
 
   public ApiKeyToken {
     Objects.requireNonNull(prefix, "prefix");

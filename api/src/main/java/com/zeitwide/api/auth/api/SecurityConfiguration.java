@@ -6,6 +6,7 @@ import com.zeitwide.api.auth.app.AccountJwtAuthenticationConverter;
 import com.zeitwide.api.auth.app.ApiKeyAuthenticator;
 import com.zeitwide.api.auth.app.AuthProperties;
 import com.zeitwide.api.auth.app.InternalAuthProperties;
+import com.zeitwide.api.auth.domain.ApiKeyToken;
 import com.zeitwide.api.mcp.app.McpProperties;
 import com.zeitwide.api.web.CorsProperties;
 import com.zeitwide.api.web.ProblemCode;
@@ -194,7 +195,7 @@ public class SecurityConfiguration {
       String authorization = request.getHeader("Authorization");
       if (path.equals("/internal")
           || path.startsWith("/internal/")
-          || (authorization != null && authorization.startsWith("Bearer sc_"))) {
+          || (authorization != null && authorization.startsWith("Bearer " + ApiKeyToken.SCHEME))) {
         return null;
       }
       return delegate.resolve(request);

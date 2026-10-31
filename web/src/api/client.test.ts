@@ -67,7 +67,7 @@ describe("createZeitwideClient", () => {
     const { fetch, requests } = recordingFetch(200, ANSWER);
     const client = createZeitwideClient({
       baseUrl: "https://api.test",
-      apiKey: "sc_test_x",
+      apiKey: "zw_test_x",
       fetch,
     });
 
@@ -75,7 +75,7 @@ describe("createZeitwideClient", () => {
       body: { calendars: ["US-FEDWIRE", "EU-T2"], date: "2026-04-03", combine: "any_open" },
     });
 
-    expect(requests[0]?.headers.get("Authorization")).toBe("Bearer sc_test_x");
+    expect(requests[0]?.headers.get("Authorization")).toBe("Bearer zw_test_x");
     expect(await requests[0]?.json()).toEqual({
       calendars: ["US-FEDWIRE", "EU-T2"],
       date: "2026-04-03",

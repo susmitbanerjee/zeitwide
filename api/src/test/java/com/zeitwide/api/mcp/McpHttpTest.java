@@ -40,7 +40,8 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class McpHttpTest {
 
-  private static final String API_KEY_PREFIX = "sc_live_McpTest1";
+  // A made-up test key, never a real credential.
+  private static final String API_KEY_PREFIX = "zw_live_McpTest1"; // gitleaks:allow
   private static final String API_KEY_SECRET = "A".repeat(43); // gitleaks:allow
   private static final String API_KEY = API_KEY_PREFIX + "_" + API_KEY_SECRET;
   private static final String AS_OF = "2022-09-10T00:00:00Z";

@@ -83,7 +83,7 @@ class AnswersApiTest {
 
   private static final String PROBLEM_JSON = MediaType.APPLICATION_PROBLEM_JSON_VALUE;
   // A made-up test key, never a real credential.
-  private static final String KEY_PREFIX = "sc_live_AbCd1234"; // gitleaks:allow
+  private static final String KEY_PREFIX = "zw_live_AbCd1234"; // gitleaks:allow
   private static final String KEY_SECRET = "s3cr3t".repeat(6) + "1234567";
   private static final String KEY = KEY_PREFIX + "_" + KEY_SECRET;
 

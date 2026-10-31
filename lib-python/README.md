@@ -20,7 +20,7 @@ the evidence behind every answer, needs `pip install "zeitwide[online]"`:
 ```python
 from zeitwide.client import ZeitwideClient
 
-with ZeitwideClient(api_key="sc_live_…") as api:
+with ZeitwideClient(api_key="zw_live_…") as api:
     api.day("US-FEDWIRE", date(2026, 11, 26))["is_business_day"]  # False
 ```
 

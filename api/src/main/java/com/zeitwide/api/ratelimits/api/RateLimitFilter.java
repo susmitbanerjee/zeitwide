@@ -3,6 +3,7 @@ package com.zeitwide.api.ratelimits.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zeitwide.api.auth.app.ApiKeyAuthenticator;
 import com.zeitwide.api.auth.domain.AccountPrincipal;
+import com.zeitwide.api.auth.domain.ApiKeyToken;
 import com.zeitwide.api.auth.domain.Caller;
 import com.zeitwide.api.ratelimits.app.RateLimits;
 import com.zeitwide.api.ratelimits.domain.Allowance;
@@ -88,7 +89,7 @@ public final class RateLimitFilter extends OncePerRequestFilter {
     }
     String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
     if (authorization != null) {
-      if (!authorization.startsWith("Bearer sc_")) {
+      if (!authorization.startsWith("Bearer " + ApiKeyToken.SCHEME)) {
         return Optional.empty();
       }
       return authenticator

@@ -77,16 +77,16 @@ class RateLimitHttpTest {
   void shouldRejectUnknownAndRevokedKeys() throws Exception {
     String key = createKey();
     jdbc.sql("UPDATE api_key SET revoked_at = now() WHERE prefix = :prefix")
-        .param("prefix", key.substring(0, "sc_live_".length() + 8))
+        .param("prefix", key.substring(0, "zw_live_".length() + 8))
         .update();
 
     assertThat(statusOf(key, null)).isEqualTo(UNAUTHORIZED);
-    assertThat(statusOf("sc_live_Zz999999_" + "x".repeat(43), null)).isEqualTo(UNAUTHORIZED);
+    assertThat(statusOf("zw_live_Zz999999_" + "x".repeat(43), null)).isEqualTo(UNAUTHORIZED);
   }
 
   private String createKey() {
     String id = Integer.toString(Math.abs(UUID.randomUUID().hashCode() % 90_000_000) + 10_000_000);
-    String prefix = "sc_live_" + id;
+    String prefix = "zw_live_" + id;
     String secret = UUID.randomUUID().toString().replace("-", "") + "abcdefghijk";
     UUID account =
         jdbc.sql("INSERT INTO account (name) VALUES ('Test') RETURNING id")

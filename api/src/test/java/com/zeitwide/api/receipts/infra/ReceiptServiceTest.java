@@ -26,7 +26,7 @@ class ReceiptServiceTest {
   void shouldIssueJcsReceiptAndRejectTamperedPayload() throws Exception {
     KeyPair pair = keyPair();
     ReceiptService receipts =
-        service("sc-2026-10", pair, List.of(publicKey("sc-2026-10", pair, null)), ROTATED_AT);
+        service("zw-2026-10", pair, List.of(publicKey("zw-2026-10", pair, null)), ROTATED_AT);
 
     IssuedReceipt receipt = receipts.issue(request(), answer(false), "2026.10.29.0", revisions());
 
@@ -51,16 +51,16 @@ class ReceiptServiceTest {
     KeyPair oldPair = keyPair();
     KeyPair newPair = keyPair();
     Instant issuedAt = ROTATED_AT.minusSeconds(1);
-    PublicReceiptKey oldAtIssue = publicKey("sc-2026-09", oldPair, ROTATED_AT);
-    ReceiptService oldSigner = service("sc-2026-09", oldPair, List.of(oldAtIssue), issuedAt);
+    PublicReceiptKey oldAtIssue = publicKey("zw-2026-09", oldPair, ROTATED_AT);
+    ReceiptService oldSigner = service("zw-2026-09", oldPair, List.of(oldAtIssue), issuedAt);
     IssuedReceipt oldReceipt =
         oldSigner.issue(request(), answer(false), "2026.10.29.0", revisions());
 
     ReceiptService rotatedVerifier =
         service(
-            "sc-2026-10",
+            "zw-2026-10",
             newPair,
-            List.of(oldAtIssue, publicKey("sc-2026-10", newPair, null)),
+            List.of(oldAtIssue, publicKey("zw-2026-10", newPair, null)),
             ROTATED_AT.plusSeconds(1));
 
     assertThat(rotatedVerifier.verify(oldReceipt)).isTrue();

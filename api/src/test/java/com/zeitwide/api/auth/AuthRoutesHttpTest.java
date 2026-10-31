@@ -102,7 +102,7 @@ class AuthRoutesHttpTest {
 
     mvc.perform(
             post("/mcp")
-                .header("Authorization", "Bearer sc_live_AbCd1234_" + "A".repeat(43))
+                .header("Authorization", "Bearer zw_live_AbCd1234_" + "A".repeat(43))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{}"))
         .andExpect(status().isUnauthorized())
@@ -150,7 +150,7 @@ class AuthRoutesHttpTest {
         mvc.perform(
                 post("/v1/account/api-keys")
                     .with(accountAuthentication())
-                    .header("Idempotency-Key", "test")
+                    .header("Idempotency-Key", "internal-route-test-0001")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("{\"name\":\"internal test\"}"))
             .andExpect(status().isCreated())
@@ -181,7 +181,7 @@ class AuthRoutesHttpTest {
     UUID keyId = UUID.fromString(createdJson.path("id").asText());
     String secret = key.substring(key.lastIndexOf('_') + 1);
 
-    assertThat(key).matches("sc_live_[A-Za-z0-9]{8}_[A-Za-z0-9]{43}");
+    assertThat(key).matches("zw_live_[A-Za-z0-9]{8}_[A-Za-z0-9]{43}");
     assertThat(prefix).isEqualTo(key.substring(0, key.lastIndexOf('_')));
     mvc.perform(
             post("/v1/account/api-keys")

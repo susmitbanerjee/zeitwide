@@ -40,7 +40,7 @@ def client_for(status: int, body: object, seen: list[httpx.Request]) -> Zeitwide
         return httpx.Response(status, json=body)
 
     return ZeitwideClient(
-        "https://api.test", api_key="sc_test_key", transport=httpx.MockTransport(handle)
+        "https://api.test", api_key="zw_test_key", transport=httpx.MockTransport(handle)
     )
 
 
@@ -51,7 +51,7 @@ def test_day_uses_the_documented_path_and_key() -> None:
 
     assert answer["is_business_day"] is False
     assert str(seen[0].url) == "https://api.test/v1/calendars/US-FEDWIRE/days/2026-11-26"
-    assert seen[0].headers["Authorization"] == "Bearer sc_test_key"
+    assert seen[0].headers["Authorization"] == "Bearer zw_test_key"
 
 
 def test_as_of_is_sent_with_its_time_zone() -> None:
