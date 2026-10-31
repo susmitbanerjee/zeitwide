@@ -16,14 +16,34 @@
       }
     ]
   },
-  "clientScopes": [
+  "clients": [
     {
-      "name": "zeitwide-api-audience",
-      "description": "Include the Zeitwide API in access-token audiences",
+      "clientId": "zeitwide-web",
+      "name": "Zeitwide web app",
+      "enabled": true,
+      "publicClient": true,
       "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "${ZEITWIDE_WEB_ORIGIN}/*"
+      ],
+      "webOrigins": [
+        "${ZEITWIDE_WEB_ORIGIN}"
+      ],
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "profile",
+        "roles",
+        "basic",
+        "email"
+      ],
       "attributes": {
-        "display.on.consent.screen": "false",
-        "include.in.token.scope": "true"
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "${ZEITWIDE_WEB_ORIGIN}/*"
       },
       "protocolMappers": [
         {
@@ -39,34 +59,6 @@
           }
         }
       ]
-    }
-  ],
-  "clients": [
-    {
-      "clientId": "zeitwide-web",
-      "name": "Zeitwide web app",
-      "enabled": true,
-      "publicClient": true,
-      "protocol": "openid-connect",
-      "standardFlowEnabled": true,
-      "implicitFlowEnabled": false,
-      "directAccessGrantsEnabled": false,
-      "serviceAccountsEnabled": false,
-      "redirectUris": ["${ZEITWIDE_WEB_ORIGIN}/*"],
-      "webOrigins": ["${ZEITWIDE_WEB_ORIGIN}"],
-      "defaultClientScopes": [
-        "web-origins",
-        "acr",
-        "profile",
-        "roles",
-        "basic",
-        "email",
-        "zeitwide-api-audience"
-      ],
-      "attributes": {
-        "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": "${ZEITWIDE_WEB_ORIGIN}/*"
-      }
     },
     {
       "clientId": "zeitwide-api",

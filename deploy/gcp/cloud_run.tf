@@ -299,7 +299,10 @@ resource "google_cloud_run_v2_service" "keycloak" {
           cpu    = "1"
           memory = "1Gi"
         }
-        cpu_idle          = true
+        # Keycloak works in the background (session expiry, imports) while holding
+        # database connections; with CPU only during requests that work stalls and the
+        # pool of 3 runs dry. It still scales to zero when idle.
+        cpu_idle          = false
         startup_cpu_boost = true
       }
 
