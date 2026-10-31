@@ -329,13 +329,18 @@ resource "google_cloud_run_v2_service" "keycloak" {
         mount_path = local.db_ca_mount_dir
       }
 
-      # Keycloak serves /health on its management port (9000), not the HTTP port,
-      # so startup waits for the HTTP port to accept connections instead.
+      # Keycloak serves /health on its management port (9000). Waiting for readiness,
+      # not just an open HTTP port, matters: Cloud Run throttles the CPU once startup is
+      # over, and a realm import still running then (first start) crawls for hours. Up to
+      # ten minutes for that import.
       startup_probe {
-        tcp_socket {}
+        http_get {
+          path = "/health/ready"
+          port = 9000
+        }
         period_seconds    = 10
         timeout_seconds   = 5
-        failure_threshold = 24
+        failure_threshold = 60
       }
     }
   }
