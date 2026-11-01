@@ -6,8 +6,8 @@ const PROBLEMS: Record<string, string> = {
   AccessDenied: "That account isn't allowed to sign in. Try a different one.",
   OAuthAccountNotLinked:
     "That email is already signed up with a different provider. Use the provider you first signed in with.",
+  Configuration: "Sign-in isn't set up properly yet. Please try again shortly.",
   SessionRequired: "Your session ended. Sign in again to continue.",
-  RefreshTokenError: "Your session ended. Sign in again to continue.",
 };
 
 const FALLBACK = "Sign-in didn't complete. Please try again.";

@@ -1,38 +1,32 @@
+import { jwtVerify } from "jose";
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const auth = vi.fn();
 const getToken = vi.fn();
-vi.mock("@/auth", () => ({ auth }));
 vi.mock("next-auth/jwt", () => ({ getToken }));
 
 const { GET, POST } = await import("./route");
 
+const TOKEN_SECRET = "unit-token-secret-0123456789abcdef0123456789";
 const context = (...path: string[]) => ({ params: Promise.resolve({ path }) });
 const upstream = vi.fn<typeof fetch>();
+const signedIn = { subject: "google:123", name: "Ada", email: "ada@example.com", roles: [] };
 
 describe("/api/zw proxy", () => {
   beforeEach(() => {
     vi.stubEnv("AUTH_SECRET", "unit-secret");
+    vi.stubEnv("ZEITWIDE_API_TOKEN_SECRET", TOKEN_SECRET);
     vi.stubGlobal("fetch", upstream);
     upstream.mockReset();
-    auth.mockReset();
     getToken.mockReset();
-    auth.mockImplementation(({ res }: { res: { headers: Headers } }) => {
-      res.headers.append("set-cookie", "authjs.session-token=refreshed; Path=/; HttpOnly");
-      return Promise.resolve(null);
-    });
   });
   afterEach(() => {
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
   });
 
-  it("adds the session's access token and passes the API's answer back", async () => {
-    // Read twice: before the refresh (an expired token) and after it.
-    getToken
-      .mockResolvedValueOnce({ accessToken: "expired" })
-      .mockResolvedValueOnce({ accessToken: "access-123" });
+  it("signs a token for the signed-in person and passes the API's answer back", async () => {
+    getToken.mockResolvedValue({ ...signedIn, roles: ["reviewer"] });
     upstream.mockResolvedValue(
       Response.json([], {
         headers: { "zeitwide-dataset-release": "2026.10.31.1", "set-cookie": "x=1" },
@@ -47,44 +41,51 @@ describe("/api/zw proxy", () => {
     expect(response.status).toBe(200);
     const [url, init] = upstream.mock.calls[0]!;
     expect(url).toBe("http://localhost:8080/v1/account/api-keys?limit=5");
-    expect(new Headers(init?.headers).get("authorization")).toBe("Bearer access-123");
-    expect(new Headers(init?.headers).get("cookie")).toBeNull();
+    const headers = new Headers(init?.headers);
+    expect(headers.get("cookie")).toBeNull();
+    const { payload } = await jwtVerify(
+      headers.get("authorization")!.replace("Bearer ", ""),
+      new TextEncoder().encode(TOKEN_SECRET),
+      { issuer: "http://localhost:3000", audience: "zeitwide-api" },
+    );
+    expect(payload).toMatchObject({
+      sub: "google:123",
+      name: "Ada",
+      email: "ada@example.com",
+      roles: ["reviewer"],
+    });
     expect(response.headers.get("zeitwide-dataset-release")).toBe("2026.10.31.1");
     expect(response.headers.get("cache-control")).toBe("no-store");
-    // The refreshed session cookie goes back to the browser; the API's cookies never do.
-    expect(response.headers.getSetCookie()).toEqual([
-      "authjs.session-token=refreshed; Path=/; HttpOnly",
-    ]);
-    expect(getToken.mock.calls[1]?.[0].req.headers.cookie).toBe("authjs.session-token=refreshed");
-  });
-
-  it("doesn't re-issue the session cookie when nothing was refreshed", async () => {
-    // A call still in flight at sign-out must not bring back the cookie sign-out deleted.
-    getToken.mockResolvedValue({ accessToken: "access-123" });
-    upstream.mockResolvedValue(Response.json([]));
-    const response = await GET(
-      new NextRequest("http://localhost:3000/api/zw/v1/calendars", {
-        headers: { cookie: "authjs.session-token=current" },
-      }),
-      context("v1", "calendars"),
-    );
-    expect(response.status).toBe(200);
+    // Nothing from the API's cookies reaches the browser, and the proxy sets none of its own:
+    // a call still in flight at sign-out can't bring the session cookie back.
     expect(response.headers.getSetCookie()).toEqual([]);
   });
 
-  it("refuses callers without a session or after a failed refresh", async () => {
-    getToken.mockResolvedValue({ accessToken: "stale", error: "RefreshTokenError" });
-    const expired = await GET(
-      new NextRequest("http://localhost:3000/api/zw/v1/calendars"),
-      context("v1", "calendars"),
-    );
-    expect(expired.status).toBe(401);
+  it("refuses callers without a session", async () => {
     getToken.mockResolvedValue(null);
     const anonymous = await GET(
       new NextRequest("http://localhost:3000/api/zw/v1/calendars"),
       context("v1", "calendars"),
     );
     expect(anonymous.status).toBe(401);
+    // A cookie that decrypts but says nobody is signed in is no session either.
+    getToken.mockResolvedValue({ name: "Nobody" });
+    const nobody = await GET(
+      new NextRequest("http://localhost:3000/api/zw/v1/calendars"),
+      context("v1", "calendars"),
+    );
+    expect(nobody.status).toBe(401);
+    expect(upstream).not.toHaveBeenCalled();
+  });
+
+  it("won't call the API without the secret to sign with", async () => {
+    vi.stubEnv("ZEITWIDE_API_TOKEN_SECRET", "");
+    getToken.mockResolvedValue(signedIn);
+    const response = await GET(
+      new NextRequest("http://localhost:3000/api/zw/v1/calendars"),
+      context("v1", "calendars"),
+    );
+    expect(response.status).toBe(500);
     expect(upstream).not.toHaveBeenCalled();
   });
 
@@ -120,7 +121,7 @@ describe("/api/zw proxy", () => {
   });
 
   it("reports an unreachable API as a problem", async () => {
-    getToken.mockResolvedValue({ accessToken: "access-123" });
+    getToken.mockResolvedValue(signedIn);
     upstream.mockRejectedValue(new TypeError("fetch failed"));
     const response = await POST(
       new NextRequest("http://localhost:3000/api/zw/v1/business-days/check", {

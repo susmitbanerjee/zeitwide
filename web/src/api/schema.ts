@@ -194,23 +194,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/.well-known/oauth-protected-resource/mcp": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** OAuth protected resource metadata for the MCP endpoint */
-        get: operations["getMcpProtectedResourceMetadata"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/account/api-keys": {
         parameters: {
             query?: never;
@@ -350,7 +333,7 @@ export interface paths {
         /**
          * List candidate changes for review, urgent first
          * @description Pending candidates sort urgent first (under 14 days' notice), then by date. Requires
-         *     the Keycloak role `reviewer`.
+         *     the `reviewer` role.
          */
         get: operations["listCandidates"];
         put?: never;
@@ -1355,31 +1338,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReceiptKeySet"];
-                };
-            };
-        };
-    };
-    getMcpProtectedResourceMetadata: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description MCP resource identifier, authorization server, and supported bearer method. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** Format: uri */
-                        resource: string;
-                        authorization_servers: string[];
-                        bearer_methods_supported: "header"[];
-                    };
                 };
             };
         };

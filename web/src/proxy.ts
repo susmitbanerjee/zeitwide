@@ -27,8 +27,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     hasSessionCookie(request.cookies.getAll().map((c) => c.name)) &&
     (await hasLiveSession(request))
   ) {
-    // Already signed in: skip the sign-in screen. A session that couldn't be refreshed doesn't
-    // count, or the app and this page would send the visitor back and forth.
+    // Already signed in: skip the sign-in screen.
     const landing = safeCallback(
       request.nextUrl.searchParams.get("callbackUrl"),
       defaultLanding(pathname),
@@ -70,7 +69,7 @@ export const config = {
   ],
 };
 
-/** Whether the session cookie decrypts, hasn't expired and holds tokens that are still good. */
+/** Whether the session cookie decrypts, hasn't expired and says who is signed in. */
 async function hasLiveSession(request: NextRequest): Promise<boolean> {
   const secret = process.env.AUTH_SECRET;
   if (secret === undefined) {
@@ -81,5 +80,5 @@ async function hasLiveSession(request: NextRequest): Promise<boolean> {
     secret,
     secureCookie: appOrigin.startsWith("https:"),
   });
-  return token !== null && token.error === undefined;
+  return token !== null && typeof token.subject === "string";
 }

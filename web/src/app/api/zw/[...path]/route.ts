@@ -1,8 +1,7 @@
 import { getToken } from "next-auth/jwt";
 import { NextResponse, type NextRequest } from "next/server";
 
-import { auth } from "@/auth";
-import { applySetCookies } from "@/auth/tokens";
+import { type SignedInUser, signApiToken } from "@/auth/api-token";
 import { env } from "@/lib/env";
 import {
   FORWARDED_REQUEST_HEADERS,
@@ -12,7 +11,7 @@ import {
   upstreamPath,
 } from "@/lib/upstream";
 
-// The API scales to zero too and takes about 20 seconds to start, so the first call after a quiet
+// The API scales to zero and takes about 20 seconds to start, so the first call after a quiet
 // spell is slow rather than failed.
 const UPSTREAM_TIMEOUT_MS = 45_000;
 
@@ -41,10 +40,14 @@ async function forward(request: NextRequest, { params }: RouteContext): Promise<
     return problem(413, "payload_too_large", "The request is too large");
   }
 
-  const { accessToken, setCookies } = await sessionToken(request);
   // Only signed-in users reach the API through here; it relays nothing anonymously.
-  if (accessToken === undefined) {
+  const user = await sessionUser(request);
+  if (user === undefined) {
     return problem(401, "unauthorized", "Sign in to use the API from the app");
+  }
+  const tokenSecret = process.env.ZEITWIDE_API_TOKEN_SECRET;
+  if (tokenSecret === undefined || tokenSecret === "") {
+    return problem(500, "internal_error", "The app isn't set up to call the API");
   }
   const headers = new Headers();
   for (const name of FORWARDED_REQUEST_HEADERS) {
@@ -53,7 +56,7 @@ async function forward(request: NextRequest, { params }: RouteContext): Promise<
       headers.set(name, value);
     }
   }
-  headers.set("authorization", `Bearer ${accessToken}`);
+  headers.set("authorization", `Bearer ${await signApiToken(user, tokenSecret)}`);
 
   let upstream: Response;
   try {
@@ -78,55 +81,33 @@ async function forward(request: NextRequest, { params }: RouteContext): Promise<
     }
   });
   response.headers.set("cache-control", "no-store");
-  for (const cookie of setCookies) {
-    response.headers.append("set-cookie", cookie);
-  }
   return response;
 }
 
 /**
- * The signed-in user's access token, refreshed by Auth.js when it is about to expire. A refresh
- * rewrites the session cookie, so the new cookie goes back on this response and is read here.
+ * Who the session cookie says is signed in, or undefined. It only reads the cookie: unlike an
+ * Auth.js call that renews the session, it never sends one back, so a call still in flight when
+ * someone signs out can't bring their cookie back.
  */
-async function sessionToken(
-  request: NextRequest,
-): Promise<{ accessToken: string | undefined; setCookies: string[] }> {
-  const pending = { headers: new Headers() };
-  // The { req, res } form only reads the session: it runs the jwt callback (refreshing tokens) and
-  // puts any new cookie on `pending`. A real Request would be handled as an Auth.js route instead.
-  await (
-    auth as unknown as (context: {
-      req: { headers: Headers };
-      res: typeof pending;
-    }) => Promise<unknown>
-  )({
-    req: { headers: request.headers },
-    res: pending,
-  });
-  const setCookies = pending.headers.getSetCookie();
+async function sessionUser(request: NextRequest): Promise<SignedInUser | undefined> {
   const secret = process.env.AUTH_SECRET;
   if (secret === undefined) {
-    return { accessToken: undefined, setCookies };
+    return undefined;
   }
-  const secureCookie = env.appUrl.startsWith("https://");
-  const original = await getToken({
-    req: { headers: { cookie: request.headers.get("cookie") ?? "" } },
-    secret,
-    secureCookie,
-  });
   const token = await getToken({
-    req: {
-      headers: { cookie: applySetCookies(request.headers.get("cookie") ?? "", setCookies) },
-    },
+    req: { headers: request.headers },
     secret,
-    secureCookie,
+    secureCookie: env.appUrl.startsWith("https://"),
   });
-  const accessToken = token === null || token.error !== undefined ? undefined : token.accessToken;
-  // Auth.js re-issues the session cookie on every read to slide its expiry. Send it back only when
-  // the tokens were really refreshed: a call still in flight when the visitor signs out would
-  // otherwise put the cookie that sign-out just deleted back in the browser.
-  const refreshed = original?.accessToken !== token?.accessToken;
-  return { accessToken, setCookies: refreshed ? setCookies : [] };
+  if (token === null || typeof token.subject !== "string") {
+    return undefined;
+  }
+  return {
+    subject: token.subject,
+    name: typeof token.name === "string" ? token.name : undefined,
+    email: typeof token.email === "string" ? token.email : undefined,
+    roles: token.roles ?? [],
+  };
 }
 
 async function readBody(request: NextRequest): Promise<ArrayBuffer | null> {

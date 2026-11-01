@@ -4,7 +4,7 @@
     "title": "Zeitwide API",
     "version": "1.0.0",
     "summary": "Is this a business day, and what is the next one? Every answer with its evidence.",
-    "description": "Business-day answers for payment rails (Fedwire, FedACH, FedNow, T2, CHAPS) and public\nholiday calendars. The rules are in `dataset/README.md`; this API, the hosted MCP server\nand the open Python library all answer through the same engine and pass the same\nconformance suite.\n\n**Determinism.** Answers come from the latest dataset release. Every response names it\n(`dataset_release`, and the `Zeitwide-Dataset-Release` header) with the revision of each\ncalendar it used, so the same request against the same release always gives the same\nanswer.\n\n**As of.** `as_of` answers with what Zeitwide had recorded at that instant (the\ndefault is now). A release holds everything recorded up to its own `as_of`, so a later\n`as_of` is answered as of the release; the response's `as_of` says which instant was\nused.\n\n**Never a guess.** A calendar covers 1 January of the first year to 31 December of the\nlast year its sources published. A date outside that is `out_of_range`, never an answer\nfrom the weekend rule. Calendars that close on no holiday (FedNow) have no limit.\n\n**Access.** Every route needs an API key (`Authorization: Bearer zw_live_…`, free from\nthe Zeitwide app) or a Zeitwide sign-in token. Only the public receipt keys and the MCP\nprotected-resource metadata are open.\n\n**Limits.** 10,000 calls a day per key. Requests without a valid identity are also\nlimited per address before they are refused.\n\n**Errors** are RFC 9457 problem details with a stable `code`.\n",
+    "description": "Business-day answers for payment rails (Fedwire, FedACH, FedNow, T2, CHAPS) and public\nholiday calendars. The rules are in `dataset/README.md`; this API, the hosted MCP server\nand the open Python library all answer through the same engine and pass the same\nconformance suite.\n\n**Determinism.** Answers come from the latest dataset release. Every response names it\n(`dataset_release`, and the `Zeitwide-Dataset-Release` header) with the revision of each\ncalendar it used, so the same request against the same release always gives the same\nanswer.\n\n**As of.** `as_of` answers with what Zeitwide had recorded at that instant (the\ndefault is now). A release holds everything recorded up to its own `as_of`, so a later\n`as_of` is answered as of the release; the response's `as_of` says which instant was\nused.\n\n**Never a guess.** A calendar covers 1 January of the first year to 31 December of the\nlast year its sources published. A date outside that is `out_of_range`, never an answer\nfrom the weekend rule. Calendars that close on no holiday (FedNow) have no limit.\n\n**Access.** Every route needs an API key (`Authorization: Bearer zw_live_…`, free from\nthe Zeitwide app). Only the public receipt keys are open.\n\n**Limits.** 10,000 calls a day per key. Requests without a valid identity are also\nlimited per address before they are refused.\n\n**Errors** are RFC 9457 problem details with a stable `code`.\n",
     "license": {
       "name": "API terms of service; dataset under CC BY-NC 4.0",
       "identifier": "CC-BY-NC-4.0"
@@ -45,7 +45,7 @@
     },
     {
       "name": "admin",
-      "description": "Reviewer-only routes for the admin screens (Keycloak role `reviewer`)."
+      "description": "Reviewer-only routes for the admin screens (the `reviewer` role)."
     }
   ],
   "paths": {
@@ -698,55 +698,6 @@
         }
       }
     },
-    "/.well-known/oauth-protected-resource/mcp": {
-      "get": {
-        "operationId": "getMcpProtectedResourceMetadata",
-        "security": [],
-        "tags": [
-          "mcp"
-        ],
-        "summary": "OAuth protected resource metadata for the MCP endpoint",
-        "responses": {
-          "200": {
-            "description": "MCP resource identifier, authorization server, and supported bearer method.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "resource",
-                    "authorization_servers",
-                    "bearer_methods_supported"
-                  ],
-                  "properties": {
-                    "resource": {
-                      "type": "string",
-                      "format": "uri"
-                    },
-                    "authorization_servers": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "format": "uri"
-                      }
-                    },
-                    "bearer_methods_supported": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "enum": [
-                          "header"
-                        ]
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/account/api-keys": {
       "get": {
         "operationId": "listApiKeys",
@@ -1317,7 +1268,7 @@
           "admin"
         ],
         "summary": "List candidate changes for review, urgent first",
-        "description": "Pending candidates sort urgent first (under 14 days' notice), then by date. Requires\nthe Keycloak role `reviewer`.\n",
+        "description": "Pending candidates sort urgent first (under 14 days' notice), then by date. Requires\nthe `reviewer` role.\n",
         "security": [
           {
             "bearerAuth": []
@@ -1595,7 +1546,7 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT",
-        "description": "Keycloak access token with issuer zeitwide and audience zeitwide-api."
+        "description": "A short-lived token the Zeitwide web app signs for a signed-in person. Customers use an API key instead."
       },
       "apiKey": {
         "type": "http",

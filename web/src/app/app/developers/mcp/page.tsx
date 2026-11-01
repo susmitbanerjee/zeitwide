@@ -19,7 +19,18 @@ const TOOLS = [
 
 /** C2: connecting an agent to the hosted MCP server, or running the open one locally. */
 export default function McpPage() {
-  const hosted = JSON.stringify({ mcpServers: { zeitwide: { url: env.mcpUrl } } }, null, 2);
+  const hosted = JSON.stringify(
+    {
+      mcpServers: {
+        zeitwide: {
+          url: env.mcpUrl,
+          headers: { Authorization: "Bearer YOUR_API_KEY" },
+        },
+      },
+    },
+    null,
+    2,
+  );
   const local = JSON.stringify(
     { mcpServers: { zeitwide: { command: "uvx", args: ["zeitwide-mcp", "--offline"] } } },
     null,
@@ -35,8 +46,9 @@ export default function McpPage() {
         <Card className="flex flex-col gap-3 p-5">
           <SectionTitle>Hosted MCP server</SectionTitle>
           <p className="text-sm text-ink-muted">
-            Streamable HTTP. Clients sign in with Zeitwide (OAuth 2.1) or send an API key as a
-            bearer token. <Link href="/app/developers">Create a key</Link>.
+            Streamable HTTP. Send an API key as a bearer token: put your key where it says{" "}
+            <span className="font-mono">YOUR_API_KEY</span>.{" "}
+            <Link href="/app/developers">Create a key</Link>.
           </p>
           <Code>{hosted}</Code>
           <div>

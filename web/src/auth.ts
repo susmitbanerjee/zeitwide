@@ -1,90 +1,119 @@
-import NextAuth, { customFetch } from "next-auth";
-import Keycloak from "next-auth/providers/keycloak";
+import NextAuth, { type NextAuthConfig } from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+import GitHub from "next-auth/providers/github";
+import Google from "next-auth/providers/google";
+import type { OAuthConfig } from "next-auth/providers";
 
 import {
-  endSessionUrl,
-  needsRefresh,
-  refreshTokens,
-  REVIEWER_ROLE,
-  rolesFromAccessToken,
-} from "./auth/tokens";
-
-const issuer = process.env.AUTH_KEYCLOAK_ISSUER ?? "http://localhost:8180/realms/zeitwide";
-/** Longer than a cold Keycloak needs to start (about 30 s), shorter than the 5-minute request limit. */
-const KEYCLOAK_COLD_START_MS = 60_000;
-const clientId = process.env.AUTH_KEYCLOAK_ID ?? "zeitwide-web";
+  configuredProviders,
+  TEST_USERS,
+  testLoginEnabled,
+  testUserFrom,
+} from "./auth/identity-providers";
+import { REVIEWER_ROLE, reviewerEmails, rolesFor } from "./auth/roles";
 
 /**
- * Keycloak sign-in with Auth.js: authorization code flow with PKCE, state and nonce, for the
- * public zeitwide-web client. The session is a JWT encrypted with AUTH_SECRET in an httpOnly,
- * SameSite=Lax cookie (Secure over HTTPS). Access and refresh tokens stay in that cookie and
- * reach the API only through /api/zw; the browser's session object carries neither.
+ * Microsoft sign-in for work, school and personal accounts at once. It is a plain OAuth provider
+ * rather than Auth.js's OIDC one: that checks the ID token's issuer, which differs per tenant and
+ * so never matches the shared "common" endpoint. The profile comes from Microsoft's userinfo
+ * endpoint, over the access token, instead.
+ */
+function microsoft(): OAuthConfig<{
+  sub: string;
+  name?: string;
+  email?: string;
+  picture?: string;
+}> {
+  return {
+    id: "microsoft",
+    name: "Microsoft",
+    type: "oauth",
+    authorization: {
+      url: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
+      params: { scope: "openid profile email" },
+    },
+    token: "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+    userinfo: "https://graph.microsoft.com/oidc/userinfo",
+    clientId: process.env.AUTH_MICROSOFT_ID ?? "",
+    clientSecret: process.env.AUTH_MICROSOFT_SECRET ?? "",
+    checks: ["pkce", "state"],
+    profile: (profile) => ({
+      id: profile.sub,
+      name: profile.name ?? profile.email ?? null,
+      email: profile.email ?? null,
+      image: profile.picture ?? null,
+    }),
+  };
+}
+
+function providers(): NextAuthConfig["providers"] {
+  const list: NextAuthConfig["providers"] = [];
+  for (const { id } of configuredProviders()) {
+    if (id === "google") {
+      list.push(Google({ checks: ["pkce", "state"] }));
+    } else if (id === "github") {
+      list.push(GitHub({ checks: ["pkce", "state"] }));
+    } else {
+      list.push(microsoft());
+    }
+  }
+  if (testLoginEnabled()) {
+    list.push(
+      Credentials({
+        id: "test-login",
+        name: "Test sign-in",
+        credentials: { user: {} },
+        authorize: (credentials) => {
+          const user = testUserFrom(credentials.user);
+          return user === null ? null : TEST_USERS[user];
+        },
+      }),
+    );
+  }
+  return list;
+}
+
+const reviewers = reviewerEmails(process.env.ZEITWIDE_REVIEWER_EMAILS);
+
+/**
+ * Sign-in with Auth.js, straight to Google, Microsoft or GitHub (authorization code flow with
+ * PKCE and state). The session is a JWT encrypted with AUTH_SECRET in an httpOnly, SameSite=Lax
+ * cookie (Secure over HTTPS) holding who the person is and their roles. Calls to the API go
+ * through /api/zw, which signs a short-lived token from it; the browser never holds one.
  */
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [
-    Keycloak({
-      issuer,
-      clientId,
-      client: { token_endpoint_auth_method: "none" },
-      // Keycloak scales to zero on Cloud Run and takes about 30 seconds to start, so its first
-      // answer after a quiet spell can't be cut off after Auth.js's default of a few seconds.
-      [customFetch]: (input: RequestInfo | URL, init?: RequestInit) =>
-        fetch(input, { ...init, signal: AbortSignal.timeout(KEYCLOAK_COLD_START_MS) }),
-      checks: ["pkce", "state", "nonce"],
-    }),
-  ],
+  providers: providers(),
   session: { strategy: "jwt", maxAge: 8 * 60 * 60 },
   pages: { signIn: "/signin", error: "/signin" },
   trustHost: true,
   callbacks: {
-    async jwt({ token, account }) {
-      if (account?.access_token !== undefined) {
-        return {
-          ...token,
-          accessToken: account.access_token,
-          refreshToken: account.refresh_token,
-          // Only for Keycloak's end-session call on sign-out (id_token_hint).
-          idToken: account.id_token,
-          expiresAt: account.expires_at,
-          roles: rolesFromAccessToken(account.access_token),
-          error: undefined,
-        };
+    jwt({ token, account, user, profile }) {
+      // Only at sign-in does Auth.js hand over the provider's account; keep who they are after.
+      if (account && user) {
+        token.subject = `${account.provider}:${account.providerAccountId}`;
+        token.roles =
+          account.provider === "test-login"
+            ? user.id === TEST_USERS.reviewer.id
+              ? [REVIEWER_ROLE]
+              : []
+            : rolesFor(
+                account.provider,
+                user.email,
+                // Google says so in the profile; GitHub only ever offers a verified primary address.
+                account.provider === "github" ||
+                  (profile as { email_verified?: boolean } | undefined)?.email_verified === true,
+                reviewers,
+              );
       }
-      if (!needsRefresh(token.expiresAt, Date.now())) {
-        return token;
-      }
-      if (token.refreshToken === undefined) {
-        return { ...token, error: "RefreshTokenError" as const };
-      }
-      try {
-        const refreshed = await refreshTokens(issuer, clientId, token.refreshToken, Date.now());
-        return {
-          ...token,
-          ...refreshed,
-          roles: rolesFromAccessToken(refreshed.accessToken),
-          error: undefined,
-        };
-      } catch {
-        return { ...token, error: "RefreshTokenError" as const };
-      }
+      return token;
     },
     session({ session, token }) {
-      // Only what the UI needs; tokens never go to the browser.
+      // Only what the screens need.
       const roles = token.roles ?? [];
       return {
         ...session,
-        user: {
-          ...session.user,
-          roles,
-          reviewer: roles.includes(REVIEWER_ROLE),
-        },
-        ...(token.error === undefined ? {} : { error: token.error }),
+        user: { ...session.user, roles, reviewer: roles.includes(REVIEWER_ROLE) },
       };
     },
   },
 });
-
-/** Where Sign out sends the browser: Keycloak's end-session page, which then returns home. */
-export function keycloakSignOutUrl(idToken: string | undefined, appOrigin: string): string {
-  return endSessionUrl(issuer, clientId, idToken, `${appOrigin}/`);
-}

@@ -4,20 +4,24 @@ import { after } from "next/server";
 
 import { env } from "@/lib/env";
 
-const issuer = process.env.AUTH_KEYCLOAK_ISSUER ?? "http://localhost:8180/realms/zeitwide";
+const THROTTLE_MS = 3 * 60_000;
+let lastWarmUp = 0;
 
 /**
- * Wakes Keycloak and the API while the visitor is still choosing how to sign in. Both scale to
- * zero on Cloud Run and take 20 to 30 seconds to start, so by the time a button is clicked they
- * are usually ready. Runs after the page has been sent; an error is nobody's business.
+ * Wakes the API ahead of the first call. It scales to zero on Cloud Run and takes 20 to 30
+ * seconds to start, so the earlier someone is seen on the site, the more likely it is ready by
+ * the time they sign in and the app asks it something. Runs after the response has been sent, at
+ * most once every few minutes per instance, and an error is nobody's business.
  */
-export function warmUpBackends(): void {
+export function warmUpBackends(now: number = Date.now()): void {
+  if (now - lastWarmUp < THROTTLE_MS) {
+    return;
+  }
+  lastWarmUp = now;
   after(async () => {
-    const ping = (url: string) =>
-      fetch(url, { cache: "no-store", signal: AbortSignal.timeout(60_000) }).catch(() => undefined);
-    await Promise.all([
-      ping(`${issuer}/.well-known/openid-configuration`),
-      ping(`${env.apiUrl}/actuator/health`),
-    ]);
+    await fetch(`${env.apiUrl}/actuator/health`, {
+      cache: "no-store",
+      signal: AbortSignal.timeout(120_000),
+    }).catch(() => undefined);
   });
 }

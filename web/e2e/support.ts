@@ -1,12 +1,11 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page } from "@playwright/test";
 
-export const KEYCLOAK = "http://localhost:8180";
 export const MOCK_API = "http://127.0.0.1:8090";
 
 export const USERS = {
-  member: { username: "e2e-member", firstName: "Grace" },
-  reviewer: { username: "e2e-reviewer", firstName: "Priya" },
+  member: { label: "member", firstName: "Grace" },
+  reviewer: { label: "reviewer", firstName: "Priya" },
 } as const;
 export type Role = keyof typeof USERS;
 
@@ -16,15 +15,13 @@ export const STATE = {
   reviewer: "e2e/.auth/reviewer.json",
 } as const;
 
-/** The real authorization-code flow: the app, then Keycloak's login form, then back. */
-export async function signInThroughKeycloak(page: Page, username: string, password: string) {
-  await page.goto("/app/explorer");
-  await expect(page).toHaveURL(/\/signin/);
-  await page.getByRole("button", { name: "GitHub or company single sign-on" }).click();
-  await page.waitForURL(/localhost:8180\/realms\/zeitwide/);
-  await page.locator("#username").fill(username);
-  await page.locator("#password").fill(password);
-  await page.locator("#kc-login").click();
+/**
+ * Signs in with the app's test-only sign-in (ZEITWIDE_TEST_LOGIN, localhost only): the real
+ * session cookie and the real signed calls to the API, without a Google account.
+ */
+export async function signInAs(page: Page, role: Role) {
+  await page.goto("/signin?callbackUrl=%2Fapp%2Fexplorer");
+  await page.getByRole("button", { name: `Test sign-in: ${USERS[role].label}` }).click();
   await page.waitForURL(/\/app\/explorer/);
 }
 

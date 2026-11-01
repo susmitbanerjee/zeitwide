@@ -26,12 +26,38 @@ test("sign-up offers the same providers and links back to sign in", async ({ bro
   await page.goto("/signup?callbackUrl=%2Fapp%2Fchanges");
   await expect(page.getByRole("heading", { name: "Create your free account" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Continue with Google" })).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "GitHub or company single sign-on" }),
-  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Continue with GitHub" })).toBeVisible();
   await page.getByRole("link", { name: "Sign in" }).click();
   await expect(page).toHaveURL(/\/signin\?callbackUrl=%2Fapp%2Fchanges/);
 });
+
+for (const [provider, host, id] of [
+  ["Google", "accounts.google.com", "e2e-google-id"],
+  ["Microsoft", "login.microsoftonline.com", "e2e-microsoft-id"],
+  ["GitHub", "github.com", "e2e-github-id"],
+] as const) {
+  test(`Continue with ${provider} sends the visitor to ${provider} with the right callback`, async ({
+    browser,
+  }) => {
+    const page = await (
+      await browser.newContext({ storageState: { cookies: [], origins: [] } })
+    ).newPage();
+    // Stand in for the provider: all that matters is where the app sends the browser.
+    const sent = page.waitForRequest((request) => new URL(request.url()).hostname === host);
+    await page.route(`https://${host}/**`, (route) =>
+      route.fulfill({ status: 200, contentType: "text/html", body: "<h1>provider</h1>" }),
+    );
+    await page.goto("/signin");
+    await page.getByRole("button", { name: `Continue with ${provider}` }).click();
+    const url = new URL((await sent).url());
+    expect(url.searchParams.get("client_id")).toBe(id);
+    expect(url.searchParams.get("redirect_uri")).toBe(
+      `http://localhost:3000/api/auth/callback/${provider.toLowerCase()}`,
+    );
+    expect(url.searchParams.get("code_challenge_method")).toBe("S256");
+    expect(url.searchParams.get("state")).not.toBeNull();
+  });
+}
 
 test("a visitor who is already signed in skips the sign-in page", async ({ page }) => {
   await page.goto("/signin?callbackUrl=%2Fapp%2Fchanges");

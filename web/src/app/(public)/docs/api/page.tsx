@@ -82,7 +82,7 @@ export default function ApiReferencePage() {
                   )}
                   <p className="text-sm text-ink-muted">
                     {operation.authenticated
-                      ? "Needs a Keycloak token or an API key."
+                      ? "Needs an API key."
                       : "Open to anyone, no key needed."}
                   </p>
                   {operation.parameters.length > 0 && (

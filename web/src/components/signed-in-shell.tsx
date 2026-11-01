@@ -1,10 +1,7 @@
-import { getToken } from "next-auth/jwt";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { auth, keycloakSignOutUrl, signOut } from "@/auth";
-import { env } from "@/lib/env";
+import { auth, signOut } from "@/auth";
 
 import { AppHeader } from "./app-chrome";
 import { QueryProvider } from "./query-provider";
@@ -12,19 +9,12 @@ import { SkipLink } from "./site-chrome";
 
 async function signOutAction(): Promise<void> {
   "use server";
-  const token = await getToken({
-    req: { headers: await headers() },
-    secret: process.env.AUTH_SECRET ?? "",
-    secureCookie: env.appUrl.startsWith("https://"),
-  });
-  await signOut({ redirect: false });
-  // Ends the Keycloak session too, so the next sign-in asks who you are.
-  redirect(keycloakSignOutUrl(token?.idToken, env.appUrl));
+  await signOut({ redirectTo: "/" });
 }
 
 /**
- * The frame for the app and admin. It reads the session on the server: no session, or one whose
- * tokens could not be refreshed, goes back to sign-in. The API still checks every call itself.
+ * The frame for the app and admin. It reads the session on the server: no session goes back to
+ * sign-in. The API still checks every call itself.
  */
 export async function SignedInShell({
   children,
@@ -36,10 +26,8 @@ export async function SignedInShell({
   path: string;
 }) {
   const session = await auth();
-  if (session === null || session.error !== undefined) {
-    // An error means a session existed and could not be refreshed: say so rather than loop quietly.
-    const ended = session === null ? "" : "&error=SessionRequired";
-    redirect(`/signin?callbackUrl=${encodeURIComponent(path)}${ended}`);
+  if (session === null) {
+    redirect(`/signin?callbackUrl=${encodeURIComponent(path)}`);
   }
   const reviewer = session.user.reviewer;
   return (
@@ -55,7 +43,8 @@ export async function SignedInShell({
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-bold">Reviewers only</h1>
             <p className="text-ink-muted">
-              The admin screens need the Keycloak role <span className="font-mono">reviewer</span>.
+              The admin screens are for reviewers. Ask an owner to add your email to the reviewer
+              list.
             </p>
           </div>
         ) : (

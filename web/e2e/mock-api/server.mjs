@@ -129,7 +129,7 @@ function claims(req) {
   if (payload === undefined) return null;
   try {
     const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
-    return { sub: parsed.sub, roles: parsed.realm_access?.roles ?? [] };
+    return { sub: parsed.sub, roles: parsed.roles ?? [] };
   } catch {
     return null;
   }
