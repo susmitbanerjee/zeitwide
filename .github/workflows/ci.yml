@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Run it by hand from the Actions tab to deploy whatever is out of date.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -71,7 +73,7 @@ jobs:
   # Google with the run's OIDC token (workload identity federation): no key is stored anywhere.
   # Set the two repository variables from `tofu output` first (deploy/gcp/README.md, step 8).
   deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     needs: [hooks, api, python, web]
     runs-on: ubuntu-24.04
     permissions:
@@ -93,21 +95,37 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           fetch-depth: 0
-      - name: Work out what changed
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.DEPLOY_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3
+      - name: Work out what is out of date
         id: changed
-        env:
-          BEFORE: ${{ github.event.before }}
         run: |
-          # A new branch or a force push has no usable "before": deploy everything.
-          if ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
-            files="api/ pipeline/ web/"
-          else
-            files="$(git diff --name-only "$BEFORE" "$GITHUB_SHA")"
-          fi
+          # Compare each folder with the commit its running image was built from (the image tag
+          # is `git describe`), not with the previous push: a failed or skipped deploy is
+          # picked up by the next run, and a re-run deploys what a pushed commit left behind.
+          project=project-6eaae4e0-3164-4e31-bc4
+          region=us-central1
+          out_of_date() {
+            local folder="$1" image="$2" tag sha
+            tag="${image##*:}"
+            sha="${tag%-dirty}"
+            # Built from uncommitted changes, or from a commit this checkout doesn't have
+            # (or Cloud Run's sample image): unknown, so deploy.
+            [ "$tag" != "$sha" ] && return 0
+            git cat-file -e "$sha^{commit}" 2>/dev/null || return 0
+            ! git diff --quiet "$sha" "$GITHUB_SHA" -- "$folder"
+          }
+          service_image() {
+            gcloud run services describe "$1" --project "$project" --region "$region"               --format='value(spec.template.spec.containers[0].image)'
+          }
           components=""
-          grep -q '^api/' <<<"$files" && components="$components api"
-          grep -q '^pipeline/' <<<"$files" && components="$components pipeline"
-          grep -q '^web/' <<<"$files" && components="$components web"
+          out_of_date api/ "$(service_image zeitwide-api-dev)" && components="$components api"
+          out_of_date pipeline/ "$(gcloud run jobs describe zeitwide-pipeline-dev             --project "$project" --region "$region"             --format='value(spec.template.spec.template.spec.containers[0].image)')" &&
+            components="$components pipeline"
+          out_of_date web/ "$(service_image zeitwide-web-dev)" && components="$components web"
           echo "components=${components# }" >> "$GITHUB_OUTPUT"
           echo "Deploying: ${components:-nothing}"
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
@@ -115,13 +133,6 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
-      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
-        if: steps.changed.outputs.components != ''
-        with:
-          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ env.DEPLOY_SERVICE_ACCOUNT }}
-      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3
-        if: steps.changed.outputs.components != ''
       - name: Build, push and roll out
         if: steps.changed.outputs.components != ''
         env:
