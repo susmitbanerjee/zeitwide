@@ -12,7 +12,9 @@ import {
   upstreamPath,
 } from "@/lib/upstream";
 
-const UPSTREAM_TIMEOUT_MS = 10_000;
+// The API scales to zero too and takes about 20 seconds to start, so the first call after a quiet
+// spell is slow rather than failed.
+const UPSTREAM_TIMEOUT_MS = 45_000;
 
 interface RouteContext {
   params: Promise<{ path: string[] }>;

@@ -4,9 +4,10 @@ import { startSignIn } from "@/auth/actions";
 import { defaultLanding, safeCallback } from "@/auth/callback";
 import { DIRECT_IDENTITY_PROVIDERS, type DirectIdentityProvider } from "@/auth/identity-providers";
 import { signInProblem } from "@/auth/messages";
+import { warmUpBackends } from "@/auth/warm-up";
 
 import { Logo, SkipLink } from "./site-chrome";
-import { Button } from "./ui/button";
+import { ProviderButton } from "./provider-button";
 
 type Mode = "signin" | "signup";
 
@@ -40,6 +41,7 @@ const PROOF = [
 
 async function ProviderForm({ mode, searchParams }: { mode: Mode; searchParams: Props }) {
   const params = await searchParams;
+  warmUpBackends();
   const copy = COPY[mode];
   const callbackUrl = safeCallback(params.callbackUrl, copy.defaultPath);
   const problem = signInProblem(params.error);
@@ -57,30 +59,26 @@ async function ProviderForm({ mode, searchParams }: { mode: Mode; searchParams: 
           </p>
         )}
         {DIRECT_IDENTITY_PROVIDERS.map(({ alias, name }) => (
-          <Button
+          <ProviderButton
             key={alias}
-            type="submit"
-            name="provider"
             value={alias}
-            variant="outline"
             tip={`${mode === "signup" ? "Create your account" : "Sign in"} with your ${name} account`}
           >
             <ProviderIcon provider={alias} />
             Continue with {name}
-          </Button>
+          </ProviderButton>
         ))}
         <div className="flex items-center gap-3 text-xs text-ink-subtle" aria-hidden="true">
           <span className="h-px flex-1 bg-line" />
           or
           <span className="h-px flex-1 bg-line" />
         </div>
-        <Button
-          type="submit"
-          variant="outline"
+        <ProviderButton
+          value=""
           tip="Sign in with GitHub, or with your company's identity provider"
         >
           GitHub or company single sign-on
-        </Button>
+        </ProviderButton>
       </form>
       <p className="text-[15px] text-ink-muted">
         {copy.switchLead}{" "}

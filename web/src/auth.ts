@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth, { customFetch } from "next-auth";
 import Keycloak from "next-auth/providers/keycloak";
 
 import {
@@ -10,6 +10,8 @@ import {
 } from "./auth/tokens";
 
 const issuer = process.env.AUTH_KEYCLOAK_ISSUER ?? "http://localhost:8180/realms/zeitwide";
+/** Longer than a cold Keycloak needs to start (about 30 s), shorter than the 5-minute request limit. */
+const KEYCLOAK_COLD_START_MS = 60_000;
 const clientId = process.env.AUTH_KEYCLOAK_ID ?? "zeitwide-web";
 
 /**
@@ -24,6 +26,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       issuer,
       clientId,
       client: { token_endpoint_auth_method: "none" },
+      // Keycloak scales to zero on Cloud Run and takes about 30 seconds to start, so its first
+      // answer after a quiet spell can't be cut off after Auth.js's default of a few seconds.
+      [customFetch]: (input: RequestInfo | URL, init?: RequestInit) =>
+        fetch(input, { ...init, signal: AbortSignal.timeout(KEYCLOAK_COLD_START_MS) }),
       checks: ["pkce", "state", "nonce"],
     }),
   ],

@@ -56,7 +56,9 @@ export async function refreshTokens(
       client_id: clientId,
       refresh_token: refreshToken,
     }),
-    signal: AbortSignal.timeout(5_000),
+    // Keycloak may be starting from zero: a short limit here would end the session of everyone
+    // whose access token (5 minutes) ran out while it was idle.
+    signal: AbortSignal.timeout(45_000),
   });
   const body: unknown = await response.json().catch(() => ({}));
   const tokens = body as { access_token?: unknown; refresh_token?: unknown; expires_in?: unknown };
