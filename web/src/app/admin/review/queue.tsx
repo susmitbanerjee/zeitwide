@@ -76,7 +76,7 @@ export function ReviewQueue() {
                   </Td>
                   <Td>
                     {candidate.urgent ? (
-                      <span className="rounded bg-closed-soft px-2 py-0.5 font-semibold text-closed">
+                      <span className="rounded bg-closed-soft px-2 py-0.5 font-semibold text-closed-ink">
                         Urgent · {candidate.notice_days} days
                       </span>
                     ) : (

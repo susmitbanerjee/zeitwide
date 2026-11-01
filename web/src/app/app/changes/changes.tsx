@@ -52,14 +52,14 @@ export function Changes() {
         title="Changes"
         lead="Everything that changed in the calendars we publish, newest first, and the rules that decide which ones alert you."
       />
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
         <section aria-labelledby="feed" className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <SectionTitle id="feed">Published changes</SectionTitle>
             <label className="inline-flex min-h-11 items-center gap-2 text-sm">
               <input
                 type="checkbox"
-                className="size-4 accent-[#1f4fd8]"
+                className="size-4 accent-[#2a3fcf]"
                 checked={onlyMine}
                 onChange={(event) => setOnlyMine(event.target.checked)}
               />
@@ -79,7 +79,7 @@ export function Changes() {
                     <span>{TYPES.find((t) => t.value === change.type)?.label ?? change.type}</span>
                     <span>· Published {formatInstant(change.published_at)}</span>
                     {change.notice_days < 14 && (
-                      <span className="rounded bg-closed-soft px-1.5 text-closed">
+                      <span className="rounded bg-closed-soft px-1.5 text-closed-ink">
                         Short notice · {change.notice_days} days
                       </span>
                     )}
@@ -260,7 +260,7 @@ function AlertRules({
               <label key={type.value} className="inline-flex min-h-11 items-center gap-2 text-sm">
                 <input
                   type="checkbox"
-                  className="size-4 accent-[#1f4fd8]"
+                  className="size-4 accent-[#2a3fcf]"
                   checked={events.includes(type.value)}
                   onChange={(e) =>
                     setEvents(

@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
   output: "standalone",
   cacheComponents: true,
   partialPrefetching: true,
+  experimental: {
+    // Prerendering calls the API once per page, and the API's Postgres pool has 4 connections.
+    // Seven workers exhausted that pool, so the build runs two.
+    cpus: 2,
+  },
   poweredByHeader: false,
   cacheLife: {
     // Answer data: a calendar changes only when a release is cut, and the cache key holds its

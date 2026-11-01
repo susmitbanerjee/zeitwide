@@ -15,7 +15,7 @@ export function DayStatus({ kind, label }: { kind: DayKind; label?: string }) {
     <span
       className={cn(
         "inline-flex items-center gap-2 rounded px-2 py-0.5 text-[13px] leading-5 font-semibold",
-        closed ? "bg-closed-soft text-closed" : "border border-line-strong bg-surface text-ink",
+        closed ? "bg-closed-soft text-closed-ink" : "border border-line-strong bg-surface text-ink",
       )}
     >
       <DaySwatch kind={kind} className="size-2.5" />

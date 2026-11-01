@@ -99,7 +99,7 @@ export default async function AnswerPage({ params }: PageProps<"/calendars/[id]/
           <section aria-labelledby="answer" className="flex flex-col gap-3 p-6">
             <p
               id="answer"
-              className={`text-6xl leading-none font-bold tracking-[-0.04em] ${day.is_open ? "text-ink" : "text-closed"}`}
+              className={`text-6xl leading-none font-bold tracking-[-0.04em] ${day.is_open ? "text-ink" : "text-closed-ink"}`}
             >
               {day.is_open ? "Yes." : "No."}
             </p>

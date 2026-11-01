@@ -10,14 +10,18 @@ import { CalendarPicker } from "@/components/calendar-picker";
 import { DayLegend, DayStatus } from "@/components/day-status";
 import { Card, ErrorText, Input, Label, Status } from "@/components/ui/primitives";
 import { browserApi } from "@/lib/api-browser";
-import { dayKind, findDay } from "@/lib/answers";
+import { dayKind, findDay, groupCalendars } from "@/lib/answers";
 import { cn } from "@/lib/cn";
 import { formatDate } from "@/lib/format";
 import { errorMessage, useCalendars, useDays } from "@/lib/queries";
 import { answerPath } from "@/lib/seo";
 
-/** How many listed days the default view shows, starting from the API's "today". */
-const DEFAULT_SPAN = 21;
+/** How many listed days a preset shows, starting from the API's "today". */
+const SPANS = [
+  { days: 14, label: "2 weeks" },
+  { days: 21, label: "3 weeks" },
+  { days: 90, label: "Quarter" },
+] as const;
 
 /**
  * A2: every chosen calendar as a row of days. The dates are the API's: the default range starts
@@ -32,8 +36,8 @@ export function Explorer() {
   const defaults = useDays(reference?.id ?? "");
   const defaultFrom = defaults.data?.today;
   const todayIndex = defaults.data?.days.findIndex((d) => d.date === defaultFrom) ?? -1;
-  const defaultTo =
-    todayIndex < 0 ? undefined : defaults.data?.days[todayIndex + DEFAULT_SPAN - 1]?.date;
+  const [span, setSpan] = useState<number>(21);
+  const defaultTo = todayIndex < 0 ? undefined : defaults.data?.days[todayIndex + span - 1]?.date;
   const [range, setRange] = useState<{ from: string; to: string } | null>(null);
   const from = range?.from ?? defaultFrom;
   const to = range?.to ?? defaultTo;
@@ -70,10 +74,37 @@ export function Explorer() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeading
-        title="Explorer"
-        lead="Every calendar you choose, one row each. Select a day to see why it is open or closed."
-      />
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+        <PageHeading
+          title="Timetable"
+          lead="Every calendar you follow, one row each. Select a day to see why."
+        />
+        <div
+          role="group"
+          aria-label="Range"
+          className="inline-flex gap-0.5 rounded-lg bg-[#e7e8e5] p-[3px]"
+        >
+          {SPANS.map((option) => (
+            <button
+              key={option.days}
+              type="button"
+              aria-pressed={range === null && span === option.days}
+              onClick={() => {
+                setRange(null);
+                setSpan(option.days);
+              }}
+              className={cn(
+                "min-h-11 rounded-md px-3.5 text-sm",
+                range === null && span === option.days
+                  ? "bg-surface font-semibold ring-1 ring-line-strong"
+                  : "hover:bg-surface/60",
+              )}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
       <Card className="flex flex-col gap-4 p-5">
         <CalendarPicker calendars={all} selected={selected} onChange={setChosen} />
         <form
@@ -120,13 +151,25 @@ export function Explorer() {
       {columns.length === 0 && !failed && <Status>Loading the calendars…</Status>}
 
       {columns.length > 0 && (
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-          <Card className="overflow-x-auto p-4">
-            <table className="border-separate border-spacing-1 text-sm">
+        <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_21rem]">
+          <Card className="overflow-x-auto px-5 pt-4 pb-5">
+            <table className="w-full min-w-[40rem] border-separate border-spacing-x-0.5 border-spacing-y-1 text-sm">
               <caption className="sr-only">
                 Days from {formatDate(columns[0] ?? "")} to {formatDate(columns.at(-1) ?? "")}
               </caption>
               <thead>
+                <tr aria-hidden="true">
+                  <td />
+                  {months(columns).map((month) => (
+                    <td
+                      key={month.label + month.first}
+                      colSpan={month.count}
+                      className="border-b border-ink pb-1 text-left text-xs font-semibold"
+                    >
+                      {month.count > 2 ? month.label : ""}
+                    </td>
+                  ))}
+                </tr>
                 <tr>
                   <th scope="col" className="sr-only">
                     Calendar
@@ -135,55 +178,69 @@ export function Explorer() {
                     <th
                       key={date}
                       scope="col"
-                      className="min-w-11 font-mono text-[11px] font-normal text-ink-muted"
+                      className={cn(
+                        "min-w-6 rounded-[3px] py-1 font-mono text-[11px] font-normal",
+                        selectedDate === date ? "bg-ink text-white" : "text-ink-muted",
+                      )}
                     >
-                      <span className="block">{formatDate(date, "weekday")}</span>
-                      <span className="block text-[13px] text-ink">{formatDate(date, "day")}</span>
+                      <span className="block">{formatDate(date, "weekday").slice(0, 2)}</span>
+                      <span className="block text-[13px]">{formatDate(date, "day")}</span>
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody>
-                {rows.map(({ calendar, range: days }) => (
-                  <tr key={calendar.id}>
-                    <th scope="row" className="pr-3 text-left whitespace-nowrap">
-                      <span className="block font-semibold">{calendar.name}</span>
-                      <span className="block font-mono text-[11px] font-normal text-ink-subtle">
-                        {calendar.id}
-                      </span>
+              {groupRows(rows).map((group) => (
+                <tbody key={group.label}>
+                  <tr>
+                    <th
+                      scope="colgroup"
+                      colSpan={columns.length + 1}
+                      className="pt-3 text-left text-[11.5px] font-semibold tracking-[0.08em] text-ink-subtle uppercase"
+                    >
+                      {group.label}
                     </th>
-                    {columns.map((date) => {
-                      const day = findDay(days ?? null, date);
-                      const kind = day === undefined ? undefined : dayKind(day, calendar.weekend);
-                      return (
-                        <td key={date}>
-                          <button
-                            type="button"
-                            onClick={() => setPicked(date)}
-                            aria-pressed={selectedDate === date}
-                            aria-label={`${calendar.name}, ${formatDate(date, "long")}: ${
-                              day === undefined
-                                ? "no data"
-                                : day.is_open
-                                  ? "open"
-                                  : (day.reason ?? "weekend")
-                            }`}
-                            className={cn(
-                              "block h-11 w-11 rounded",
-                              kind === "open" && "border border-line bg-surface",
-                              kind === "closed" && "bg-closed",
-                              kind === "weekend" && "hatch border border-line",
-                              kind === "weekend-holiday" && "hatch border-2 border-closed",
-                              kind === undefined && "bg-surface-sunken",
-                              selectedDate === date && "outline-2 outline-offset-1 outline-ink",
-                            )}
-                          />
-                        </td>
-                      );
-                    })}
                   </tr>
-                ))}
-              </tbody>
+                  {group.rows.map(({ calendar, range: days }) => (
+                    <tr key={calendar.id}>
+                      <th scope="row" className="min-w-40 pr-3 text-left whitespace-nowrap">
+                        <span className="block text-sm font-semibold">{calendar.name}</span>
+                        <span className="block font-mono text-[11.5px] font-normal text-ink-subtle">
+                          {calendar.id}
+                        </span>
+                      </th>
+                      {columns.map((date) => {
+                        const day = findDay(days ?? null, date);
+                        const kind = day === undefined ? undefined : dayKind(day, calendar.weekend);
+                        return (
+                          <td key={date} className="p-0">
+                            <button
+                              type="button"
+                              onClick={() => setPicked(date)}
+                              aria-pressed={selectedDate === date}
+                              aria-label={`${calendar.name}, ${formatDate(date, "long")}: ${
+                                day === undefined
+                                  ? "no data"
+                                  : day.is_open
+                                    ? "open"
+                                    : (day.reason ?? "weekend")
+                              }`}
+                              className={cn(
+                                "block h-10 w-full min-w-6 rounded-[3px]",
+                                kind === "open" && "border border-line bg-surface",
+                                kind === "closed" && "bg-closed",
+                                kind === "weekend" && "hatch border border-line",
+                                kind === "weekend-holiday" && "hatch border-2 border-closed",
+                                kind === undefined && "bg-surface-sunken",
+                                selectedDate === date && "outline-2 outline-offset-1 outline-ink",
+                              )}
+                            />
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              ))}
             </table>
             <div className="mt-4">
               <DayLegend />
@@ -254,4 +311,29 @@ function SelectedDay({
       </ul>
     </Card>
   );
+}
+
+/** Consecutive dates that share a month, in the order given: the labels above the columns. */
+export function months(dates: string[]): { label: string; first: string; count: number }[] {
+  const runs: { label: string; first: string; count: number }[] = [];
+  for (const date of dates) {
+    const label = formatDate(date, "month");
+    const last = runs.at(-1);
+    if (last?.label === label) {
+      last.count += 1;
+    } else {
+      runs.push({ label, first: date, count: 1 });
+    }
+  }
+  return runs;
+}
+
+type Row = { calendar: Calendar; range: DayRange | undefined };
+
+/** Payment rails, then public holidays, then exchanges, each group in the order chosen. */
+function groupRows(rows: Row[]): { label: string; rows: Row[] }[] {
+  return groupCalendars(rows.map((row) => row.calendar)).map((group) => ({
+    label: group.label,
+    rows: rows.filter((row) => group.calendars.some((c) => c.id === row.calendar.id)),
+  }));
 }

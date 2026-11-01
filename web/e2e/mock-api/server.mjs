@@ -429,6 +429,9 @@ function readJson(req) {
 
 createServer((req, res) => {
   const url = new URL(req.url ?? "/", "http://localhost");
+  if (process.env.MOCK_API_LOG !== undefined) {
+    console.warn(`${req.method} ${url.pathname}${url.search}`);
+  }
   route(req, res, url).catch((error) => {
     console.error(error);
     problem(res, 500, "internal_error", "Mock failure");

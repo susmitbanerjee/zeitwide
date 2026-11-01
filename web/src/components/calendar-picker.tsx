@@ -29,7 +29,7 @@ export function CalendarPicker({
             >
               <input
                 type="checkbox"
-                className="size-4 accent-[#1f4fd8]"
+                className="size-4 accent-[#2a3fcf]"
                 checked={checked}
                 disabled={!checked && selected.length >= max}
                 onChange={(event) =>

@@ -37,7 +37,7 @@ export function DayStrip({
                 className={cn(
                   "flex h-14 flex-col items-center justify-center rounded text-ink no-underline",
                   kind === "open" && "border border-line bg-surface hover:border-ink",
-                  kind === "closed" && "bg-closed text-white hover:text-white",
+                  kind === "closed" && "bg-closed text-ink hover:text-ink",
                   kind === "weekend" && "hatch border border-line text-ink-muted",
                   kind === "weekend-holiday" && "hatch border-2 border-closed",
                   day.date === selected && "outline-2 outline-offset-2 outline-ink",

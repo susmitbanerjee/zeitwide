@@ -1,9 +1,9 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useId, useState } from "react";
 
-import { unwrap, type DayAnswer } from "@/api/client";
+import { unwrap, type DayAnswer, type Receipt } from "@/api/client";
 import { PageHeading } from "@/components/app-chrome";
 import { DayStatus } from "@/components/day-status";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
   SectionTitle,
   Select,
   Status,
+  Textarea,
 } from "@/components/ui/primitives";
 import { browserApi } from "@/lib/api-browser";
 import { formatDate, formatInstant } from "@/lib/format";
@@ -38,9 +39,11 @@ export function TimeTravel({ initial }: { initial: Partial<Question> }) {
   return (
     <div className="flex flex-col gap-6">
       <PageHeading
-        title="Time travel"
-        lead="See any date as Zeitwide recorded it at a past moment, and what changed since."
+        title="Audit"
+        lead="Prove what Zeitwide said, when it said it, and whether it still holds."
       />
+      <ReceiptChecker />
+      <SectionTitle>Replay an answer as of any moment</SectionTitle>
       <Card className="p-5">
         <form
           className="grid gap-4 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-end"
@@ -135,7 +138,7 @@ function Replay({ question }: { question: Question }) {
       <SectionTitle id="replay">
         {formatDate(question.date, "long")} on {question.calendar}
       </SectionTitle>
-      <p className={changed ? "font-semibold text-closed" : "text-ink-muted"}>
+      <p className={changed ? "font-semibold text-closed-ink" : "text-ink-muted"}>
         {changed
           ? "The answer has changed since then."
           : "The answer is the same now as it was then."}
@@ -179,5 +182,100 @@ function AnswerCard({ title, answer }: { title: string; answer: DayAnswer }) {
         release {answer.dataset_release} · receipt {answer.receipt.id}
       </p>
     </Card>
+  );
+}
+
+/** What a pasted receipt is: JSON with an id, a payload and a signature. The API checks the rest. */
+export function parseReceipt(text: string): Receipt | null {
+  try {
+    const value: unknown = JSON.parse(text);
+    return typeof value === "object" && value !== null && !Array.isArray(value)
+      ? (value as Receipt)
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Pastes a full receipt and asks the API whether its signature holds. */
+function ReceiptChecker() {
+  const id = useId();
+  const [text, setText] = useState("");
+  const [unreadable, setUnreadable] = useState(false);
+  const verify = useMutation({
+    mutationFn: async (receipt: Receipt) =>
+      unwrap(await browserApi.POST("/v1/receipts/verify", { body: receipt })),
+  });
+  const receipt = verify.variables;
+  return (
+    <section aria-labelledby={`${id}-title`} className="grid items-start gap-5 lg:grid-cols-2">
+      <Card className="p-5">
+        <form
+          aria-labelledby={`${id}-title`}
+          className="flex flex-col gap-4"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const parsed = parseReceipt(text);
+            setUnreadable(parsed === null);
+            if (parsed !== null) {
+              verify.mutate(parsed);
+            }
+          }}
+        >
+          <SectionTitle id={`${id}-title`}>Check a receipt</SectionTitle>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor={`${id}-receipt`}>The full receipt, as JSON</Label>
+            <Textarea
+              id={`${id}-receipt`}
+              rows={6}
+              className="font-mono text-[13px]"
+              value={text}
+              onChange={(event) => setText(event.target.value)}
+              placeholder='{"id": "rcpt_…", "payload": { … }, "signature": "…"}'
+            />
+          </div>
+          <div>
+            <Button type="submit" disabled={text.trim() === "" || verify.isPending}>
+              Check
+            </Button>
+          </div>
+          <p className="text-sm text-ink-muted">
+            Signatures can also be checked offline with the open library and our published keys. You
+            don&apos;t have to trust this page.
+          </p>
+        </form>
+      </Card>
+      <div aria-live="polite" className="flex flex-col gap-3">
+        {unreadable && (
+          <ErrorText>That isn&apos;t a JSON receipt. Paste the whole object.</ErrorText>
+        )}
+        {verify.isError && <ErrorText>{errorMessage(verify.error)}</ErrorText>}
+        {verify.isSuccess && receipt !== undefined && (
+          <Card className="flex flex-col gap-3 p-5">
+            <p
+              className={
+                verify.data.valid
+                  ? "text-xl font-semibold"
+                  : "text-xl font-semibold text-closed-ink"
+              }
+            >
+              {verify.data.valid ? "Signature valid" : "Signature does not match"}
+            </p>
+            <dl className="grid grid-cols-[max-content_minmax(0,1fr)] gap-x-4 gap-y-1 text-sm">
+              <dt className="text-ink-muted">Receipt</dt>
+              <dd className="font-mono break-all">{receipt.id}</dd>
+              <dt className="text-ink-muted">Issued</dt>
+              <dd>{formatInstant(receipt.payload?.issued_at)}</dd>
+              <dt className="text-ink-muted">Data used</dt>
+              <dd className="font-mono">release {receipt.payload?.dataset_release}</dd>
+              <dt className="text-ink-muted">Signed by</dt>
+              <dd>
+                Ed25519 · key <span className="font-mono">{receipt.key_id}</span>
+              </dd>
+            </dl>
+          </Card>
+        )}
+      </div>
+    </section>
   );
 }

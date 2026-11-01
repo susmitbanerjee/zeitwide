@@ -10,13 +10,13 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-ink text-white hover:bg-[#1d2a40] hover:text-white",
+        primary: "bg-ink text-white hover:bg-[#2a2e35] hover:text-white",
         accent: "bg-accent text-white hover:bg-accent-hover hover:text-white",
         outline:
           "border border-line-strong bg-surface text-ink hover:bg-surface-sunken hover:text-ink",
         ghost: "text-accent hover:bg-accent-soft hover:text-accent-hover",
         danger:
-          "border border-closed bg-surface text-closed hover:bg-closed-soft hover:text-closed",
+          "border border-closed bg-surface text-closed-ink hover:bg-closed-soft hover:text-closed-ink",
       },
       size: { default: "", sm: "px-3 text-sm", icon: "w-11 px-0" },
     },

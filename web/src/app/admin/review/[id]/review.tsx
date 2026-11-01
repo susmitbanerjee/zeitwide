@@ -59,7 +59,7 @@ export function Review({ candidateId }: { candidateId: number }) {
         } · ${candidate.status}`}
       />
       {candidate.urgent && (
-        <p className="rounded-md bg-closed-soft px-4 py-3 font-semibold text-closed">
+        <p className="rounded-md bg-closed-soft px-4 py-3 font-semibold text-closed-ink">
           Urgent: less than 14 days&apos; notice.
         </p>
       )}
@@ -174,7 +174,7 @@ function StateCard({
         <p className="mt-1">No entry (the weekend rule decides)</p>
       ) : (
         <p className="mt-1">
-          <span className={state.is_open ? "font-semibold" : "font-semibold text-closed"}>
+          <span className={state.is_open ? "font-semibold" : "font-semibold text-closed-ink"}>
             {state.is_open ? "Open" : "Closed"}
           </span>
           : {state.reason}

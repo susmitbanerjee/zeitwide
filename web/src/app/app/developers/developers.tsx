@@ -276,7 +276,7 @@ function Webhooks() {
               >
                 <input
                   type="checkbox"
-                  className="size-4 accent-[#1f4fd8]"
+                  className="size-4 accent-[#2a3fcf]"
                   checked={events.includes(event.value)}
                   onChange={(e) =>
                     setEvents(

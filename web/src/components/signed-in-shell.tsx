@@ -37,7 +37,9 @@ export async function SignedInShell({
 }) {
   const session = await auth();
   if (session === null || session.error !== undefined) {
-    redirect(`/signin?callbackUrl=${encodeURIComponent(path)}`);
+    // An error means a session existed and could not be refreshed: say so rather than loop quietly.
+    const ended = session === null ? "" : "&error=SessionRequired";
+    redirect(`/signin?callbackUrl=${encodeURIComponent(path)}${ended}`);
   }
   const reviewer = session.user.reviewer;
   return (
@@ -48,7 +50,7 @@ export async function SignedInShell({
         reviewer={reviewer}
         signOut={signOutAction}
       />
-      <main id="main" className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">
+      <main id="main" className="mx-auto w-full max-w-[1440px] flex-1 px-4 py-7 sm:px-8">
         {reviewerOnly && !reviewer ? (
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-bold">Reviewers only</h1>

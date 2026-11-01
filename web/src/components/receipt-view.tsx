@@ -38,7 +38,7 @@ export function ReceiptView({ receipt }: { receipt: Receipt }) {
           Verify receipt
         </Button>
         {verify.isSuccess && (
-          <Status className={verify.data.valid ? "text-success" : "text-closed"}>
+          <Status className={verify.data.valid ? "text-success" : "text-closed-ink"}>
             {verify.data.valid ? "Signature valid" : "Signature does not match"}
           </Status>
         )}

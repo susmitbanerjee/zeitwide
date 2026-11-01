@@ -12,8 +12,8 @@ import { errorMessage } from "@/lib/queries";
 
 const HEALTH: Record<SourceHealth["health"], { label: string; className: string }> = {
   healthy: { label: "Healthy", className: "bg-success-soft text-success" },
-  failing: { label: "Failing", className: "bg-closed-soft text-closed" },
-  suspended: { label: "Suspended", className: "bg-closed-soft text-closed" },
+  failing: { label: "Failing", className: "bg-closed-soft text-closed-ink" },
+  suspended: { label: "Suspended", className: "bg-closed-soft text-closed-ink" },
   disabled: { label: "Disabled", className: "bg-surface-sunken text-ink-muted" },
   never_checked: { label: "Never checked", className: "bg-warning-soft text-warning" },
 };
@@ -35,7 +35,10 @@ export function Sources() {
       {sources.isPending && <Status>Loading sources…</Status>}
       {sources.isError && <ErrorText>{errorMessage(sources.error)}</ErrorText>}
       {failing.length > 0 && (
-        <p role="status" className="rounded-md bg-closed-soft px-4 py-3 font-semibold text-closed">
+        <p
+          role="status"
+          className="rounded-md bg-closed-soft px-4 py-3 font-semibold text-closed-ink"
+        >
           {failing.length === 1 ? "1 source needs" : `${failing.length} sources need`} attention.
         </p>
       )}

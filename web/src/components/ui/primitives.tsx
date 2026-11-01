@@ -97,7 +97,7 @@ export function ErrorText({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
       role="alert"
-      className={cn("rounded-md bg-closed-soft px-3 py-2 text-sm text-closed", className)}
+      className={cn("rounded-md bg-closed-soft px-3 py-2 text-sm text-closed-ink", className)}
       {...props}
     />
   );

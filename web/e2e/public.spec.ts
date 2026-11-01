@@ -85,13 +85,17 @@ test.describe("A1 public answer page", () => {
     expect((await page.goto("/calendars/XX-NONE/2026-12-28"))?.status()).toBe(404);
   });
 
-  test("finds a date from the home page", async ({ page }) => {
+  test("checks a date on the home page and opens its answer", async ({ page }) => {
     await page.goto("/");
-    await page.getByLabel("Calendar", { exact: true }).selectOption("EU-T2");
-    await page.getByLabel("Date").fill("2026-04-03");
-    await page.getByRole("button", { name: "Check the date" }).click();
-    await expect(page).toHaveURL("/calendars/EU-T2/2026-04-03");
-    await expect(page.getByText("T2 is closed: Good Friday.")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Business days you can prove.", level: 1 }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "T2", exact: true }).click();
+    await page.getByRole("button", { name: "Fri 25 Dec" }).click();
+    await expect(page.getByText("No, closed.")).toBeVisible();
+    await expect(page.getByText("Christmas Day.", { exact: false }).first()).toBeVisible();
+    await page.getByRole("link", { name: "See the full answer and its evidence" }).click();
+    await expect(page).toHaveURL("/calendars/EU-T2/2026-12-25");
   });
 
   for (const path of [
@@ -102,6 +106,8 @@ test.describe("A1 public answer page", () => {
     "/docs",
     "/docs/api",
     "/signin",
+    "/signup",
+    "/does-not-exist",
   ]) {
     test(`${path} has no accessibility violations`, async ({ page }) => {
       await page.goto(path);

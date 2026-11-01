@@ -4,7 +4,7 @@ import { isIsoDate } from "@/lib/format";
 
 import { TimeTravel } from "./time-travel";
 
-export const metadata: Metadata = { title: "Time travel" };
+export const metadata: Metadata = { title: "Audit" };
 
 export default async function TimeTravelPage({ searchParams }: PageProps<"/app/time-travel">) {
   const params = await searchParams;

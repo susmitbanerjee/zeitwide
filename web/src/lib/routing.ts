@@ -4,7 +4,7 @@
  * served straight from Cloud Run. Locally both are the same origin.
  */
 
-const PRIVATE_PREFIXES = ["/app", "/admin", "/signin", "/api/auth", "/api/zw"] as const;
+const PRIVATE_PREFIXES = ["/app", "/admin", "/signin", "/signup", "/api/auth", "/api/zw"] as const;
 
 export function isPrivatePath(pathname: string): boolean {
   return PRIVATE_PREFIXES.some(
@@ -12,7 +12,7 @@ export function isPrivatePath(pathname: string): boolean {
   );
 }
 
-/** Pages that need a signed-in user; /signin and the auth routes themselves don't. */
+/** Pages that need a signed-in user; /signin, /signup and the auth routes themselves don't. */
 export function needsSession(pathname: string): boolean {
   return ["/app", "/admin"].some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),

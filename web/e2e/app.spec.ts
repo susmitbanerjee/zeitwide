@@ -14,15 +14,55 @@ test("signed-out visitors are sent to sign in", async ({ browser }) => {
   ).newPage();
   await page.goto("/app/calculator");
   await expect(page).toHaveURL(/\/signin\?callbackUrl=%2Fapp%2Fcalculator/);
-  await expect(page.getByRole("heading", { name: "Sign in to Zeitwide" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Welcome back" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Continue with Google" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Continue with Microsoft" })).toBeVisible();
 });
 
-test("A2 explorer shows each calendar's days and explains a selected day", async ({ page }) => {
+test("sign-up offers the same providers and links back to sign in", async ({ browser }) => {
+  const page = await (
+    await browser.newContext({ storageState: { cookies: [], origins: [] } })
+  ).newPage();
+  await page.goto("/signup?callbackUrl=%2Fapp%2Fchanges");
+  await expect(page.getByRole("heading", { name: "Create your free account" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Continue with Google" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "GitHub or company single sign-on" }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "Sign in" }).click();
+  await expect(page).toHaveURL(/\/signin\?callbackUrl=%2Fapp%2Fchanges/);
+});
+
+test("a visitor who is already signed in skips the sign-in page", async ({ page }) => {
+  await page.goto("/signin?callbackUrl=%2Fapp%2Fchanges");
+  await expect(page).toHaveURL(/\/app\/changes/);
+  await page.goto("/signup");
+  await expect(page).toHaveURL(/\/app\/developers/);
+});
+
+test("sign-in never redirects off site", async ({ page }) => {
+  await page.goto("/signin?callbackUrl=https%3A%2F%2Fevil.example%2F");
+  await expect(page).toHaveURL(/\/app$/);
+});
+
+test("P2 today shows every rail, what is coming and a quick check", async ({ page }) => {
+  await page.goto("/app");
+  await expect(
+    page.getByRole("heading", { name: /settles? today|settle today/, level: 1 }),
+  ).toBeVisible();
+  const rails = page.getByRole("region", { name: "Right now" });
+  await expect(rails.getByRole("link", { name: "CHAPS" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Coming up" })).toBeVisible();
+  await page.getByLabel("Rail", { exact: true }).selectOption("EU-T2");
+  await page.getByLabel("Date", { exact: true }).fill("2026-12-25");
+  await expect(page.getByText("Closed. Christmas Day")).toBeVisible();
+  await expectAccessible(page);
+});
+
+test("A2 timetable shows each calendar's days and explains a selected day", async ({ page }) => {
   const problems = watchConsole(page);
   await page.goto("/app/explorer");
-  await expect(page.getByRole("heading", { name: "Explorer", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Timetable", level: 1 })).toBeVisible();
   await page.getByLabel("From", { exact: true }).fill("2026-12-21");
   await page.getByLabel("To", { exact: true }).fill("2027-01-04");
   await page.getByRole("button", { name: "Show these dates" }).click();
@@ -52,9 +92,7 @@ test("A3 evidence lists the sources and verifies the signed receipt", async ({ p
   expect(problems).toEqual([]);
 });
 
-test("A4 calculator adds business days across rails and lists what it skipped", async ({
-  page,
-}) => {
+test("A4 planner adds business days across rails and lists what it skipped", async ({ page }) => {
   await page.goto("/app/calculator");
   await page.getByLabel("You instruct on").fill("2026-12-24");
   await page.getByLabel("Business days to add").fill("2");
@@ -65,7 +103,7 @@ test("A4 calculator adds business days across rails and lists what it skipped", 
   await expectAccessible(page);
 });
 
-test("A5 time travel replays an answer as of a past moment", async ({ page }) => {
+test("A5 audit replays an answer as of a past moment", async ({ page }) => {
   await page.goto("/app/time-travel?calendar=GB-CHAPS&date=2022-09-19");
   await page.getByLabel("As of (UTC)").fill("2022-09-09T12:00");
   await page.getByRole("button", { name: "Replay" }).click();
@@ -73,6 +111,20 @@ test("A5 time travel replays an answer as of a past moment", async ({ page }) =>
   await expect(page.getByText("Open", { exact: true })).toBeVisible();
   await expect(page.getByText("Closed", { exact: true })).toBeVisible();
   await expect(page.getByText(/closure added with 9 days' notice/)).toBeVisible();
+  await expectAccessible(page);
+});
+
+test("P7 audit checks a pasted receipt's signature", async ({ page, request }) => {
+  const { receipt } = (await (await request.get(`${MOCK_API}/v1/calendars`)).json()) as {
+    receipt: unknown;
+  };
+  await page.goto("/app/time-travel");
+  await page.getByLabel("The full receipt, as JSON").fill("not json");
+  await page.getByRole("button", { name: "Check", exact: true }).click();
+  await expect(page.getByText("That isn't a JSON receipt")).toBeVisible();
+  await page.getByLabel("The full receipt, as JSON").fill(JSON.stringify(receipt));
+  await page.getByRole("button", { name: "Check", exact: true }).click();
+  await expect(page.getByText("Signature valid")).toBeVisible();
   await expectAccessible(page);
 });
 

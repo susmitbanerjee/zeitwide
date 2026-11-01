@@ -1,5 +1,9 @@
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+
+import { Today } from "./today";
+
+export const metadata: Metadata = { title: "Today" };
 
 export default function AppHome() {
-  redirect("/app/explorer");
+  return <Today />;
 }

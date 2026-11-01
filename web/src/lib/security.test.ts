@@ -50,6 +50,9 @@ describe("routing", () => {
     expect(isPrivatePath("/calendars/GB-CHAPS/2026-12-28")).toBe(false);
     expect(needsSession("/admin")).toBe(true);
     expect(needsSession("/signin")).toBe(false);
+    // Sign-up starts a session on the app host, so it lives there too, and needs none.
+    expect(isPrivatePath("/signup")).toBe(true);
+    expect(needsSession("/signup")).toBe(false);
   });
 
   it("sends signed-in paths on the public host to the app host only", () => {
