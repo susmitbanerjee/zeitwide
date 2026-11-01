@@ -40,5 +40,5 @@ api_base_url = "https://api.zeitwide.com"
 google_client_id    = "18853622142-q9lb6915a8pldfqt4arhib3einmkkvba.apps.googleusercontent.com"
 microsoft_client_id = "89e130c0-2fa4-426a-b847-10fba84277c0"
 
-# Who may review changes in the admin screens: a verified Google or GitHub address.
+# Who may open the admin screens: only these addresses, and only when signed in with Google.
 reviewer_emails = ["susmit.b1@gmail.com"]

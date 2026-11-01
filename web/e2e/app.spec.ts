@@ -1,3 +1,5 @@
+import { createServer } from "node:http";
+
 import { expect, test } from "@playwright/test";
 
 import { expectAccessible, MOCK_API, STATE, watchConsole } from "./support";
@@ -33,7 +35,6 @@ test("sign-up offers the same providers and links back to sign in", async ({ bro
 
 for (const [provider, host, id] of [
   ["Google", "accounts.google.com", "e2e-google-id"],
-  ["Microsoft", "login.microsoftonline.com", "e2e-microsoft-id"],
   ["GitHub", "github.com", "e2e-github-id"],
 ] as const) {
   test(`Continue with ${provider} sends the visitor to ${provider} with the right callback`, async ({
@@ -55,9 +56,67 @@ for (const [provider, host, id] of [
       `http://localhost:3000/api/auth/callback/${provider.toLowerCase()}`,
     );
     expect(url.searchParams.get("code_challenge_method")).toBe("S256");
+    // Google and Microsoft always show their account chooser, so a visitor who is already
+    // signed in to one account still picks which to use.
+    if (provider === "Google") {
+      expect(url.searchParams.get("prompt")).toBe("select_account");
+    }
     expect(url.searchParams.get("state")).not.toBeNull();
   });
 }
+
+test("Microsoft sign-in completes: code, token, profile, then the app", async ({ browser }) => {
+  // A fake Microsoft: send the visitor straight back with a code, trade the code for an access
+  // token (no ID token, as the real flow now asks), and answer the Graph profile call.
+  let authorize: URL | undefined;
+  const microsoft = createServer((request, response) => {
+    const url = new URL(request.url ?? "/", "http://127.0.0.1:8091");
+    if (url.pathname === "/") {
+      authorize = url;
+      const back = new URL(url.searchParams.get("redirect_uri") ?? "");
+      back.searchParams.set("code", "fake-code");
+      back.searchParams.set("state", url.searchParams.get("state") ?? "");
+      response.writeHead(302, { location: back.toString() }).end();
+    } else if (url.pathname === "/token") {
+      response
+        .writeHead(200, { "content-type": "application/json" })
+        .end(
+          JSON.stringify({ access_token: "fake-access", token_type: "Bearer", expires_in: 3600 }),
+        );
+    } else if (url.pathname === "/me") {
+      response
+        .writeHead(200, { "content-type": "application/json" })
+        .end(
+          JSON.stringify({ id: "ms-123", displayName: "Mia Microsoft", mail: "mia@example.com" }),
+        );
+    } else {
+      response.writeHead(404).end();
+    }
+  });
+  await new Promise<void>((resolve) => microsoft.listen(8091, "127.0.0.1", resolve));
+  try {
+    const page = await (
+      await browser.newContext({ storageState: { cookies: [], origins: [] } })
+    ).newPage();
+    await page.goto("/signin?callbackUrl=%2Fapp%2Fexplorer");
+    await page.getByRole("button", { name: "Continue with Microsoft" }).click();
+    // The first visit to the callback and the app can be slow to compile outside a built app.
+    await expect(page).toHaveURL(/\/app\/explorer/, { timeout: 45_000 });
+    expect(authorize?.searchParams.get("client_id")).toBe("e2e-microsoft-id");
+    expect(authorize?.searchParams.get("redirect_uri")).toBe(
+      "http://localhost:3000/api/auth/callback/microsoft",
+    );
+    expect(authorize?.searchParams.get("prompt")).toBe("select_account");
+    expect(authorize?.searchParams.get("scope")).toBe("User.Read");
+    expect(authorize?.searchParams.get("code_challenge_method")).toBe("S256");
+    const session = await (await page.request.get("/api/auth/session")).json();
+    expect(session.user.name).toBe("Mia Microsoft");
+    // Microsoft never grants the reviewer role, whatever address it reports.
+    expect(session.user.reviewer).toBe(false);
+  } finally {
+    await new Promise((resolve) => microsoft.close(resolve));
+  }
+});
 
 test("a visitor who is already signed in skips the sign-in page", async ({ page }) => {
   await page.goto("/signin?callbackUrl=%2Fapp%2Fchanges");

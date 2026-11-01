@@ -15,9 +15,10 @@ describe("reviewerEmails", () => {
 describe("rolesFor", () => {
   const reviewers = reviewerEmails("ada@example.com");
 
-  it("makes a verified Google or GitHub address on the list a reviewer", () => {
+  it("makes a verified Google address on the list a reviewer, and nobody else", () => {
     expect(rolesFor("google", "Ada@example.com", true, reviewers)).toEqual(["reviewer"]);
-    expect(rolesFor("github", "ada@example.com", true, reviewers)).toEqual(["reviewer"]);
+    // The same address through another provider is not enough.
+    expect(rolesFor("github", "ada@example.com", true, reviewers)).toEqual([]);
   });
 
   it("never does it for an unverified address, Microsoft, or an address not on the list", () => {

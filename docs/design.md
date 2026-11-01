@@ -100,7 +100,7 @@ There is no identity server. The web app signs people in with **Auth.js**, strai
 | Google, Microsoft, GitHub login | Auth.js providers; a button shows only when its OAuth app is configured |
 | Web app sessions | An encrypted, httpOnly session cookie holding who the person is and their roles |
 | Calls to the API | The web app's server signs a one-minute HS256 token (issuer, audience, subject, roles) for each call; the API checks the signature, issuer, audience and lifetime, and the browser never holds one |
-| Admin review screen | The `reviewer` role, given at sign-in to a verified Google or GitHub address on the `reviewer_emails` list |
+| Admin review screen | The `reviewer` role, given at sign-in to a verified Google address on the `reviewer_emails` list |
 | MCP clients | An API key as a bearer token on `/mcp` |
 | Enterprise SSO | A Microsoft work account signs in through the same Microsoft button; per-customer SAML is future work |
 

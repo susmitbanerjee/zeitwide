@@ -14,35 +14,42 @@ import { REVIEWER_ROLE, reviewerEmails, rolesFor } from "./auth/roles";
 
 /**
  * Microsoft sign-in for work, school and personal accounts at once. It is a plain OAuth provider
- * rather than Auth.js's OIDC one: that checks the ID token's issuer, which differs per tenant and
- * so never matches the shared "common" endpoint. The profile comes from Microsoft's userinfo
- * endpoint, over the access token, instead.
+ * rather than Auth.js's OIDC one, and it asks for no `openid` scope on purpose: with it Microsoft
+ * returns an ID token, and Auth.js checks that token's issuer, which differs for every tenant and
+ * so never matches the shared "common" endpoint (the sign-in failed with an issuer mismatch).
+ * Without it there is no ID token, and the profile comes from Microsoft Graph over the access
+ * token instead.
  */
 function microsoft(): OAuthConfig<{
-  sub: string;
-  name?: string;
-  email?: string;
-  picture?: string;
+  id: string;
+  displayName?: string;
+  mail?: string | null;
+  userPrincipalName?: string;
 }> {
+  // The tests point these at a fake Microsoft on localhost; ignored anywhere else.
+  const test = process.env.AUTH_MICROSOFT_TEST_BASE;
+  const base = testLoginEnabled() && test !== undefined && test !== "" ? test : undefined;
   return {
     id: "microsoft",
     name: "Microsoft",
     type: "oauth",
     authorization: {
-      url: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
-      params: { scope: "openid profile email" },
+      url: base ?? "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
+      // Always show the account chooser, even when one account is already signed in.
+      params: { scope: "User.Read", prompt: "select_account" },
     },
-    token: "https://login.microsoftonline.com/common/oauth2/v2.0/token",
-    userinfo: "https://graph.microsoft.com/oidc/userinfo",
+    token:
+      base === undefined
+        ? "https://login.microsoftonline.com/common/oauth2/v2.0/token"
+        : `${base}/token`,
+    userinfo: base === undefined ? "https://graph.microsoft.com/v1.0/me" : `${base}/me`,
     clientId: process.env.AUTH_MICROSOFT_ID ?? "",
     clientSecret: process.env.AUTH_MICROSOFT_SECRET ?? "",
     checks: ["pkce", "state"],
-    profile: (profile) => ({
-      id: profile.sub,
-      name: profile.name ?? profile.email ?? null,
-      email: profile.email ?? null,
-      image: profile.picture ?? null,
-    }),
+    profile: (profile) => {
+      const email = profile.mail ?? profile.userPrincipalName ?? null;
+      return { id: profile.id, name: profile.displayName ?? email, email, image: null };
+    },
   };
 }
 
@@ -50,7 +57,13 @@ function providers(): NextAuthConfig["providers"] {
   const list: NextAuthConfig["providers"] = [];
   for (const { id } of configuredProviders()) {
     if (id === "google") {
-      list.push(Google({ checks: ["pkce", "state"] }));
+      list.push(
+        Google({
+          checks: ["pkce", "state"],
+          // Always show the account chooser, even when one account is already signed in.
+          authorization: { params: { prompt: "select_account" } },
+        }),
+      );
     } else if (id === "github") {
       list.push(GitHub({ checks: ["pkce", "state"] }));
     } else {
@@ -99,9 +112,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             : rolesFor(
                 account.provider,
                 user.email,
-                // Google says so in the profile; GitHub only ever offers a verified primary address.
-                account.provider === "github" ||
-                  (profile as { email_verified?: boolean } | undefined)?.email_verified === true,
+                // Google says so in the profile; no other provider is trusted for the role.
+                (profile as { email_verified?: boolean } | undefined)?.email_verified === true,
                 reviewers,
               );
       }

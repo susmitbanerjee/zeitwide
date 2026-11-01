@@ -88,8 +88,8 @@ gcloud storage buckets update gs://PROJECT_ID-tofu-state --versioning
 - `google_client_id`, `microsoft_client_id`, and `github_client_id` for the sign-in OAuth
   apps (`../README.md`). A provider with no client ID gets no button. The client secrets are
   entered in Secret Manager in step 6.
-- `reviewer_emails`: the addresses allowed into the admin screens (a verified Google or
-  GitHub address; Microsoft never counts).
+- `reviewer_emails`: the only addresses allowed into the admin screens, and only when signed
+  in with Google (GitHub and Microsoft never count).
 - `github_repository` and `github_repository_id`. Get the ID with:
 
   ```bash

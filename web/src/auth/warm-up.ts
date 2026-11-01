@@ -13,12 +13,14 @@ let lastWarmUp = 0;
  * the time they sign in and the app asks it something. Runs after the response has been sent, at
  * most once every few minutes per instance, and an error is nobody's business.
  */
-export function warmUpBackends(now: number = Date.now()): void {
-  if (now - lastWarmUp < THROTTLE_MS) {
-    return;
-  }
-  lastWarmUp = now;
+export function warmUpBackends(): void {
   after(async () => {
+    // The clock is read here, after the response, not while the page renders.
+    const now = Date.now();
+    if (now - lastWarmUp < THROTTLE_MS) {
+      return;
+    }
+    lastWarmUp = now;
     await fetch(`${env.apiUrl}/actuator/health`, {
       cache: "no-store",
       signal: AbortSignal.timeout(120_000),

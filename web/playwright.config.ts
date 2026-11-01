@@ -46,6 +46,8 @@ export default defineConfig({
         AUTH_GOOGLE_SECRET: "e2e-google-secret",
         AUTH_MICROSOFT_ID: "e2e-microsoft-id",
         AUTH_MICROSOFT_SECRET: "e2e-microsoft-secret",
+        // A fake Microsoft the sign-in test starts itself (honoured on localhost only).
+        AUTH_MICROSOFT_TEST_BASE: "http://127.0.0.1:8091",
         AUTH_GITHUB_ID: "e2e-github-id",
         AUTH_GITHUB_SECRET: "e2e-github-secret",
         ZEITWIDE_TEST_LOGIN: "1",

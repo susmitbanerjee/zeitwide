@@ -12,8 +12,9 @@ export function reviewerEmails(value: string | undefined): Set<string> {
 
 /**
  * The roles a person gets at sign-in. A reviewer decides what reaches the published dataset, so
- * the role goes only to an address the provider has verified: Google and GitHub confirm theirs,
- * Microsoft does not, so a Microsoft sign-in is never a reviewer, whatever email it claims.
+ * the role goes only to an address Google says it has verified. GitHub and Microsoft don't say
+ * so in what they send, so a GitHub or Microsoft sign-in is never a reviewer, whatever email it
+ * claims.
  */
 export function rolesFor(
   provider: string,
@@ -24,7 +25,7 @@ export function rolesFor(
   if (provider === "test-login") {
     return [];
   }
-  const verified = (provider === "google" || provider === "github") && emailVerified;
+  const verified = provider === "google" && emailVerified;
   return verified && typeof email === "string" && reviewers.has(email.toLowerCase())
     ? [REVIEWER_ROLE]
     : [];

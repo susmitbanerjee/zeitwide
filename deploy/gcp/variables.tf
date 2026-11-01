@@ -212,7 +212,7 @@ variable "api_min_instances" {
 }
 
 variable "reviewer_emails" {
-  description = "Email addresses allowed to review changes in the admin screens. Only a verified Google or GitHub address counts."
+  description = "Email addresses allowed to review changes in the admin screens. Only a verified Google address counts: GitHub and Microsoft sign-ins never become reviewers."
   type        = list(string)
   default     = []
 }
