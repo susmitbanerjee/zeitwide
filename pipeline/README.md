@@ -27,7 +27,7 @@ jobs use):
 
 `--reviewer` (or `ZEITWIDE_REVIEWER`) is recorded with every decision. The CLI connects
 with the pipeline's database login, so anyone who can run it can approve. The web review
-screen will record the reviewer's Keycloak subject instead.
+screen will record the reviewer's sign-in subject instead.
 
 ## Review and publish
 

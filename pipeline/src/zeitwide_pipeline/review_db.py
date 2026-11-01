@@ -44,7 +44,7 @@ class PublishResult(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class Review:
-    """Who decided, and why. The web review screen will pass a Keycloak subject."""
+    """Who decided, and why. The web review screen will pass the reviewer's sign-in subject."""
 
     reviewer: str
     reason: str

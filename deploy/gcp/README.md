@@ -9,7 +9,7 @@ Aiven's free plan, which you create by hand.
 | `apis.tf` | Required Google APIs (left on when a workspace is destroyed) |
 | `iam.tf` | One service account per workload, resource-level role bindings |
 | `secrets.tf` | Secret Manager secrets, **containers only**: values are added by hand |
-| `cloud_run.tf` | Services `zeitwide-api-<env>`, `zeitwide-web-<env>`, `keycloak-<env>`; job `zeitwide-pipeline-<env>` |
+| `cloud_run.tf` | Services `zeitwide-api-<env>`, `zeitwide-web-<env>`; job `zeitwide-pipeline-<env>` |
 | `scheduler.tf` | Three Cloud Scheduler jobs: pipeline every 15 min, outbox drain every minute, daily release and backup |
 | `storage.tf` | Snapshots bucket (versioned, kept forever) and backups bucket (30-day expiry) |
 | `artifact_registry.tf` | Docker repository that keeps the last 3 versions of each image |
@@ -31,7 +31,6 @@ If they share a project, both budgets watch the same spend.
 | --- | --- | --- |
 | `zeitwide-api` | `zeitwide-api-<env>` | Read its secrets; read snapshots |
 | `zeitwide-web` | `zeitwide-web-<env>` | Read its secrets |
-| `keycloak` | `zeitwide-keycloak-<env>` | Read its secrets |
 | `zeitwide-pipeline` job | `zeitwide-pipeline-<env>` | Read its secrets; create and read snapshots; create backups (no overwrite or delete) |
 | Scheduler: pipeline runs | `zeitwide-sched-run-<env>` | Start the pipeline job, with argument overrides |
 | Scheduler: outbox drain | `zeitwide-sched-drain-<env>` | Nothing in GCP; the API accepts its OIDC token |
@@ -45,7 +44,6 @@ with your own credentials.
 | Client | Instances | Pool | Worst case |
 | --- | --- | --- | --- |
 | API (Hikari) | 2 | 4 | 8 |
-| Keycloak | 1 | 3 | 3 |
 | Pipeline, regular run | 1 | 2 | 2 |
 | Pipeline, daily run overlapping a regular run | 1 | 2 + 1 for `pg_dump` | 3 |
 | **Total** | | | **16** |
@@ -87,8 +85,11 @@ gcloud storage buckets update gs://PROJECT_ID-tofu-state --versioning
 ### 3. Fill in `envs/<env>.tfvars`
 
 - `project_id`, `billing_account` (`gcloud billing accounts list`).
-- `google_client_id`, `microsoft_client_id`, and `github_client_id` for the OAuth apps
-  used by Keycloak. The client secrets are entered in Secret Manager in step 6.
+- `google_client_id`, `microsoft_client_id`, and `github_client_id` for the sign-in OAuth
+  apps (`../README.md`). A provider with no client ID gets no button. The client secrets are
+  entered in Secret Manager in step 6.
+- `reviewer_emails`: the addresses allowed into the admin screens (a verified Google or
+  GitHub address; Microsoft never counts).
 - `github_repository` and `github_repository_id`. Get the ID with:
 
   ```bash
@@ -120,7 +121,7 @@ refused.
    the free plan, in the region closest to `us-central1` that the free plan offers.
    Check Aiven's current limits on free services per account. Dev and prod each need
    their own service, because the database and user names below are the same in both.
-2. Create the databases `zeitwide` and `keycloak`.
+2. Create the database `zeitwide`.
 3. Connect as `avnadmin` and create one login per client. Generate each password with
    `openssl rand -base64 32`:
 
@@ -128,10 +129,8 @@ refused.
    CREATE ROLE zeitwide_api LOGIN PASSWORD '...';
    CREATE ROLE zeitwide_pipeline LOGIN PASSWORD '...';
    CREATE ROLE zeitwide_backup LOGIN PASSWORD '...';
-   CREATE ROLE keycloak LOGIN PASSWORD '...';
 
    ALTER DATABASE zeitwide OWNER TO zeitwide_api;   -- Flyway runs as the API
-   ALTER DATABASE keycloak OWNER TO keycloak;
    ```
 
    Don't grant anything on `zeitwide` by hand. Each time the API starts, Flyway runs
@@ -141,14 +140,6 @@ refused.
    - It can't read accounts, keys or webhooks.
    - The backup login gets read-only access to every table.
 
-   For the `keycloak` database, connect as `keycloak` and let the backup login read it:
-
-   ```sql
-   GRANT SELECT ON ALL TABLES IN SCHEMA public TO zeitwide_backup;
-   GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO zeitwide_backup;
-   ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO zeitwide_backup;
-   ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON SEQUENCES TO zeitwide_backup;
-   ```
 4. Download the service's **CA certificate** (Overview > Connection information).
 5. Note the host and port. Every client connects with `sslmode=verify-full` against
    that CA, so it checks both the certificate chain and the hostname.
@@ -183,11 +174,10 @@ the others. Delete local copies afterwards.
 | `db-api-password` | Password of `zeitwide_api` |
 | `db-pipeline-password` | Password of `zeitwide_pipeline` |
 | `db-backup-password` | Password of `zeitwide_backup` |
-| `db-keycloak-password` | Password of `keycloak` |
-| `keycloak-admin-password` | `openssl rand -base64 32`; used only for Keycloak's first start (step 12) |
-| `google-oauth-client-secret` | OAuth client secret for the Google identity provider |
-| `microsoft-oauth-client-secret` | OAuth client secret for the Microsoft identity provider |
-| `github-oauth-client-secret` | OAuth client secret for the GitHub identity provider |
+| `api-token-secret` | 48 random bytes, base64 (`openssl rand -base64 48`). The web app signs the tokens it sends the API with it, and the API checks them with it |
+| `google-oauth-client-secret` | OAuth client secret for Google sign-in |
+| `microsoft-oauth-client-secret` | OAuth client secret for Microsoft sign-in |
+| `github-oauth-client-secret` | OAuth client secret for GitHub sign-in |
 | `webhook-encryption-key` | `openssl rand -base64 32`; AES-256-GCM key used to encrypt signing secrets at rest |
 | `receipt-signing-key` | Ed25519 PKCS#8 private key PEM, loaded by the API at startup; never commit it or put it in tfvars |
 | `web-auth-secret` | `openssl rand -base64 32` (Auth.js cookie encryption) |
@@ -222,9 +212,8 @@ file outside the repository. The public ring JSON has this shape:
 [{"key_id":"local-1","public_key":"-----BEGIN PUBLIC KEY-----\n…\n-----END PUBLIC KEY-----","valid_from":"2026-01-01T00:00:00Z","valid_to":null}]
 ```
 
-Register each provider callback as `<auth URL>/realms/zeitwide/broker/<provider>/endpoint`;
-for local development the auth URL is `http://localhost:8180`. The imported realm resolves
-the `*_CLIENT_ID` and `*_CLIENT_SECRET` placeholders from Keycloak's environment.
+Register each provider's callback as `<site>/api/auth/callback/<provider>` (`../README.md`).
+The web app reads the client IDs from its environment and the secrets from Secret Manager.
 
 ### 7. Plan and apply everything
 
@@ -261,7 +250,7 @@ running on a ref in `github_deploy_refs`, can get a token.
 ### 9. Build and deploy images
 
 Pushing to `main` deploys by itself: the `deploy` job builds and rolls out only the
-components whose folders changed (`api/`, `pipeline/`, `web/`, `deploy/keycloak/`) with
+components whose folders changed (`api/`, `pipeline/`, `web/`) with
 `deploy-images.sh`, so the API's migrations still run first. To do it by hand, push to
 `tofu output -raw image_repository`, then deploy with
 `gcloud run deploy <service> --image=…` and `gcloud run jobs deploy zeitwide-pipeline-<env> --image=…`.
@@ -272,15 +261,11 @@ from your machine, from the repository root:
 bash deploy/gcp/deploy-images.sh
 ```
 
-It builds the API with Jib and the others from `pipeline/Dockerfile`, `web/Dockerfile`
-and `deploy/keycloak/Dockerfile`, tags them with `git describe --dirty`, and rolls out
+It builds the API with Jib and the others from `pipeline/Dockerfile` and `web/Dockerfile`,
+tags them with `git describe --dirty`, and rolls out
 the API first so its Flyway migrations run before the pipeline uses the schema.
 The images need:
 
-- **Keycloak:** an image built `FROM quay.io/keycloak/keycloak` that runs
-  `kc.sh build --db=postgres --health-enabled=true` and imports
-  `deploy/keycloak/realm.json` (`--import-realm`). The image runs `start --optimized` and
-  sets `KC_DB_POOL_MAX_SIZE=3`.
 - **Pipeline:** the `pg_dump` client at the same major version as the Aiven server
   (`postgresql-client-18`: `pg_dump` refuses to dump a newer server, and Aiven runs PostgreSQL 18), and the CLI commands `run-due` (the default) and `daily`.
 
@@ -295,41 +280,32 @@ The images need:
 
 Firebase Hosting forwards no cookie except `__session` to Cloud Run, so Hosting serves only
 the public pages. Signed-in pages (`/app`, `/admin`, sign-in) use `web_app_origin`, the web
-service's own URL (or a domain mapped to it with `web_app_domain`); Keycloak's redirect
-URIs and `AUTH_URL` point there.
+service's own URL (or a domain mapped to it with `web_app_domain`); `AUTH_URL` and the
+sign-in callbacks point there.
 
 ### 11. DNS and custom domains
 
 - **Web:** in Firebase Hosting, add the custom domain and create the TXT and A records it
   shows. Then set `web_origin` to the new origin.
-- **API and Keycloak:** verify the domain once in Google Search Console, then map each
-  subdomain:
+- **API:** verify the domain once in Google Search Console, then map the subdomain:
 
   ```bash
   gcloud beta run domain-mappings create --service=zeitwide-api-dev --domain=api.dev.example.com --region=us-central1
   ```
 
-  ```bash
-  gcloud beta run domain-mappings create --service=keycloak-dev --domain=auth.dev.example.com --region=us-central1
-  ```
-
   Create the CNAME records it prints (`ghs.googlehosted.com.`). Google issues the
   certificates, which can take up to an hour or so.
-- Set `api_base_url` and `auth_base_url` in the tfvars, then plan and apply again.
-  Keycloak always has its hostname pinned (`KC_HOSTNAME`): to the custom domain once
-  `auth_base_url` is set, or to the service's deterministic `run.app` URL before then.
+- Set `api_base_url` in the tfvars, then plan and apply again.
 
-### 12. Finish Keycloak
+### 12. Finish sign-in
 
-1. Sign in to `<auth URL>/admin` as `bootstrap-admin` with `keycloak-admin-password`.
-2. Create a permanent admin with MFA, then delete `bootstrap-admin`. The bootstrap
-   variables only take effect when no admin exists.
-3. The import configures `zeitwide-web` redirect, web origin and post-logout URI from
-   `web_origin`, and adds the `zeitwide-api` audience mapper.
-4. To register MCP clients dynamically, create an initial access token under **Clients >
-   Initial access tokens**, set a short expiry and client limit, then provide it to the MCP
-   client through a secret store. The registration endpoint is
-   `/realms/zeitwide/clients-registrations/openid-connect`.
+1. Create the OAuth apps and register their callback URLs (`../README.md`), then put the
+   client IDs in the tfvars and the secrets in Secret Manager (step 6).
+2. Add `api-token-secret` (step 6) before the first apply that references it: Cloud Run
+   won't start a revision whose secret has no value. Create just the container first with
+   `tofu apply -var-file=envs/dev.tfvars -target='google_secret_manager_secret.this["api-token-secret"]'`,
+   then add the value with `bash deploy/gcp/add-secret.sh api-token-secret`.
+3. List who may review changes in `reviewer_emails`.
 
 ## Moving an environment from SettleCal to Zeitwide
 
@@ -352,7 +328,7 @@ recreated by an apply, but the data has to move first, in this order:
    them, and adopt the new ones:
    `tofu state rm 'google_secret_manager_secret.this["db-host"]'`, then
    `tofu import 'google_secret_manager_secret.this["db-host"]' projects/<project>/secrets/zeitwide-dev-db-host`,
-   for every secret in `locals.secret_readers`. Every secret Keycloak reads needs a value
+   for every secret in `locals.secret_readers`. Every secret a service reads needs a value
    before the apply, including the three OAuth client secrets.
 5. **Apply** (step 7) with the real images. It replaces the services, job, Scheduler jobs
    and service accounts under their new names, and the startup probes need the real apps:
@@ -362,31 +338,28 @@ recreated by an apply, but the data has to move first, in this order:
    `zeitwide-web-dev` and deploy Hosting again (step 10).
 7. **Check, then clean up.** Once the new API answers, delete what OpenTofu no longer
    tracks: the `settlecal-dev-*` secrets, the `settlecal-dev-*` buckets and the
-   `settlecal-dev` Artifact Registry repository. Keycloak keeps the old `settlecal` realm
-   next to the new `zeitwide` one; delete it in the admin console.
+   `settlecal-dev` Artifact Registry repository.
 
 ## What the application code must do
 
 This configuration hands these settings to the apps. The apps must use them as follows:
 
-- **API:** read the JDBC URL from `SPRING_DATASOURCE_URL`. Validate JWTs against
-  `SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI` and audience `zeitwide-api`.
-  Allow only `ZEITWIDE_CORS_ALLOWED_ORIGINS`. Keep `/internal/**` out of the Keycloak
-  filter chain and verify instead that the caller's Google-signed OIDC token has:
+- **API:** read the JDBC URL from `SPRING_DATASOURCE_URL`. Accept only tokens signed with
+  `ZEITWIDE_AUTH_TOKEN_SECRET` (HS256) by issuer `ZEITWIDE_AUTH_ISSUER` for audience
+  `zeitwide-api`, living at most five minutes. Allow only `ZEITWIDE_CORS_ALLOWED_ORIGINS`.
+  Keep `/internal/**` out of that filter chain and verify instead that the caller's
+  Google-signed OIDC token has:
   - issuer `https://accounts.google.com`
   - audience `ZEITWIDE_OUTBOX_DRAIN_AUDIENCE`
   - `email` equal to `ZEITWIDE_OUTBOX_DRAIN_INVOKER`, with `email_verified` true
 
   The service is public, so that token check is the only thing protecting the drain
-  endpoint. The MCP endpoint is `/mcp`; `ZEITWIDE_MCP_RESOURCE_URL` is its public URL,
-  used by `/.well-known/oauth-protected-resource/mcp` and the OAuth challenge. MCP clients
-  use either a Zeitwide API key or a Keycloak bearer token with audience `zeitwide-api`.
+  endpoint. The MCP endpoint is `/mcp`; clients send a Zeitwide API key as a bearer token.
 - **Pipeline:** connect with the standard `PG*` variables. Keep its pool at
   `ZEITWIDE_DB_POOL_MAX_SIZE`. Implement `run-due` and `daily`. In `daily`, run
   `pg_dump` for each database in `ZEITWIDE_BACKUP_DATABASES` as `ZEITWIDE_BACKUP_DB_USER`.
   Name each dump with a new object path, because the pipeline can't overwrite objects.
-- **Web:** read `ZEITWIDE_API_URL` and the `AUTH_*` variables, and name the session
-  cookie `__session` (step 10).
+- **Web:** read `ZEITWIDE_API_URL`, the `AUTH_*` variables and `ZEITWIDE_API_TOKEN_SECRET`.
 
 ## Cost
 

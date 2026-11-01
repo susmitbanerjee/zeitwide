@@ -100,7 +100,7 @@ jobs:
         run: |
           # A new branch or a force push has no usable "before": deploy everything.
           if ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
-            files="api/ pipeline/ web/ deploy/keycloak/"
+            files="api/ pipeline/ web/"
           else
             files="$(git diff --name-only "$BEFORE" "$GITHUB_SHA")"
           fi
@@ -108,7 +108,6 @@ jobs:
           grep -q '^api/' <<<"$files" && components="$components api"
           grep -q '^pipeline/' <<<"$files" && components="$components pipeline"
           grep -q '^web/' <<<"$files" && components="$components web"
-          grep -q '^deploy/keycloak/' <<<"$files" && components="$components keycloak"
           echo "components=${components# }" >> "$GITHUB_OUTPUT"
           echo "Deploying: ${components:-nothing}"
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5

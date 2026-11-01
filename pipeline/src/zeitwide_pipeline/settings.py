@@ -40,7 +40,7 @@ class Settings(FetchSettings):
     backup_bucket: str | None = None
     backup_db_user: str | None = None
     backup_db_password: SecretStr | None = None
-    # Comma-separated, such as "zeitwide,keycloak".
+    # Comma-separated, such as "zeitwide".
     backup_databases: str = ""
     dataset_repository: str | None = None
     github_token: SecretStr | None = Field(default=None, validation_alias="GITHUB_TOKEN")

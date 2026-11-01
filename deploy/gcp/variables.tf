@@ -116,26 +116,20 @@ variable "api_base_url" {
   default     = null
 }
 
-variable "auth_base_url" {
-  description = "Public base URL of Keycloak once a custom domain is mapped. Null uses the service's deterministic run.app URL."
-  type        = string
-  default     = null
-}
-
 variable "google_client_id" {
-  description = "Google OAuth client ID for Keycloak's identity provider."
+  description = "Google OAuth client ID for sign-in. Empty hides the Google button."
   type        = string
   default     = ""
 }
 
 variable "microsoft_client_id" {
-  description = "Microsoft Entra OAuth client ID for Keycloak's identity provider."
+  description = "Microsoft Entra OAuth client ID for sign-in. Empty hides the Microsoft button."
   type        = string
   default     = ""
 }
 
 variable "github_client_id" {
-  description = "GitHub OAuth application client ID for Keycloak's identity provider."
+  description = "GitHub OAuth application client ID for sign-in. Empty hides the GitHub button."
   type        = string
   default     = ""
 }
@@ -193,14 +187,32 @@ variable "bootstrap_job_image" {
 # The API's and web app's startup probes call their health endpoints, which the bootstrap
 # image doesn't serve, so a service created from it never becomes ready. Pass the real
 # images when a service or the job is (re)created, for example
-# -var 'initial_images={api="…/api:TAG",web="…/web:TAG",keycloak="…",pipeline="…"}'.
+# -var 'initial_images={api="…/api:TAG",web="…/web:TAG",pipeline="…"}'.
 variable "initial_images" {
-  description = "Images by component (api, web, keycloak, pipeline), used only at creation; missing ones fall back to the bootstrap images."
+  description = "Images by component (api, web, pipeline), used only at creation; missing ones fall back to the bootstrap images."
   type        = map(string)
   default     = {}
 
   validation {
-    condition     = alltrue([for name in keys(var.initial_images) : contains(["api", "web", "keycloak", "pipeline"], name)])
-    error_message = "initial_images keys are api, web, keycloak and pipeline."
+    condition     = alltrue([for name in keys(var.initial_images) : contains(["api", "web", "pipeline"], name)])
+    error_message = "initial_images keys are api, web and pipeline."
   }
+}
+
+
+variable "api_min_instances" {
+  description = "API instances kept running. 0 scales to zero, so the first call after a quiet spell waits 20 to 30 seconds for the JVM; 1 removes that wait and costs roughly USD 10 a month."
+  type        = number
+  default     = 0
+
+  validation {
+    condition     = var.api_min_instances >= 0 && var.api_min_instances <= 2
+    error_message = "api_min_instances is between 0 and 2 (the service's maximum)."
+  }
+}
+
+variable "reviewer_emails" {
+  description = "Email addresses allowed to review changes in the admin screens. Only a verified Google or GitHub address counts."
+  type        = list(string)
+  default     = []
 }

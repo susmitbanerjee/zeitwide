@@ -24,13 +24,12 @@ secret() {
 [ -s "$CA_FILE" ] || { echo "No CA certificate at $CA_FILE" >&2; exit 1; }
 grep -q "BEGIN CERTIFICATE" "$CA_FILE" || { echo "$CA_FILE is not a PEM certificate" >&2; exit 1; }
 
-export DB_HOST DB_PORT API_PASSWORD PIPELINE_PASSWORD BACKUP_PASSWORD KEYCLOAK_PASSWORD PGPASSWORD
+export DB_HOST DB_PORT API_PASSWORD PIPELINE_PASSWORD BACKUP_PASSWORD PGPASSWORD
 DB_HOST="$(secret db-host)"
 DB_PORT="$(secret db-port)"
 API_PASSWORD="$(secret db-api-password)"
 PIPELINE_PASSWORD="$(secret db-pipeline-password)"
 BACKUP_PASSWORD="$(secret db-backup-password)"
-KEYCLOAK_PASSWORD="$(secret db-keycloak-password)"
 read -rsp "avnadmin password for $DB_HOST: " PGPASSWORD
 echo
 
@@ -41,14 +40,14 @@ CA_MOUNT="$(cd "$(dirname "$CA_FILE")" && pwd -W 2>/dev/null || pwd)/$(basename 
 docker run --rm -i \
   -v "$CA_MOUNT:/ca.pem:ro" \
   -e DB_HOST -e DB_PORT -e PGPASSWORD \
-  -e API_PASSWORD -e PIPELINE_PASSWORD -e BACKUP_PASSWORD -e KEYCLOAK_PASSWORD \
+  -e API_PASSWORD -e PIPELINE_PASSWORD -e BACKUP_PASSWORD \
   "$PSQL_IMAGE" sh -c '
     psql "host=$DB_HOST port=$DB_PORT user=avnadmin dbname=defaultdb sslmode=verify-full sslrootcert=/ca.pem" \
       -v api_password="$API_PASSWORD" -v pipeline_password="$PIPELINE_PASSWORD" \
-      -v backup_password="$BACKUP_PASSWORD" -v keycloak_password="$KEYCLOAK_PASSWORD" \
+      -v backup_password="$BACKUP_PASSWORD" \
       -f /dev/stdin
   ' < "$HERE/setup.sql"
-unset PGPASSWORD API_PASSWORD PIPELINE_PASSWORD BACKUP_PASSWORD KEYCLOAK_PASSWORD
+unset PGPASSWORD API_PASSWORD PIPELINE_PASSWORD BACKUP_PASSWORD
 
 # The connection above already proved this CA verifies Aiven's certificate and hostname.
 if "$GCLOUD" secrets versions list "zeitwide-$ENVIRONMENT-db-ca-cert" --project "$PROJECT" \

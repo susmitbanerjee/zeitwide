@@ -61,7 +61,7 @@ ReviewerOption = Annotated[
     str,
     typer.Option(
         envvar="ZEITWIDE_REVIEWER",
-        help="Who decides; recorded with the decision (the web screen records Keycloak's ID).",
+        help="Who decides; recorded with the decision (the web screen records their sign-in ID).",
     ),
 ]
 ReasonOption = Annotated[str, typer.Option(help="Why; recorded with the decision.")]

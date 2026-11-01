@@ -12,33 +12,26 @@ locals {
   # pool caps below keep the worst case at 16 (README has the table).
   db = {
     zeitwide_database = "zeitwide"
-    keycloak_database = "keycloak"
     api_user          = "zeitwide_api"
     pipeline_user     = "zeitwide_pipeline"
     backup_user       = "zeitwide_backup"
-    keycloak_user     = "keycloak"
     api_pool_max      = 4
     pipeline_pool_max = 2
-    keycloak_pool_max = 3
   }
 
   db_ca_mount_dir = "/secrets/db-ca"
   db_ca_file      = "${local.db_ca_mount_dir}/ca.pem"
 
   max_instances = {
-    api      = 2
-    web      = 2
-    keycloak = 1
+    api = 2
+    web = 2
   }
-
-  realm = "zeitwide"
 
   # Runtime identities. Scheduler jobs get their own two accounts so the token that
   # can start the pipeline is never the one sent to the API.
   service_accounts = {
     api         = "Cloud Run service zeitwide-api"
     web         = "Cloud Run service zeitwide-web"
-    keycloak    = "Cloud Run service keycloak"
     pipeline    = "Cloud Run job zeitwide-pipeline"
     sched-run   = "Cloud Scheduler: starts the pipeline job"
     sched-drain = "Cloud Scheduler: calls the API outbox drain"
@@ -48,20 +41,20 @@ locals {
   # Secret containers only. Values are added by hand (README), never in code.
   # Each secret lists the runtime accounts that may read it.
   secrets = {
-    "db-host"                       = ["api", "pipeline", "keycloak"]
-    "db-port"                       = ["api", "pipeline", "keycloak"]
-    "db-ca-cert"                    = ["api", "pipeline", "keycloak"]
+    "db-host"                       = ["api", "pipeline"]
+    "db-port"                       = ["api", "pipeline"]
+    "db-ca-cert"                    = ["api", "pipeline"]
     "db-api-password"               = ["api"]
     "db-pipeline-password"          = ["pipeline"]
     "db-backup-password"            = ["pipeline"]
-    "db-keycloak-password"          = ["keycloak"]
-    "keycloak-admin-password"       = ["keycloak"]
-    "google-oauth-client-secret"    = ["keycloak"]
-    "microsoft-oauth-client-secret" = ["keycloak"]
-    "github-oauth-client-secret"    = ["keycloak"]
+    "google-oauth-client-secret"    = ["web"]
+    "microsoft-oauth-client-secret" = ["web"]
+    "github-oauth-client-secret"    = ["web"]
     "webhook-encryption-key"        = ["api"]
     "receipt-signing-key"           = ["api"]
     "web-auth-secret"               = ["web"]
+    # Signs and checks the short-lived tokens the web app sends the API (add-secret.sh).
+    "api-token-secret" = ["api", "web"]
     # The web app's own API key (create-web-api-key.sh), for prerendering answer pages.
     "web-api-key"          = ["web"]
     "otlp-headers"         = ["api", "pipeline", "web"]
@@ -79,12 +72,6 @@ locals {
     var.api_base_url,
     "https://${local.app}-api-${local.env}-${data.google_project.this.number}.${var.region}.run.app"
   )
-
-  # Cloud Run's deterministic URL, known before the service exists, so Keycloak can
-  # be told its own hostname.
-  keycloak_run_url = "https://keycloak-${local.env}-${data.google_project.this.number}.${var.region}.run.app"
-  auth_url         = coalesce(var.auth_base_url, local.keycloak_run_url)
-  issuer           = "${local.auth_url}/realms/${local.realm}"
 
   # Public pages go through Firebase Hosting (web_origin); signed-in pages need cookies, so
   # they're served from the web service's own URL, known before the service exists. The names

@@ -15,7 +15,7 @@ The Zeitwide MVP has three parts: Python ingests and verifies calendar data, Pos
 | Snapshots | Google Cloud Storage (fake-gcs-server locally) | Raw source pages stored by SHA-256 for provenance (M1) |
 | Cache and limits | Caffeine in-process cache; rate limits in Postgres (Bucket4j) | Rate limits per key, hot-answer cache |
 | Job queue | Postgres-backed queue (Procrastinate) | One less system to run; jobs share the database's transactions |
-| Auth | Keycloak | Open source; Google, Microsoft, GitHub, SAML/OIDC SSO, and OAuth for MCP clients |
+| Auth | Auth.js in the web app | Google, Microsoft and GitHub sign-in with no identity server to run; the API trusts short-lived tokens the web app signs |
 | Observability | OpenTelemetry → Grafana Cloud free plan (metrics, logs, traces, Faro) | You asked for Grafana; OTel keeps code vendor-neutral |
 | Billing | None in MVP; `plan` and `entitlements` tables from day one | Free adoption now; paid plans later without a migration |
 
@@ -72,7 +72,7 @@ A GiST exclusion constraint on `(calendar_id, entry_date, recorded_during)` stop
 | `change_event` | Type, calendar, date, before/after JSON, notice days, published at | Publish step |
 | `outbox` | Events waiting for webhook delivery | Publish step |
 | `dataset_release` | Release ID, created at, calendar revisions, export checksum | Release builder |
-| `account`, `app_user` | Organization, members, Keycloak subject ID, `plan` = `free` | Java |
+| `account`, `app_user` | Organization, members, sign-in subject (`google:1234`), `plan` = `free` | Java |
 | `api_key` | Prefix, SHA-256 of the secret, scopes, last used, revoked at | Java |
 | `webhook_subscription`, `webhook_delivery` | Endpoint, secret, event filter; attempts and responses | Java |
 | `entitlement` | Plan to feature limits (empty checks in MVP) | Java |
@@ -84,7 +84,7 @@ Receipts are stateless and are never written to Postgres: their payload and sign
 All three surfaces in the mockups (REST, MCP and webhooks) live in one Spring Boot service and call the same `AnswerEngine` class, so a person and an agent can never get different dates.
 
 - **REST API (v1).** Check a date, add business days, list calendars and closures, page through changes, and verify receipts. Answer routes accept `as_of`; their responses carry the effective instant, dataset release, per-calendar revisions and a receipt. `GET /v1/changes` filters by calendars, `since` and event types, and uses an opaque keyset cursor. Spring MVC on virtual threads (Java 21). Define the contract in OpenAPI and generate the Python and TypeScript clients from it.
-- **Hosted MCP server.** The six tools from the C2 mockup, built on the official MCP Java SDK (Spring AI MCP server) over Streamable HTTP at `/mcp`. Each tool is a thin wrapper over `AnswerEngine` with a strict JSON schema and returns the same structured answer, sources and receipt as REST. MCP clients can use an API key or Keycloak OAuth 2.1 bearer token; path-specific protected-resource metadata points to Keycloak. Server instructions tell agents to use source citations, retain receipts and check `get_changes` before acting on old dates.
+- **Hosted MCP server.** The six tools from the C2 mockup, built on the official MCP Java SDK (Spring AI MCP server) over Streamable HTTP at `/mcp`. Each tool is a thin wrapper over `AnswerEngine` with a strict JSON schema and returns the same structured answer, sources and receipt as REST. MCP clients send an API key as a bearer token.
 - **Local MCP server.** Shipped in Python inside the open library and run with `uvx zeitwide-mcp --offline` on the bundled dataset. *This changes the mockup, which showed `npx`, to keep the stack to Java and Python.*
 - **Webhooks.** Authenticated accounts manage subscriptions with `GET/POST /v1/account/webhooks`, `PUT/DELETE /v1/account/webhooks/{id}`, and `POST /v1/account/webhooks/{id}/test`. A create response shows the signing secret once; the database keeps only its AES-GCM ciphertext under a key from Secret Manager. Accept HTTPS URLs only, resolve every address before saving and before delivery, reject private, loopback, link-local and metadata ranges, and pin that validated DNS answer for the request. The HTTP client follows no redirects and uses a five-second timeout. Cloud Scheduler calls `POST /internal/outbox/drain` every minute. It claims rows with `FOR UPDATE SKIP LOCKED`, fans out only to matching event and calendar subscriptions, sends stable event IDs and a timestamped HMAC-SHA256 `Zeitwide-Signature` header, and records every attempt in `webhook_delivery`. Failed deliveries use exponential backoff for up to 24 hours, then become terminal failures. A receiver can deduplicate retries by event ID.
 - **Receipts.** Every answer gets a self-contained receipt over RFC 8785 canonical JSON for `{request, answer, dataset_release, calendar_revisions, issued_at}`. Its SHA-256 payload hash and Ed25519 signature are returned with the payload; `POST /v1/receipts/verify` checks it without a receipt lookup or database row. Keep the PKCS#8 private key in GCP Secret Manager, never in Postgres. `GET /.well-known/zeitwide-keys.json` publishes the SPKI public key ring with each key's validity interval. On rotation, deploy the new active key and keep prior public keys in the ring so older receipts still verify. The JDK's built-in Ed25519 provider signs and verifies receipts.
@@ -93,19 +93,20 @@ All three surfaces in the mockups (REST, MCP and webhooks) live in one Spring Bo
 
 ## Auth
 
-Use **Keycloak**, self-hosted. It's open source (Apache 2.0) and a CNCF project, it runs on the same JVM skills as the API, and one install covers everything you listed. You never store passwords.
+There is no identity server. The web app signs people in with **Auth.js**, straight to Google, Microsoft and GitHub, so Zeitwide never stores a password and there is nothing extra to run, start or pay for.
 
-| Need | How Keycloak covers it |
+| Need | How it is covered |
 | --- | --- |
-| Google, Microsoft, GitHub login | Built-in identity providers; users click a button, no Zeitwide password |
-| Enterprise SSO | Per-customer OIDC or SAML identity provider, mapped to that customer's account by email domain |
-| Web app sessions | Next.js uses OIDC with PKCE; Spring Boot validates the access token as a resource server |
-| MCP clients | Keycloak acts as the OAuth 2.1 authorization server that the MCP spec expects, with dynamic client registration |
-| Admin review screen | A Keycloak role `reviewer`, required by the admin routes |
+| Google, Microsoft, GitHub login | Auth.js providers; a button shows only when its OAuth app is configured |
+| Web app sessions | An encrypted, httpOnly session cookie holding who the person is and their roles |
+| Calls to the API | The web app's server signs a one-minute HS256 token (issuer, audience, subject, roles) for each call; the API checks the signature, issuer, audience and lifetime, and the browser never holds one |
+| Admin review screen | The `reviewer` role, given at sign-in to a verified Google or GitHub address on the `reviewer_emails` list |
+| MCP clients | An API key as a bearer token on `/mcp` |
+| Enterprise SSO | A Microsoft work account signs in through the same Microsoft button; per-customer SAML is future work |
 
-API keys stay outside Keycloak because they are for machines, not people. Keys look like `zw_live_…`. Store only the prefix and a SHA-256 hash of the secret, and show the full key once. The API accepts either a Keycloak token or an API key, and both resolve to the same account.
+API keys are for machines, not people. Keys look like `zw_live_…`. Store only the prefix and a SHA-256 hash of the secret, and show the full key once. The API accepts either a web-signed token or an API key, and both resolve to the same account.
 
-Alternatives, if Keycloak feels heavy to run: **Zitadel** (lighter, built for multi-tenant SaaS) or **Authentik** (simpler admin UI). Both cover the same logins and SSO. Avoid building login yourself or tying the MVP to a paid identity service you would have to move off later.
+An address that fails a key check too often is turned away before the database is asked. OAuth for MCP clients (an authorization server with dynamic client registration) is not built; add one when a client needs it.
 
 ## Frontend
 
@@ -114,7 +115,7 @@ Build one Next.js app (React 19, TypeScript) with three areas. A plain single-pa
 | Area | Screens from the mockups | Rendering | Auth |
 | --- | --- | --- | --- |
 | Public answer pages | A1, calendar year pages | Static generation, refreshed when a release is cut | None |
-| App | A2 explorer, A3 evidence, A4 calculator, A5 time travel, A6 changes, C1 keys and webhooks, C2 MCP setup | Client components calling the API | Keycloak login |
+| App | A2 explorer, A3 evidence, A4 calculator, A5 time travel, A6 changes, C1 keys and webhooks, C2 MCP setup | Client components calling the API | Sign-in |
 | Admin | Review queue, source health, releases | Client components | `reviewer` role |
 | Docs | C3, C4 API reference | Static pages generated from the OpenAPI file | None |
 
@@ -169,12 +170,12 @@ zeitwide/
   web/            Next.js: answer pages, app, admin, docs
   conformance/    golden test cases both languages must pass
   dataset/        exported releases (mirrored to the public data repo)
-  deploy/         Docker Compose, Keycloak realm, Alloy and Grafana config
+  deploy/         Docker Compose, GCP config, Alloy and Grafana config
 ```
 
 **Deployment on GCP, for about $12–15 a month.** Everything lives in us-central1:
 
-- The API, web app and Keycloak run as Cloud Run services that scale to zero.
+- The API and web app run as Cloud Run services that scale to zero.
 - The pipeline runs as Cloud Run Jobs, started by Cloud Scheduler.
 - Cloud SQL `db-f1-micro` holds both databases.
 - Cloud Storage holds snapshots.
@@ -193,5 +194,5 @@ The MVP covers Fedwire, FedACH, FedNow, T2 and CHAPS, plus US federal, England a
 | A source page changes layout and a parser breaks silently | Freshness alerts, fail loudly after 3 bad parses, keep the snapshot |
 | Two languages slow one person down | Python only in the pipeline and library; all serving in Java; generated clients |
 | Wrong date published | Two-source rule, review step, and `basis: projected` when an operator hasn't published |
-| Running Keycloak is a chore | Run its official container image with the realm exported to git; Zitadel is the fallback |
+| Cold starts | Scale-to-zero services take up to 30 seconds to start, so the site wakes the API when a visitor arrives |
 | Source terms of use | Check each source's reuse terms before adding it; store facts and links, not copied page text |

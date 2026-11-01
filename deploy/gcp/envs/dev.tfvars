@@ -34,7 +34,11 @@ api_base_url = "https://api.zeitwide.com"
 
 # otlp_endpoint = "https://otlp-gateway-prod-us-central-0.grafana.net/otlp"
 
-# OAuth client IDs for Keycloak's Google and Microsoft sign-in (public; the secrets are in
-# Secret Manager). A running realm also needs keycloak-identity-provider.sh.
+# OAuth client IDs for sign-in (public; the secrets are in Secret Manager). Callback URLs:
+# https://zeitwide.com/api/auth/callback/google and /microsoft. A provider with no client ID
+# gets no button, so GitHub stays hidden until github_client_id is set.
 google_client_id    = "18853622142-q9lb6915a8pldfqt4arhib3einmkkvba.apps.googleusercontent.com"
 microsoft_client_id = "89e130c0-2fa4-426a-b847-10fba84277c0"
+
+# Who may review changes in the admin screens: a verified Google or GitHub address.
+reviewer_emails = ["susmit.b1@gmail.com"]

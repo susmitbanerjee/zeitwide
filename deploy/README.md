@@ -4,49 +4,49 @@ Local and deployment configuration.
 
 | Path | What |
 | --- | --- |
-| `../docker-compose.yml` | Local stack: Postgres 18, Keycloak, fake GCS |
-| `postgres/init/` | Creates the Keycloak database on first Postgres start |
-| `keycloak/realm.json` | The `zeitwide` realm, imported on Keycloak start |
-| `keycloak/branding/` | Zeitwide logo for the Google and Microsoft OAuth consent screens |
+| `../docker-compose.yml` | Local stack: Postgres 18 and a fake GCS server |
+| `branding/` | Zeitwide logo for the Google and Microsoft OAuth consent screens |
 | `fake-gcs/` | Buckets pre-created in the fake GCS server (one folder per bucket) |
 | `gcp/` | OpenTofu for the dev and prod GCP environments; its README lists every manual step |
+| `firebase/` | Firebase Hosting config (kept for the `*.web.app` site; the apex domain goes straight to Cloud Run) |
 
-For local Google, Microsoft, or GitHub login, copy `.env.example` to `.env`, create OAuth
-apps with callback URLs such as `http://localhost:8180/realms/zeitwide/broker/google/endpoint`,
-and fill their client IDs and secrets into `.env` before the first Keycloak start. Run
-`docker compose up -d keycloak` and open `http://localhost:8180/realms/zeitwide/account/`.
+## Sign-in apps
+
+Zeitwide has no identity server. The web app signs people in with Google, Microsoft or
+GitHub through Auth.js, so each provider needs an OAuth app whose callback URL is the web
+app's: `<site>/api/auth/callback/<provider>`, where `<site>` is `https://zeitwide.com` (or
+`http://localhost:3000` locally) and `<provider>` is `google`, `microsoft` or `github`. A
+button appears only for a provider whose client ID is set.
 
 - **Google:** Google Cloud console > APIs & Services > OAuth consent screen (External,
   scopes `openid`, `email`, `profile`), then Credentials > Create credentials > OAuth
-  client ID > Web application. Add the authorized redirect URI
-  `http://localhost:8180/realms/zeitwide/broker/google/endpoint`. Copy the client ID and
-  secret into `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`.
+  client ID > Web application. Authorized redirect URI
+  `https://zeitwide.com/api/auth/callback/google`.
 - **Microsoft:** Microsoft Entra admin center > App registrations > New registration.
-  Supported account types: any organizational directory and personal Microsoft accounts
-  (Keycloak uses the `common` endpoint). Platform Web, redirect URI
-  `http://localhost:8180/realms/zeitwide/broker/microsoft/endpoint`. Copy the
-  Application (client) ID into `MICROSOFT_CLIENT_ID`, then Certificates & secrets > New
-  client secret and copy its **Value** (not the Secret ID) into `MICROSOFT_CLIENT_SECRET`.
-  Microsoft emails aren't verified, so the realm doesn't trust them (`trustEmail: false`).
+  Supported account types: any organizational directory and personal Microsoft accounts.
+  Platform Web, redirect URI `https://zeitwide.com/api/auth/callback/microsoft`. Copy the
+  Application (client) ID, then Certificates & secrets > New client secret and copy its
+  **Value** (not the Secret ID). Microsoft doesn't verify email addresses, so a Microsoft
+  sign-in can never be a reviewer.
+- **GitHub:** Settings > Developer settings > OAuth Apps > New OAuth App. Authorization
+  callback URL `https://zeitwide.com/api/auth/callback/github`.
 
-Google and Microsoft show the name and logo set on the OAuth app itself, not anything
-Keycloak sends, so set them in each console. The logos are in `keycloak/branding/`:
+For local work add `http://localhost:3000/api/auth/callback/<provider>` as a second
+redirect URI, and put the IDs and secrets in `web/.env.local` (see `web/.env.example`).
+For dev and prod, the client IDs go in `deploy/gcp/envs/*.tfvars` and the secrets in
+Secret Manager (see `gcp/README.md`).
+
+Google and Microsoft show the name and logo set on the OAuth app itself, so set them in
+each console. The logos are in `branding/`:
 
 - **Google:** Google Auth Platform > Branding. App name `Zeitwide`, app logo
   `zeitwide-logo-120.png`, support email, and the home, privacy policy and terms links.
-  Add the domain that serves Keycloak under authorized domains. Google shows the logo
-  only after it verifies the brand (Verification centre), so until then the screen shows
-  the name alone. Keep the app in Testing with listed test users until it is verified.
+  Add `zeitwide.com` under authorized domains. Google shows the logo only after it
+  verifies the brand (Verification centre), so until then the screen shows the name alone.
+  Keep the app in Testing with listed test users until it is verified.
 - **Microsoft:** the app registration > Branding & properties. Name `Zeitwide`, logo
   `zeitwide-logo-215.png` (215 x 215, under 100 KB), home page and terms and privacy
   links. Microsoft labels the app "unverified" until you complete publisher verification
   (a verified Microsoft AI Cloud Partner Program ID) and set a verified publisher domain.
-
-Keycloak imports the realm only when it doesn't exist yet. If it already started without
-these values, either paste the ID and secret into the admin console (realm `zeitwide` >
-Identity providers > google or microsoft) or reset it with `docker compose down`, drop
-the `keycloak` database, and start again. For dev and prod, the client IDs go in
-`deploy/gcp/envs/*.tfvars` and the secrets in Secret Manager (see `gcp/README.md`), with
-the deployed Keycloak URL in place of `http://localhost:8180`.
 
 Alloy and Grafana configuration land here once observability is wired up.

@@ -35,7 +35,7 @@ check-web:
 	cd web && npm ci --no-audit --no-fund && npm run check
 
 # Playwright (with axe) and Lighthouse against a production build, the fake API in
-# web/e2e/mock-api and the local Keycloak. Needs `make up` first.
+# web/e2e/mock-api, signing in with the app's test-only sign-in.
 e2e-web:
 	cd web && npx playwright install chromium
 	cd web && npm run e2e:build

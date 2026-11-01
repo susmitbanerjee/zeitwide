@@ -37,7 +37,7 @@ folder trust prompt once). After editing a skill, run `/reload-plugins`.
 | `web/` | Answer pages, app, admin, docs | Next.js, React, TypeScript strict |
 | `conformance/` | Golden cases both languages must pass | JSON |
 | `dataset/` | Exported dataset releases | JSON |
-| `deploy/` | Keycloak realm, Postgres init, fake GCS buckets | |
+| `deploy/` | GCP and Firebase config, OAuth app logos, fake GCS buckets | OpenTofu, shell |
 | `plugins/` | Claude Code plugins (coding-standard skills), listed in `.claude-plugin/marketplace.json` | Markdown, JSON |
 
 ## Running locally
@@ -49,15 +49,19 @@ regenerates `web/src/api/schema.ts` and `lib-python/src/zeitwide/api_types.py` (
 both fail while they are stale, and an `api/` test fails if the controllers and the file
 disagree).
 
-**Local stack** (Postgres 18 on 5432, Keycloak on 8180, fake GCS on 4443):
+**Local stack** (Postgres 18 on 5432, fake GCS on 4443):
 
 ```bash
 docker compose up -d --wait   # or: make up
 docker compose down           # or: make down
 ```
 
-Keycloak admin console: http://localhost:8180 (admin / admin locally; override in `.env`,
-see `.env.example`). Realm `zeitwide`, public client `zeitwide-web`, role `reviewer`.
+Sign-in: there is no identity server. The web app signs people in with Google, Microsoft
+or GitHub through Auth.js and signs a short-lived token for each call it makes to the API
+(`ZEITWIDE_API_TOKEN_SECRET` in `web/`, `ZEITWIDE_AUTH_TOKEN_SECRET` in `api/`: the same
+value). Copy `web/.env.example` to `web/.env.local`; `ZEITWIDE_TEST_LOGIN=1` adds test
+sign-in buttons that need no Google account (localhost only). The API refuses to start
+without its token secret, so export one before `./gradlew bootRun`.
 
 **api/** needs a JDK 17+ as `JAVA_HOME` to run Gradle; it compiles with a Java 21 toolchain.
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Builds the four images from this checkout, pushes them to Artifact Registry and rolls
-# them out: the API first (it runs the Flyway migrations), then the pipeline job, the
-# web app and Keycloak. Use it when CI can't deploy.
+# Builds the three images from this checkout, pushes them to Artifact Registry and rolls
+# them out: the API first (it runs the Flyway migrations), then the pipeline job and the
+# web app. Use it when CI can't deploy.
 #
-#   bash deploy/gcp/deploy-images.sh            # all four
+#   bash deploy/gcp/deploy-images.sh            # all three
 #   bash deploy/gcp/deploy-images.sh api web    # only these
 #
 # Needs Docker, a JDK 17+ as JAVA_HOME, and `gcloud auth configure-docker
@@ -18,7 +18,7 @@ REPOSITORY="$REGION-docker.pkg.dev/$PROJECT/zeitwide-$ENVIRONMENT"
 ROOT="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 # A -dirty suffix marks images built from uncommitted changes.
 TAG="${TAG:-$(git -C "$ROOT" describe --always --dirty --abbrev=12)}"
-if [ "$#" -gt 0 ]; then COMPONENTS=("$@"); else COMPONENTS=(api pipeline web keycloak); fi
+if [ "$#" -gt 0 ]; then COMPONENTS=("$@"); else COMPONENTS=(api pipeline web); fi
 
 if command -v gcloud.cmd >/dev/null 2>&1; then GCLOUD=gcloud.cmd; else GCLOUD=gcloud; fi
 gcloud_run() { "$GCLOUD" run "$@" --project "$PROJECT" --region "$REGION" --quiet; }
@@ -39,8 +39,7 @@ build_and_push() {
       DOCKER_BUILDKIT=1 docker build --platform linux/amd64 -t "$image"         --build-arg ZEITWIDE_API_URL="$api_url"         --build-arg SITE_URL="${SITE_URL:?set SITE_URL to the public web origin}"         --secret id=zeitwide_api_key,src="$(cygpath -w "$key_file" 2>/dev/null || echo "$key_file")"         "$ROOT/web" || { rm -f "$key_file"; exit 1; }
       rm -f "$key_file"
       ;;
-    keycloak) docker build --platform linux/amd64 -t "$image" "$ROOT/deploy/keycloak" ;;
-    *) echo "Unknown component: $name (api, pipeline, web or keycloak)" >&2; exit 1 ;;
+    *) echo "Unknown component: $name (api, pipeline or web)" >&2; exit 1 ;;
   esac
   docker push --quiet "$image"
 }
@@ -50,7 +49,6 @@ roll_out() {
   echo "==> $name: deploying"
   case "$name" in
     api | web) gcloud_run services update "zeitwide-$name-$ENVIRONMENT" --image="$image" ;;
-    keycloak) gcloud_run services update "keycloak-$ENVIRONMENT" --image="$image" ;;
     pipeline) gcloud_run jobs update "zeitwide-pipeline-$ENVIRONMENT" --image="$image" ;;
   esac
 }

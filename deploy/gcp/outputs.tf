@@ -1,9 +1,8 @@
 output "service_urls" {
   description = "run.app URLs of the Cloud Run services."
   value = {
-    api      = google_cloud_run_v2_service.api.uri
-    web      = google_cloud_run_v2_service.web.uri
-    keycloak = google_cloud_run_v2_service.keycloak.uri
+    api = google_cloud_run_v2_service.api.uri
+    web = google_cloud_run_v2_service.web.uri
   }
 }
 

@@ -45,13 +45,12 @@ resource "google_cloud_run_v2_job_iam_member" "scheduler_runs_pipeline" {
   member   = google_service_account.this["sched-run"].member
 }
 
-# The API, web app and Keycloak are public at the Cloud Run layer; the apps do
+# The API and web app are public at the Cloud Run layer; the apps do
 # their own auth. /internal/outbox/drain checks the scheduler's OIDC token in the API.
 resource "google_cloud_run_v2_service_iam_member" "public" {
   for_each = {
-    api      = google_cloud_run_v2_service.api.name
-    web      = google_cloud_run_v2_service.web.name
-    keycloak = google_cloud_run_v2_service.keycloak.name
+    api = google_cloud_run_v2_service.api.name
+    web = google_cloud_run_v2_service.web.name
   }
 
   name     = each.value
@@ -71,9 +70,8 @@ resource "google_artifact_registry_repository_iam_member" "deployer_push" {
 
 resource "google_cloud_run_v2_service_iam_member" "deployer_services" {
   for_each = {
-    api      = google_cloud_run_v2_service.api.name
-    web      = google_cloud_run_v2_service.web.name
-    keycloak = google_cloud_run_v2_service.keycloak.name
+    api = google_cloud_run_v2_service.api.name
+    web = google_cloud_run_v2_service.web.name
   }
 
   name     = each.value
@@ -91,7 +89,7 @@ resource "google_cloud_run_v2_job_iam_member" "deployer_pipeline" {
 
 # Rolling out a revision means acting as that revision's runtime account.
 resource "google_service_account_iam_member" "deployer_acts_as_runtime" {
-  for_each = toset(["api", "web", "keycloak", "pipeline"])
+  for_each = toset(["api", "web", "pipeline"])
 
   service_account_id = google_service_account.this[each.key].name
   role               = "roles/iam.serviceAccountUser"

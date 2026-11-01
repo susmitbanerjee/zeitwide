@@ -23,7 +23,7 @@ Use this skill together with the language skills (`java-spring-best-practices`,
 
 ## 2. Design for change
 
-- Depend on interfaces at boundaries (ports), not on vendors. GCP, Keycloak and Grafana
+- Depend on interfaces at boundaries (ports), not on vendors. GCP, Auth.js and Grafana
   can be swapped behind adapters.
 - Use these patterns when the problem calls for them:
 
