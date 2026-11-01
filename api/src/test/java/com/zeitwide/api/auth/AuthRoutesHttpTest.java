@@ -87,6 +87,39 @@ class AuthRoutesHttpTest {
   }
 
   @Test
+  void responsesTellBrowsersToUseHttpsAndNeverLoadAnything() throws Exception {
+    mvc.perform(get(ANSWER_PROBE))
+        .andExpect(
+            header().string("Strict-Transport-Security", "max-age=63072000 ; includeSubDomains"))
+        .andExpect(
+            header()
+                .string("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'"));
+  }
+
+  @Test
+  void anAddressThatKeepsSendingInvalidKeysIsTurnedAwayBeforeTheDatabaseIsAsked() throws Exception {
+    String unknownKey = "Bearer zw_live_AbCd1234_" + "B".repeat(43);
+    for (int attempt = 0; attempt < 30; attempt++) {
+      mvc.perform(get(ANSWER_PROBE).header("Authorization", unknownKey).with(from("203.0.113.50")))
+          .andExpect(status().isUnauthorized())
+          .andExpect(jsonPath("$.code").value("invalid_api_key"));
+    }
+    mvc.perform(get(ANSWER_PROBE).header("Authorization", unknownKey).with(from("203.0.113.50")))
+        .andExpect(status().isTooManyRequests())
+        .andExpect(header().exists("Retry-After"));
+    mvc.perform(get(ANSWER_PROBE).header("Authorization", unknownKey).with(from("203.0.113.51")))
+        .andExpect(status().isUnauthorized());
+  }
+
+  private static org.springframework.test.web.servlet.request.RequestPostProcessor from(
+      String address) {
+    return request -> {
+      request.setRemoteAddr(address);
+      return request;
+    };
+  }
+
+  @Test
   void mcpPublishesProtectedResourceMetadataAndChallengesAnonymousClients() throws Exception {
     mvc.perform(get("/.well-known/oauth-protected-resource/mcp"))
         .andExpect(status().isOk())

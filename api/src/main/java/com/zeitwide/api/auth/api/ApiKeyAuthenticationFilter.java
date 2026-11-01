@@ -2,9 +2,12 @@ package com.zeitwide.api.auth.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zeitwide.api.auth.app.ApiKeyAuthenticator;
+import com.zeitwide.api.auth.app.InvalidKeyThrottle;
 import com.zeitwide.api.auth.domain.ApiKeyToken;
 import com.zeitwide.api.auth.domain.Caller;
 import com.zeitwide.api.mcp.app.McpProperties;
+import com.zeitwide.api.ratelimits.api.ClientAddress;
+import com.zeitwide.api.ratelimits.app.RateLimits;
 import com.zeitwide.api.web.ProblemCode;
 import com.zeitwide.api.web.Problems;
 import jakarta.servlet.FilterChain;
@@ -31,12 +34,20 @@ public final class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
   private final ApiKeyAuthenticator authenticator;
   private final ObjectMapper json;
   private final McpProperties mcpProperties;
+  private final InvalidKeyThrottle throttle;
+  private final RateLimits rateLimits;
 
   public ApiKeyAuthenticationFilter(
-      ApiKeyAuthenticator authenticator, ObjectMapper json, McpProperties mcpProperties) {
+      ApiKeyAuthenticator authenticator,
+      ObjectMapper json,
+      McpProperties mcpProperties,
+      InvalidKeyThrottle throttle,
+      RateLimits rateLimits) {
     this.authenticator = authenticator;
     this.json = json;
     this.mcpProperties = mcpProperties;
+    this.throttle = throttle;
+    this.rateLimits = rateLimits;
   }
 
   @Override
@@ -53,6 +64,18 @@ public final class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
       chain.doFilter(request, response);
       return;
     }
+    String address =
+        ClientAddress.of(
+            request.getRemoteAddr(),
+            request.getHeader("X-Forwarded-For"),
+            rateLimits.trustedProxies());
+    if (throttle.isBlocked(address)) {
+      response.setHeader(
+          HttpHeaders.RETRY_AFTER, Long.toString(InvalidKeyThrottle.retryAfterSeconds()));
+      writeProblem(
+          response, Problems.of(ProblemCode.RATE_LIMITED, "Too many invalid API keys; wait"));
+      return;
+    }
     Optional<Caller.Keyed> authenticated;
     try {
       authenticated = authenticator.authenticate(token);
@@ -63,6 +86,7 @@ public final class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
     if (authenticated.isEmpty()) {
+      throttle.recordFailure(address);
       String path = request.getRequestURI().substring(request.getContextPath().length());
       if (path.equals("/mcp")) {
         response.setHeader(

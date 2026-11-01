@@ -6,8 +6,10 @@ import com.zeitwide.api.auth.app.AccountJwtAuthenticationConverter;
 import com.zeitwide.api.auth.app.ApiKeyAuthenticator;
 import com.zeitwide.api.auth.app.AuthProperties;
 import com.zeitwide.api.auth.app.InternalAuthProperties;
+import com.zeitwide.api.auth.app.InvalidKeyThrottle;
 import com.zeitwide.api.auth.domain.ApiKeyToken;
 import com.zeitwide.api.mcp.app.McpProperties;
+import com.zeitwide.api.ratelimits.app.RateLimits;
 import com.zeitwide.api.web.CorsProperties;
 import com.zeitwide.api.web.ProblemCode;
 import com.zeitwide.api.web.Problems;
@@ -40,6 +42,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -94,6 +97,8 @@ public class SecurityConfiguration {
       InternalAuthProperties internalProperties,
       McpProperties mcpProperties,
       com.zeitwide.api.ratelimits.api.RateLimitFilter rateLimitFilter,
+      InvalidKeyThrottle invalidKeyThrottle,
+      RateLimits rateLimits,
       BearerTokenResolver resolver)
       throws Exception {
     AuthenticationEntryPoint authenticationEntryPoint =
@@ -118,13 +123,25 @@ public class SecurityConfiguration {
             internalProperties.audience(),
             internalProperties.serviceAccountEmail(),
             json);
-    var apiKeyFilter = new ApiKeyAuthenticationFilter(apiKeys, json, mcpProperties);
+    var apiKeyFilter =
+        new ApiKeyAuthenticationFilter(
+            apiKeys, json, mcpProperties, invalidKeyThrottle, rateLimits);
 
     return http.csrf(AbstractHttpConfigurer::disable)
         .cors(Customizer.withDefaults())
         .headers(
             headers ->
                 headers
+                    // Cloud Run ends TLS in front of the API, so the request looks plain
+                    // here; the header is for the browser, which ignores it over http.
+                    .httpStrictTransportSecurity(
+                        hsts ->
+                            hsts.requestMatcher(AnyRequestMatcher.INSTANCE)
+                                .maxAgeInSeconds(63_072_000)
+                                .includeSubDomains(true))
+                    // Every response is JSON: nothing in one should ever load or frame.
+                    .contentSecurityPolicy(
+                        csp -> csp.policyDirectives("default-src 'none'; frame-ancestors 'none'"))
                     .frameOptions(frame -> frame.deny())
                     .referrerPolicy(
                         referrer ->
