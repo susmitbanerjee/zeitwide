@@ -11,12 +11,12 @@ receipt_public_keys_json = "[{\"key_id\":\"sc-2026-10\",\"public_key\":\"-----BE
 # Public pages (Firebase Hosting). Signed-in pages use web_app_origin, which defaults to the
 # web service's run.app URL until app.zeitwide.com is mapped (deploy/firebase/README.md).
 web_origin = "https://zeitwide.com"
-# web_app_origin = "https://app.zeitwide.com"
-# web_app_domain = "app.zeitwide.com"
-# api_domain     = "api.zeitwide.com"
+web_app_origin = "https://app.zeitwide.com"
+web_app_domain = "app.zeitwide.com"
+api_domain     = "api.zeitwide.com"
 
 # The web app's own key (create-web-api-key.sh prints the ID), on the first-party limit.
-first_party_api_key_ids = []
+first_party_api_key_ids = ["a324246f-affc-4c94-a7d1-5adcb20456e8"]
 
 dataset_repository = "susmitbanerjee/zeit-dataset"
 bot_contact_url    = "https://github.com/susmitbanerjee/zeit-dataset#crawler"
@@ -29,7 +29,7 @@ budget_amount   = 900
 github_deploy_refs = ["refs/heads/main"]
 
 # Set once custom domains are mapped (README, step 11).
-# api_base_url  = "https://api.zeitwide.com"
+api_base_url  = "https://api.zeitwide.com"
 # auth_base_url = "https://auth.dev.example.com"
 
 # otlp_endpoint = "https://otlp-gateway-prod-us-central-0.grafana.net/otlp"

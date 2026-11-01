@@ -77,7 +77,7 @@ locals {
   api_url = coalesce(var.api_base_url, google_cloud_run_v2_service.api.uri)
   api_public_url = coalesce(
     var.api_base_url,
-    "https://${local.prefix}-api-${data.google_project.this.number}.${var.region}.run.app"
+    "https://${local.app}-api-${local.env}-${data.google_project.this.number}.${var.region}.run.app"
   )
 
   # Cloud Run's deterministic URL, known before the service exists, so Keycloak can
@@ -87,8 +87,10 @@ locals {
   issuer           = "${local.auth_url}/realms/${local.realm}"
 
   # Public pages go through Firebase Hosting (web_origin); signed-in pages need cookies, so
-  # they're served from the web service's own URL, known before the service exists.
-  web_run_url    = "https://${local.prefix}-web-${data.google_project.this.number}.${var.region}.run.app"
+  # they're served from the web service's own URL, known before the service exists. The names
+  # must match the services in cloud_run.tf (zeitwide-web-dev, not zeitwide-dev-web): a wrong
+  # host here sends every sign-in and /app link to a 404.
+  web_run_url    = "https://${local.app}-web-${local.env}-${data.google_project.this.number}.${var.region}.run.app"
   web_app_origin = coalesce(var.web_app_origin, local.web_run_url)
 
   # A fixed audience avoids a cycle: the API can't reference its own URL.

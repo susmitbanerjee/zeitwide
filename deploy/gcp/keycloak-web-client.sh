@@ -26,7 +26,7 @@ ADMIN_PASSWORD="$("$GCLOUD" secrets versions access latest \
   --secret "zeitwide-$ENVIRONMENT-keycloak-admin-password" --project "$PROJECT")"
 TOKEN="$(curl -fsS "$KEYCLOAK/realms/master/protocol/openid-connect/token" \
   --data-urlencode grant_type=password --data-urlencode client_id=admin-cli \
-  --data-urlencode username=bootstrap-admin --data-urlencode "password@-" <<< "$ADMIN_PASSWORD" |
+  --data-urlencode username=bootstrap-admin --data-urlencode "password@-" < <(printf '%s' "$ADMIN_PASSWORD") |
   python -I -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')"
 unset ADMIN_PASSWORD
 
