@@ -301,10 +301,9 @@ sign-in callbacks point there.
 
 1. Create the OAuth apps and register their callback URLs (`../README.md`), then put the
    client IDs in the tfvars and the secrets in Secret Manager (step 6).
-2. Add `api-token-secret` (step 6) before the first apply that references it: Cloud Run
-   won't start a revision whose secret has no value. Create just the container first with
-   `tofu apply -var-file=envs/dev.tfvars -target='google_secret_manager_secret.this["api-token-secret"]'`,
-   then add the value with `bash deploy/gcp/add-secret.sh api-token-secret`.
+2. Run `bash deploy/gcp/create-api-token-secret.sh` once. It creates `api-token-secret` with a
+   random value and hands it to OpenTofu, before the apply that first references it: Cloud
+   Run won't start a revision whose secret has no value.
 3. List who may review changes in `reviewer_emails`.
 
 ## Moving an environment from SettleCal to Zeitwide
