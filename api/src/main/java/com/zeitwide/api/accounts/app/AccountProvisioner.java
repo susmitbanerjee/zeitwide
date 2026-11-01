@@ -4,7 +4,7 @@ import com.zeitwide.api.accounts.domain.AccountIdentity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Creates the local account and owner membership on the first validated Keycloak login. */
+/** Creates the local account and owner membership on the first validated sign-in. */
 @Service
 public class AccountProvisioner {
 

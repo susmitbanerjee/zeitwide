@@ -5,7 +5,6 @@ import com.zeitwide.api.auth.app.ApiKeyAuthenticator;
 import com.zeitwide.api.auth.app.InvalidKeyThrottle;
 import com.zeitwide.api.auth.domain.ApiKeyToken;
 import com.zeitwide.api.auth.domain.Caller;
-import com.zeitwide.api.mcp.app.McpProperties;
 import com.zeitwide.api.ratelimits.api.ClientAddress;
 import com.zeitwide.api.ratelimits.app.RateLimits;
 import com.zeitwide.api.web.ProblemCode;
@@ -33,19 +32,16 @@ public final class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
   private static final String BEARER = "Bearer ";
   private final ApiKeyAuthenticator authenticator;
   private final ObjectMapper json;
-  private final McpProperties mcpProperties;
   private final InvalidKeyThrottle throttle;
   private final RateLimits rateLimits;
 
   public ApiKeyAuthenticationFilter(
       ApiKeyAuthenticator authenticator,
       ObjectMapper json,
-      McpProperties mcpProperties,
       InvalidKeyThrottle throttle,
       RateLimits rateLimits) {
     this.authenticator = authenticator;
     this.json = json;
-    this.mcpProperties = mcpProperties;
     this.throttle = throttle;
     this.rateLimits = rateLimits;
   }
@@ -87,12 +83,7 @@ public final class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
     }
     if (authenticated.isEmpty()) {
       throttle.recordFailure(address);
-      String path = request.getRequestURI().substring(request.getContextPath().length());
-      if (path.equals("/mcp")) {
-        response.setHeader(
-            HttpHeaders.WWW_AUTHENTICATE,
-            "Bearer resource_metadata=\"" + mcpProperties.protectedResourceMetadataUrl() + "\"");
-      }
+      response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Bearer realm=\"zeitwide\"");
       writeProblem(response, Problems.of(ProblemCode.INVALID_API_KEY, "The API key is not valid"));
       return;
     }

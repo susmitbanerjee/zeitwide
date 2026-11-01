@@ -31,7 +31,6 @@ import com.zeitwide.api.auth.app.AuthProperties;
 import com.zeitwide.api.auth.domain.ApiKeyToken;
 import com.zeitwide.api.auth.domain.StoredApiKey;
 import com.zeitwide.api.changes.app.ChangeRepository;
-import com.zeitwide.api.mcp.app.McpProperties;
 import com.zeitwide.api.operations.app.OperationsService;
 import com.zeitwide.api.ratelimits.app.RateLimiter;
 import com.zeitwide.api.ratelimits.domain.Allowance;
@@ -112,14 +111,7 @@ class AnswersApiTest {
     @Bean
     AuthProperties mcpAuthProperties() {
       return new AuthProperties(
-          "http://localhost:8180/realms/zeitwide",
-          "http://localhost:8180/realms/zeitwide/protocol/openid-connect/certs",
-          "zeitwide-api");
-    }
-
-    @Bean
-    McpProperties mcpProperties() {
-      return new McpProperties("http://localhost:8080/mcp");
+          "http://localhost:3000", "zeitwide-api", "test-only-secret-0123456789abcdef0123456789");
     }
 
     @Bean

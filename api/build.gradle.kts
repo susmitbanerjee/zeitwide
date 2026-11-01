@@ -74,6 +74,8 @@ dependencyLocking {
 
 tasks.test {
     useJUnitPlatform()
+    // The API refuses to start without a token secret (no default), so tests bring their own.
+    environment("ZEITWIDE_AUTH_TOKEN_SECRET", "test-only-secret-0123456789abcdef0123456789")
     // The conformance suite reads ../conformance (cases and golden dataset). Declared as an
     // input so a changed case reruns the tests instead of reusing a cached pass.
     inputs

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/** The reviewer's queue. The security chain admits only the Keycloak role {@code reviewer}. */
+/** The reviewer's queue. The security chain admits only the role {@code reviewer}. */
 @Validated
 @RestController
 @RequestMapping("/v1/admin/candidates")

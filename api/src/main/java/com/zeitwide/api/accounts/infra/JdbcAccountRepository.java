@@ -26,7 +26,7 @@ class JdbcAccountRepository implements AccountRepository {
 
   @Override
   public Optional<AccountIdentity> findBySubject(String subject) {
-    return jdbc.sql("SELECT id, account_id FROM app_user WHERE keycloak_subject = :subject")
+    return jdbc.sql("SELECT id, account_id FROM app_user WHERE subject = :subject")
         .param("subject", subject)
         .query(
             (rs, row) ->
@@ -44,7 +44,7 @@ class JdbcAccountRepository implements AccountRepository {
             .single();
     UUID appUserId =
         jdbc.sql(
-                "INSERT INTO app_user (account_id, keycloak_subject, role) "
+                "INSERT INTO app_user (account_id, subject, role) "
                     + "VALUES (:account, :subject, 'owner') RETURNING id")
             .param("account", accountId)
             .param("subject", subject)

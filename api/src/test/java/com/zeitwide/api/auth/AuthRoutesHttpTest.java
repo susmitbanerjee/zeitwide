@@ -20,7 +20,6 @@ import com.zeitwide.api.auth.domain.AccountPrincipal;
 import com.zeitwide.api.auth.domain.ApiKeyToken;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,7 +66,7 @@ class AuthRoutesHttpTest {
             .single();
     userId =
         jdbc.sql(
-                "INSERT INTO app_user (account_id, keycloak_subject, role) "
+                "INSERT INTO app_user (account_id, subject, role) "
                     + "VALUES (:account, :subject, 'owner') RETURNING id")
             .param("account", accountId)
             .param("subject", "auth-test-" + UUID.randomUUID())
@@ -120,21 +119,10 @@ class AuthRoutesHttpTest {
   }
 
   @Test
-  void mcpPublishesProtectedResourceMetadataAndChallengesAnonymousClients() throws Exception {
-    mvc.perform(get("/.well-known/oauth-protected-resource/mcp"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.resource").value("http://localhost:8080/mcp"))
-        .andExpect(
-            jsonPath("$.authorization_servers[0]").value("http://localhost:8180/realms/zeitwide"))
-        .andExpect(jsonPath("$.bearer_methods_supported[0]").value("header"));
-
+  void mcpChallengesAnonymousClientsAndRefusesUnknownKeys() throws Exception {
     mvc.perform(post("/mcp").contentType(MediaType.APPLICATION_JSON).content("{}"))
         .andExpect(status().isUnauthorized())
-        .andExpect(
-            header()
-                .string(
-                    "WWW-Authenticate",
-                    "Bearer resource_metadata=\"http://localhost:8080/.well-known/oauth-protected-resource/mcp\""));
+        .andExpect(header().string("WWW-Authenticate", "Bearer realm=\"zeitwide\""));
 
     mvc.perform(
             post("/mcp")
@@ -142,15 +130,106 @@ class AuthRoutesHttpTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{}"))
         .andExpect(status().isUnauthorized())
-        .andExpect(
-            header()
-                .string(
-                    "WWW-Authenticate",
-                    "Bearer resource_metadata=\"http://localhost:8080/.well-known/oauth-protected-resource/mcp\""));
+        .andExpect(header().string("WWW-Authenticate", "Bearer realm=\"zeitwide\""));
   }
 
   @Test
-  void mcpAcceptsAnOAuthBearerAuthentication() throws Exception {
+  void theWebAppsSignedTokensAreAcceptedAndNothingElseIs() throws Exception {
+    mvc.perform(
+            get(ACCOUNT_PROBE)
+                .header(
+                    "Authorization",
+                    "Bearer " + webToken(TOKEN_SECRET, 60, "zeitwide-api", List.of())))
+        .andExpect(status().isOk());
+    // Signed with another secret, for another audience, or meant to last for hours: all refused.
+    mvc.perform(
+            get(ACCOUNT_PROBE)
+                .header(
+                    "Authorization",
+                    "Bearer "
+                        + webToken(
+                            "some-other-secret-0123456789abcdef0123456789",
+                            60,
+                            "zeitwide-api",
+                            List.of())))
+        .andExpect(status().isUnauthorized());
+    mvc.perform(
+            get(ACCOUNT_PROBE)
+                .header(
+                    "Authorization",
+                    "Bearer " + webToken(TOKEN_SECRET, 60, "other-api", List.of())))
+        .andExpect(status().isUnauthorized());
+    mvc.perform(
+            get(ACCOUNT_PROBE)
+                .header(
+                    "Authorization",
+                    "Bearer " + webToken(TOKEN_SECRET, 4 * 3600, "zeitwide-api", List.of())))
+        .andExpect(status().isUnauthorized());
+    // An unsigned token with the right claims is not a token.
+    mvc.perform(get(ACCOUNT_PROBE).header("Authorization", "Bearer " + unsignedToken()))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void onlyATokenCarryingTheReviewerRoleReachesTheAdminRoutes() throws Exception {
+    mvc.perform(
+            get(ADMIN_PROBE)
+                .header(
+                    "Authorization",
+                    "Bearer " + webToken(TOKEN_SECRET, 60, "zeitwide-api", List.of())))
+        .andExpect(status().isForbidden());
+    mvc.perform(
+            get(ADMIN_PROBE)
+                .header(
+                    "Authorization",
+                    "Bearer " + webToken(TOKEN_SECRET, 60, "zeitwide-api", List.of("reviewer"))))
+        .andExpect(status().isOk());
+  }
+
+  private static final String TOKEN_SECRET = "test-only-secret-0123456789abcdef0123456789";
+
+  /** A token as the web app signs it: HS256, its issuer, a subject, and the roles it grants. */
+  private static String webToken(
+      String secret, long lifetimeSeconds, String audience, List<String> roles) throws Exception {
+    Instant now = Instant.now();
+    var claims =
+        new com.nimbusds.jwt.JWTClaimsSet.Builder()
+            .issuer("http://localhost:3000")
+            .audience(audience)
+            .subject("google:" + UUID.randomUUID())
+            .claim("name", "Token Tester")
+            .claim("roles", roles)
+            .issueTime(java.util.Date.from(now))
+            .expirationTime(java.util.Date.from(now.plusSeconds(lifetimeSeconds)))
+            .build();
+    var jwt =
+        new com.nimbusds.jwt.SignedJWT(
+            new com.nimbusds.jose.JWSHeader(com.nimbusds.jose.JWSAlgorithm.HS256), claims);
+    jwt.sign(
+        new com.nimbusds.jose.crypto.MACSigner(
+            secret.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+    return jwt.serialize();
+  }
+
+  private static String unsignedToken() {
+    var encoder = java.util.Base64.getUrlEncoder().withoutPadding();
+    long exp = Instant.now().plusSeconds(60).getEpochSecond();
+    String header =
+        encoder.encodeToString(
+            "{\"alg\":\"none\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    String body =
+        encoder.encodeToString(
+            ("{\"iss\":\"http://localhost:3000\",\"aud\":\"zeitwide-api\",\"sub\":\"x\",\"iat\":"
+                    + (exp - 60)
+                    + ",\"exp\":"
+                    + exp
+                    + "}")
+                .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    return header + "." + body + ".";
+  }
+
+  @Test
+  void mcpAcceptsASignedInUsersToken() throws Exception {
     mvc.perform(
             post("/mcp")
                 .with(jwt())
@@ -271,7 +350,7 @@ class AuthRoutesHttpTest {
   }
 
   @Test
-  void firstKeycloakLoginCreatesOneFreeAccountAndAppUser() {
+  void firstSignInCreatesOneFreeAccountAndAppUser() {
     String subject = "new-user-" + UUID.randomUUID();
     Instant now = Instant.now();
     Jwt jwt =
@@ -282,7 +361,7 @@ class AuthRoutesHttpTest {
             .expiresAt(now.plusSeconds(300))
             .audience(List.of("zeitwide-api"))
             .claim("name", "New User")
-            .claim("realm_access", Map.of("roles", List.of("reviewer")))
+            .claim("roles", List.of("reviewer"))
             .build();
 
     var first = jwtConverter.convert(jwt);
@@ -302,7 +381,7 @@ class AuthRoutesHttpTest {
                 .single())
         .isEqualTo("free");
     assertThat(
-            jdbc.sql("SELECT count(*) FROM app_user WHERE keycloak_subject = :subject")
+            jdbc.sql("SELECT count(*) FROM app_user WHERE subject = :subject")
                 .param("subject", subject)
                 .query(Long.class)
                 .single())

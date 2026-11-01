@@ -8,14 +8,17 @@ import com.zeitwide.api.auth.app.AuthProperties;
 import com.zeitwide.api.auth.app.InternalAuthProperties;
 import com.zeitwide.api.auth.app.InvalidKeyThrottle;
 import com.zeitwide.api.auth.domain.ApiKeyToken;
-import com.zeitwide.api.mcp.app.McpProperties;
 import com.zeitwide.api.ratelimits.app.RateLimits;
 import com.zeitwide.api.web.CorsProperties;
 import com.zeitwide.api.web.ProblemCode;
 import com.zeitwide.api.web.Problems;
 import jakarta.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -30,6 +33,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidators;
@@ -55,6 +59,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 })
 public class SecurityConfiguration {
 
+  private static final Duration MAX_TOKEN_LIFETIME = Duration.ofMinutes(5);
+
   @Bean
   org.springframework.boot.web.servlet.FilterRegistrationBean<
           com.zeitwide.api.ratelimits.api.RateLimitFilter>
@@ -64,13 +70,14 @@ public class SecurityConfiguration {
     return registration;
   }
 
+  /** Accepts only tokens the web app signed for this API: its issuer, audience and secret. */
   @Bean
-  JwtDecoder keycloakJwtDecoder(AuthProperties properties) {
+  JwtDecoder webTokenDecoder(AuthProperties properties) {
+    SecretKey key =
+        new SecretKeySpec(properties.tokenSecret().getBytes(StandardCharsets.UTF_8), "HmacSHA256");
     NimbusJwtDecoder decoder =
-        NimbusJwtDecoder.withJwkSetUri(properties.jwkSetUri())
-            .cache(jwksCache("zeitwide-keycloak-jwks"))
-            .build();
-    decoder.setJwtValidator(keycloakTokenValidator(properties.issuerUri(), properties.audience()));
+        NimbusJwtDecoder.withSecretKey(key).macAlgorithm(MacAlgorithm.HS256).build();
+    decoder.setJwtValidator(webTokenValidator(properties.issuer(), properties.audience()));
     return decoder;
   }
 
@@ -92,10 +99,9 @@ public class SecurityConfiguration {
       AccountJwtAuthenticationConverter jwtConverter,
       ApiKeyAuthenticator apiKeys,
       ObjectMapper json,
-      @Qualifier("keycloakJwtDecoder") JwtDecoder keycloakJwtDecoder,
+      @Qualifier("webTokenDecoder") JwtDecoder webTokenDecoder,
       @Qualifier("googleSchedulerJwtDecoder") JwtDecoder googleJwtDecoder,
       InternalAuthProperties internalProperties,
-      McpProperties mcpProperties,
       com.zeitwide.api.ratelimits.api.RateLimitFilter rateLimitFilter,
       InvalidKeyThrottle invalidKeyThrottle,
       RateLimits rateLimits,
@@ -103,14 +109,7 @@ public class SecurityConfiguration {
       throws Exception {
     AuthenticationEntryPoint authenticationEntryPoint =
         (request, response, exception) -> {
-          String path = request.getRequestURI().substring(request.getContextPath().length());
-          if (path.equals("/mcp")) {
-            response.setHeader(
-                HttpHeaders.WWW_AUTHENTICATE,
-                "Bearer resource_metadata=\""
-                    + mcpProperties.protectedResourceMetadataUrl()
-                    + "\"");
-          }
+          response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Bearer realm=\"zeitwide\"");
           writeProblem(response, json, ProblemCode.UNAUTHORIZED, "A valid identity is required");
         };
     AccessDeniedHandler accessDeniedHandler =
@@ -124,8 +123,7 @@ public class SecurityConfiguration {
             internalProperties.serviceAccountEmail(),
             json);
     var apiKeyFilter =
-        new ApiKeyAuthenticationFilter(
-            apiKeys, json, mcpProperties, invalidKeyThrottle, rateLimits);
+        new ApiKeyAuthenticationFilter(apiKeys, json, invalidKeyThrottle, rateLimits);
 
     return http.csrf(AbstractHttpConfigurer::disable)
         .cors(Customizer.withDefaults())
@@ -162,7 +160,7 @@ public class SecurityConfiguration {
                 authorization
                     .requestMatchers(HttpMethod.OPTIONS, "/**")
                     .permitAll()
-                    // Answers need an API key or a Keycloak token: no anonymous use, so
+                    // Answers need an API key or a signed-in user's token: no anonymous use, so
                     // every caller has an account with its own limit and can be cut off.
                     .requestMatchers("/v1/calendars/**", "/v1/business-days/**")
                     .authenticated()
@@ -171,7 +169,6 @@ public class SecurityConfiguration {
                     .requestMatchers(
                         HttpMethod.GET,
                         "/.well-known/zeitwide-keys.json",
-                        "/.well-known/oauth-protected-resource/mcp",
                         "/docs",
                         "/docs/**",
                         "/openapi.yaml",
@@ -200,8 +197,7 @@ public class SecurityConfiguration {
                     .accessDeniedHandler(accessDeniedHandler)
                     .jwt(
                         jwt ->
-                            jwt.decoder(keycloakJwtDecoder)
-                                .jwtAuthenticationConverter(jwtConverter)))
+                            jwt.decoder(webTokenDecoder).jwtAuthenticationConverter(jwtConverter)))
         .addFilterBefore(internalFilter, BearerTokenAuthenticationFilter.class)
         .addFilterBefore(apiKeyFilter, BearerTokenAuthenticationFilter.class)
         .addFilterAfter(rateLimitFilter, AnonymousAuthenticationFilter.class)
@@ -249,9 +245,27 @@ public class SecurityConfiguration {
     return source;
   }
 
-  static OAuth2TokenValidator<Jwt> keycloakTokenValidator(String issuer, String audience) {
+  /** The standard checks plus the audience, and a lifetime short enough to be per-call. */
+  static OAuth2TokenValidator<Jwt> webTokenValidator(String issuer, String audience) {
     return new org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator<>(
-        JwtValidators.createDefaultWithIssuer(issuer), audienceValidator(audience));
+        JwtValidators.createDefaultWithIssuer(issuer),
+        audienceValidator(audience),
+        lifetimeValidator());
+  }
+
+  /** Tokens are minted per call and live a minute; anything meant to last longer is refused. */
+  private static OAuth2TokenValidator<Jwt> lifetimeValidator() {
+    return jwt -> {
+      Instant issuedAt = jwt.getIssuedAt();
+      Instant expiresAt = jwt.getExpiresAt();
+      return issuedAt != null
+              && expiresAt != null
+              && !Duration.between(issuedAt, expiresAt).minus(MAX_TOKEN_LIFETIME).isPositive()
+          ? OAuth2TokenValidatorResult.success()
+          : OAuth2TokenValidatorResult.failure(
+              new org.springframework.security.oauth2.core.OAuth2Error(
+                  "invalid_token", "The token's lifetime is missing or too long", null));
+    };
   }
 
   private static OAuth2TokenValidator<Jwt> audienceValidator(String audience) {

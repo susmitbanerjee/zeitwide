@@ -24,8 +24,7 @@ info:
     from the weekend rule. Calendars that close on no holiday (FedNow) have no limit.
 
     **Access.** Every route needs an API key (`Authorization: Bearer zw_live_…`, free from
-    the Zeitwide app) or a Zeitwide sign-in token. Only the public receipt keys and the MCP
-    protected-resource metadata are open.
+    the Zeitwide app). Only the public receipt keys are open.
 
     **Limits.** 10,000 calls a day per key. Requests without a valid identity are also
     limited per address before they are refused.
@@ -48,7 +47,7 @@ tags:
   - name: receipts
   - name: account
   - name: admin
-    description: Reviewer-only routes for the admin screens (Keycloak role `reviewer`).
+    description: Reviewer-only routes for the admin screens (the `reviewer` role).
 
 paths:
   /v1/calendars:
@@ -362,29 +361,6 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/ReceiptKeySet" }
 
-  /.well-known/oauth-protected-resource/mcp:
-    get:
-      operationId: getMcpProtectedResourceMetadata
-      security: []
-      tags: [mcp]
-      summary: OAuth protected resource metadata for the MCP endpoint
-      responses:
-        "200":
-          description: MCP resource identifier, authorization server, and supported bearer method.
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [resource, authorization_servers, bearer_methods_supported]
-                properties:
-                  resource: { type: string, format: uri }
-                  authorization_servers:
-                    type: array
-                    items: { type: string, format: uri }
-                  bearer_methods_supported:
-                    type: array
-                    items: { type: string, enum: [header] }
-
   /v1/account/api-keys:
     get:
       operationId: listApiKeys
@@ -660,7 +636,7 @@ paths:
       summary: List candidate changes for review, urgent first
       description: |
         Pending candidates sort urgent first (under 14 days' notice), then by date. Requires
-        the Keycloak role `reviewer`.
+        the `reviewer` role.
       security:
         - bearerAuth: []
       parameters:
@@ -794,7 +770,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: Keycloak access token with issuer zeitwide and audience zeitwide-api.
+      description: A short-lived token the Zeitwide web app signs for a signed-in person. Customers use an API key instead.
     apiKey:
       type: http
       scheme: bearer

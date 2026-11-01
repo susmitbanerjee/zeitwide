@@ -3,7 +3,7 @@ package com.zeitwide.api.accounts.app;
 import com.zeitwide.api.accounts.domain.AccountIdentity;
 import java.util.Optional;
 
-/** Persistence boundary for Keycloak-subject account provisioning. */
+/** Persistence boundary for sign-in-subject account provisioning. */
 public interface AccountRepository {
 
   void lockSubject(String subject);

@@ -10,7 +10,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HexFormat;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
@@ -21,7 +20,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
-/** Converts Keycloak role claims and provisions the corresponding local account. */
+/** Reads the roles the web app put in its token and provisions the matching local account. */
 @Component
 public class AccountJwtAuthenticationConverter
     implements Converter<Jwt, AbstractAuthenticationToken> {
@@ -38,11 +37,7 @@ public class AccountJwtAuthenticationConverter
 
   @Override
   public AbstractAuthenticationToken convert(Jwt jwt) {
-    String name =
-        firstNonBlank(
-            jwt.getClaimAsString("name"),
-            jwt.getClaimAsString("preferred_username"),
-            jwt.getClaimAsString("email"));
+    String name = firstNonBlank(jwt.getClaimAsString("name"), jwt.getClaimAsString("email"));
     AccountIdentity identity = accounts.resolve(jwt.getSubject(), name);
     AccountPrincipal principal =
         new AccountPrincipal(identity.accountId(), identity.appUserId(), null);
@@ -52,11 +47,10 @@ public class AccountJwtAuthenticationConverter
           .addKeyValue("event", "login")
           .addKeyValue("account_id", principal.accountId())
           .addKeyValue("app_user_id", principal.appUserId())
-          .log("Keycloak login authenticated");
+          .log("Login authenticated");
     }
     Collection<GrantedAuthority> authorities = new ArrayList<>();
-    Map<String, Object> realmAccess = jwt.getClaimAsMap("realm_access");
-    if (realmAccess != null && realmAccess.get("roles") instanceof Collection<?> roles) {
+    if (jwt.getClaim("roles") instanceof Collection<?> roles) {
       roles.stream()
           .filter(String.class::isInstance)
           .map(String.class::cast)
