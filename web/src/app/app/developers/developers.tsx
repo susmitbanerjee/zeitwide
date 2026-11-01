@@ -32,7 +32,7 @@ const EVENTS: { value: ChangeType; label: string }[] = [
 /** C1: API keys and webhooks. Secrets are shown once, straight from the create response. */
 export function Developers() {
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex max-w-5xl flex-col gap-10">
       <PageHeading
         title="Keys and webhooks"
         lead="10,000 calls a day per key, free in the beta. We keep a hash of each key, never the key."
@@ -165,6 +165,7 @@ function ApiKeys() {
                         size="sm"
                         variant="danger"
                         aria-label={`Revoke ${key.name}`}
+                        tip="Stop this key working at once"
                         onClick={() => {
                           if (
                             window.confirm(`Revoke ${key.name}? Calls with it will fail at once.`)
@@ -320,6 +321,7 @@ function Webhooks() {
                 variant="outline"
                 onClick={() => test.mutate(hook.id)}
                 aria-label={`Send a test event to ${hook.url}`}
+                tip="Send a signed sample event to this endpoint"
               >
                 Send test
               </Button>
@@ -328,6 +330,7 @@ function Webhooks() {
                 variant="danger"
                 onClick={() => remove.mutate(hook.id)}
                 aria-label={`Delete ${hook.url}`}
+                tip="Stop sending events to this endpoint"
               >
                 Delete
               </Button>

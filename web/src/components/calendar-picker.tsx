@@ -19,7 +19,7 @@ export function CalendarPicker({
   return (
     <fieldset className="flex flex-col gap-1">
       <legend className="mb-1 text-sm font-semibold">{legend}</legend>
-      <div className="flex flex-wrap gap-x-4">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(15rem,100%),1fr))] gap-x-4">
         {calendars.map((calendar) => {
           const checked = selected.includes(calendar.id);
           return (

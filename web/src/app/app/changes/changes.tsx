@@ -208,6 +208,7 @@ function AlertRules({
                   size="sm"
                   variant="ghost"
                   aria-label={`Edit ${rule.name}`}
+                  tip="Change this rule's calendars, events or notice"
                   onClick={() => {
                     setEditing(rule);
                     setName(rule.name);
@@ -222,6 +223,7 @@ function AlertRules({
                   size="sm"
                   variant="ghost"
                   aria-label={`Delete ${rule.name}`}
+                  tip="Delete this rule; matching changes will alert you again"
                   onClick={() => remove.mutate(rule.id)}
                 >
                   Delete

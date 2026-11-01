@@ -4,6 +4,7 @@ import { formatDate } from "@/lib/format";
 import { bandSummary, type BandRail } from "@/lib/landing";
 
 import { DaySwatch } from "../day-status";
+import { Tip } from "../ui/tooltip";
 
 /** The Zeitband: the next three weeks, one row per rail. Open is white, closed is orange, weekends hatch. */
 export function Zeitband({
@@ -85,17 +86,20 @@ export function Zeitband({
               {days.map((day) => {
                 const kind = dayKind(day, calendar.weekend);
                 return (
-                  <span
+                  <Tip
                     key={day.date}
-                    title={`${calendar.name}, ${day.date}: ${kind === "open" ? "open" : (day.reason ?? "weekend")}`}
-                    className={cn(
-                      "mr-0.5 mb-1 h-[30px] rounded-[3px]",
-                      kind === "open" && "border border-line bg-surface",
-                      kind === "closed" && "bg-closed",
-                      kind === "weekend" && "hatch border border-line",
-                      kind === "weekend-holiday" && "hatch border-2 border-closed",
-                    )}
-                  />
+                    label={`${calendar.name}, ${formatDate(day.date, "long")}: ${kind === "open" ? "open" : (day.reason ?? "weekend")}`}
+                  >
+                    <span
+                      className={cn(
+                        "mr-0.5 mb-1 h-[30px] rounded-[3px]",
+                        kind === "open" && "border border-line bg-surface",
+                        kind === "closed" && "bg-closed",
+                        kind === "weekend" && "hatch border border-line",
+                        kind === "weekend-holiday" && "hatch border-2 border-closed",
+                      )}
+                    />
+                  </Tip>
                 );
               })}
             </div>

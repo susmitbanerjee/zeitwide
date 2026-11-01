@@ -114,9 +114,20 @@ export function Calculator() {
         <div className="flex min-w-0 flex-col gap-5">
           {add.isError && <ErrorText>{errorMessage(add.error)}</ErrorText>}
           {add.data === undefined && !add.isError && (
-            <Card className="p-6 text-ink-muted">
-              Choose the calendars that must be open, the day you instruct and how many business
-              days to add. The answer and every day it skipped appear here.
+            <Card className="flex flex-col gap-4 p-6">
+              <p className="font-semibold">How the planner works</p>
+              <ol className="m-0 flex list-none flex-col gap-3 p-0 text-ink-muted">
+                {[
+                  "Choose the calendars that must all be open for a day to count.",
+                  "Pick the day you instruct and how many business days to add.",
+                  "Read the date it lands on, and every day it skipped and why.",
+                ].map((step, index) => (
+                  <li key={step} className="flex gap-3">
+                    <span className="font-mono text-ink-subtle">0{index + 1}</span>
+                    {step}
+                  </li>
+                ))}
+              </ol>
             </Card>
           )}
           {add.data !== undefined && (

@@ -4,6 +4,8 @@ import type { ComponentProps } from "react";
 
 import { cn } from "@/lib/cn";
 
+import { Tip } from "./tooltip";
+
 // Every size keeps a 44 px touch target.
 export const buttonVariants = cva(
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 text-[15px] font-semibold whitespace-nowrap no-underline transition-colors disabled:pointer-events-none disabled:opacity-60",
@@ -26,9 +28,14 @@ export const buttonVariants = cva(
 
 export interface ButtonProps extends ComponentProps<"button">, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  /** A hover and focus hint, for a button whose label alone doesn't say what it will do. */
+  tip?: string;
 }
 
-export function Button({ className, variant, size, asChild = false, ...props }: ButtonProps) {
+export function Button({ className, variant, size, asChild = false, tip, ...props }: ButtonProps) {
   const Component = asChild ? Slot.Root : "button";
-  return <Component className={cn(buttonVariants({ variant, size }), className)} {...props} />;
+  const button = (
+    <Component className={cn(buttonVariants({ variant, size }), className)} {...props} />
+  );
+  return tip === undefined ? button : <Tip label={tip}>{button}</Tip>;
 }

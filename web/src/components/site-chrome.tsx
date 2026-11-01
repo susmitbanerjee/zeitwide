@@ -40,23 +40,27 @@ const PUBLIC_LINKS = [
 export function SiteHeader() {
   return (
     <header className="border-b border-line bg-surface">
-      <div className="mx-auto flex min-h-16 max-w-[1376px] flex-wrap items-center gap-x-8 gap-y-1 px-4 sm:px-8">
+      <div className="mx-auto flex min-h-16 max-w-[1376px] flex-wrap items-center gap-x-8 px-4 sm:px-8">
         <Link href="/" className="inline-flex min-h-11 items-center text-ink no-underline">
           <Logo />
         </Link>
-        <nav aria-label="Main" className="flex flex-wrap items-center">
+        <nav
+          aria-label="Main"
+          // On a phone the links drop to their own row and scroll sideways instead of stacking.
+          className="-mx-4 order-last flex basis-full items-center overflow-x-auto px-4 sm:-mx-8 sm:px-8 md:order-none md:mx-0 md:basis-auto md:overflow-visible md:px-0"
+        >
           {PUBLIC_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               prefetch={link.prefetch}
-              className="inline-flex min-h-11 items-center px-3 text-[15px] text-ink no-underline hover:text-accent"
+              className="inline-flex min-h-11 shrink-0 items-center px-3 text-[15px] whitespace-nowrap text-ink no-underline hover:text-accent"
             >
               {link.label}
             </Link>
           ))}
         </nav>
-        <div className="ml-auto flex flex-wrap items-center gap-2">
+        <div className="ml-auto flex items-center gap-1 sm:gap-2">
           <Link
             href="/signin"
             prefetch={false}
@@ -69,7 +73,8 @@ export function SiteHeader() {
             prefetch={false}
             className="inline-flex min-h-11 items-center rounded-md bg-ink px-4 text-[15px] font-semibold text-white no-underline hover:bg-[#2a2e35] hover:text-white"
           >
-            Get a free API key
+            <span className="sm:hidden">Get API key</span>
+            <span className="hidden sm:inline">Get a free API key</span>
           </Link>
         </div>
       </div>
@@ -79,7 +84,7 @@ export function SiteHeader() {
 
 export function SiteFooter() {
   return (
-    <footer className="mt-16 border-t border-line bg-surface">
+    <footer className="mt-12 border-t border-line bg-surface">
       <div className="mx-auto flex max-w-[1376px] flex-wrap justify-between gap-x-6 gap-y-2 px-4 py-5 text-[13px] leading-5 text-ink-muted sm:px-8">
         <p>Free during the public beta, including commercial use of the API.</p>
         <p>Data: Zeitwide open dataset, CC BY-NC 4.0 · Library: MIT</p>
@@ -93,7 +98,10 @@ export function PublicShell({ children }: { children: ReactNode }) {
     <>
       <SkipLink />
       <SiteHeader />
-      <main id="main" className="mx-auto w-full max-w-[1376px] flex-1 px-4 py-8 sm:px-8 sm:pt-14">
+      <main
+        id="main"
+        className="mx-auto w-full max-w-[1376px] flex-1 px-4 py-6 sm:px-8 sm:pt-10 sm:pb-8"
+      >
         {children}
       </main>
       <SiteFooter />

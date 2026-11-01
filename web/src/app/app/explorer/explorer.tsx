@@ -9,6 +9,7 @@ import { PageHeading } from "@/components/app-chrome";
 import { CalendarPicker } from "@/components/calendar-picker";
 import { DayLegend, DayStatus } from "@/components/day-status";
 import { Card, ErrorText, Input, Label, Status } from "@/components/ui/primitives";
+import { Tip } from "@/components/ui/tooltip";
 import { browserApi } from "@/lib/api-browser";
 import { dayKind, findDay, groupCalendars } from "@/lib/answers";
 import { cn } from "@/lib/cn";
@@ -213,27 +214,37 @@ export function Explorer() {
                         const kind = day === undefined ? undefined : dayKind(day, calendar.weekend);
                         return (
                           <td key={date} className="p-0">
-                            <button
-                              type="button"
-                              onClick={() => setPicked(date)}
-                              aria-pressed={selectedDate === date}
-                              aria-label={`${calendar.name}, ${formatDate(date, "long")}: ${
+                            <Tip
+                              label={`${calendar.name}, ${formatDate(date, "long")}: ${
                                 day === undefined
                                   ? "no data"
                                   : day.is_open
                                     ? "open"
                                     : (day.reason ?? "weekend")
                               }`}
-                              className={cn(
-                                "block h-10 w-full min-w-6 rounded-[3px]",
-                                kind === "open" && "border border-line bg-surface",
-                                kind === "closed" && "bg-closed",
-                                kind === "weekend" && "hatch border border-line",
-                                kind === "weekend-holiday" && "hatch border-2 border-closed",
-                                kind === undefined && "bg-surface-sunken",
-                                selectedDate === date && "outline-2 outline-offset-1 outline-ink",
-                              )}
-                            />
+                            >
+                              <button
+                                type="button"
+                                onClick={() => setPicked(date)}
+                                aria-pressed={selectedDate === date}
+                                aria-label={`${calendar.name}, ${formatDate(date, "long")}: ${
+                                  day === undefined
+                                    ? "no data"
+                                    : day.is_open
+                                      ? "open"
+                                      : (day.reason ?? "weekend")
+                                }`}
+                                className={cn(
+                                  "block h-10 w-full min-w-6 rounded-[3px]",
+                                  kind === "open" && "border border-line bg-surface",
+                                  kind === "closed" && "bg-closed",
+                                  kind === "weekend" && "hatch border border-line",
+                                  kind === "weekend-holiday" && "hatch border-2 border-closed",
+                                  kind === undefined && "bg-surface-sunken",
+                                  selectedDate === date && "outline-2 outline-offset-1 outline-ink",
+                                )}
+                              />
+                            </Tip>
                           </td>
                         );
                       })}

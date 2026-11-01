@@ -93,22 +93,24 @@ export default async function HomePage() {
   const nextClosure = next[0];
 
   return (
-    <div className="flex flex-col gap-24 pt-4 pb-6">
-      <section aria-labelledby="m-title" className="flex flex-col gap-10">
-        <div className="flex flex-wrap items-end gap-x-16 gap-y-8">
-          <div className="flex min-w-0 flex-[999_1_35rem] flex-col gap-[22px]">
+    <div className="flex flex-col gap-16 pb-4 sm:gap-20">
+      <section aria-labelledby="m-title" className="flex flex-col gap-8 sm:gap-10">
+        {/* Copy and the live answer sit side by side from a laptop's width and are centred on
+            each other, so neither leaves an empty corner; they stack on a phone. */}
+        <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-14">
+          <div className="flex min-w-0 flex-col gap-5 sm:gap-[22px]">
             <h1
               id="m-title"
-              className="max-w-[11em] text-5xl leading-[1.05] font-bold tracking-[-0.035em] text-balance sm:text-7xl sm:leading-[76px]"
+              className="max-w-[11em] text-[2.75rem] leading-[1.05] font-bold tracking-[-0.035em] text-balance sm:text-6xl sm:leading-[1.05] xl:text-7xl xl:leading-[76px]"
             >
               Business days you can prove.
             </h1>
-            <p className="max-w-[38em] text-xl leading-[31px] text-pretty text-ink-muted">
+            <p className="max-w-[38em] text-lg leading-[28px] text-pretty text-ink-muted sm:text-xl sm:leading-[31px]">
               Zeitwide tells you when Fedwire, FedACH, FedNow, T2 and CHAPS are open, cites the
               official source for every closed day, and warns you when a date changes. For people,
               for code, and for AI agents.
             </p>
-            <div className="flex flex-wrap gap-2.5">
+            <div className="flex flex-wrap gap-2.5 pt-1">
               <Link href="/calendars" className={cn(buttonVariants(), "min-h-12 px-5 text-base")}>
                 See the calendars
               </Link>
@@ -122,7 +124,7 @@ export default async function HomePage() {
             </div>
           </div>
           {check !== null && (
-            <div className="min-w-0 max-w-[35rem] flex-[1_1_27.5rem]">
+            <div className="min-w-0 lg:justify-self-end lg:w-full lg:max-w-[35rem]">
               <CheckADate data={check} />
             </div>
           )}
@@ -401,7 +403,7 @@ export default async function HomePage() {
           </Link>
         </div>
       </section>
-      <p className="text-sm text-ink-muted">
+      <p className="-mt-8 text-sm text-ink-muted sm:-mt-12">
         Dataset release <span className="font-mono">{release}</span>.
       </p>
     </div>
