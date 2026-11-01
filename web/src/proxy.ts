@@ -1,4 +1,7 @@
+import { getToken } from "next-auth/jwt";
 import { NextResponse, type NextRequest } from "next/server";
+
+import { defaultLanding, safeCallback } from "@/auth/callback";
 
 import { hasSessionCookie, hostRedirect, isPrivatePath, needsSession } from "@/lib/routing";
 import { contentSecurityPolicy } from "@/lib/security-headers";
@@ -12,12 +15,25 @@ const development = process.env.NODE_ENV === "development";
  * needs it, and sets the Content-Security-Policy. Signed-in pages render per request, so they get
  * a fresh nonce; Next.js reads it from the request's policy and puts it on its own scripts.
  */
-export function proxy(request: NextRequest): NextResponse {
+export async function proxy(request: NextRequest): Promise<NextResponse> {
   const { pathname, search } = request.nextUrl;
   const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "";
   const redirect = hostRedirect(host, pathname, search, siteOrigin, appOrigin);
   if (redirect !== null) {
     return NextResponse.redirect(redirect, 308);
+  }
+  if (
+    (pathname === "/signin" || pathname === "/signup") &&
+    hasSessionCookie(request.cookies.getAll().map((c) => c.name)) &&
+    (await hasLiveSession(request))
+  ) {
+    // Already signed in: skip the sign-in screen. A session that couldn't be refreshed doesn't
+    // count, or the app and this page would send the visitor back and forth.
+    const landing = safeCallback(
+      request.nextUrl.searchParams.get("callbackUrl"),
+      defaultLanding(pathname),
+    );
+    return NextResponse.redirect(new URL(landing, request.url));
   }
   if (needsSession(pathname) && !hasSessionCookie(request.cookies.getAll().map((c) => c.name))) {
     const signIn = new URL("/signin", request.url);
@@ -53,3 +69,17 @@ export const config = {
     },
   ],
 };
+
+/** Whether the session cookie decrypts, hasn't expired and holds tokens that are still good. */
+async function hasLiveSession(request: NextRequest): Promise<boolean> {
+  const secret = process.env.AUTH_SECRET;
+  if (secret === undefined) {
+    return false;
+  }
+  const token = await getToken({
+    req: { headers: request.headers },
+    secret,
+    secureCookie: appOrigin.startsWith("https:"),
+  });
+  return token !== null && token.error === undefined;
+}

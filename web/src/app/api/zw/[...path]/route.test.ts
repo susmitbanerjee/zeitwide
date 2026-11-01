@@ -29,7 +29,10 @@ describe("/api/zw proxy", () => {
   });
 
   it("adds the session's access token and passes the API's answer back", async () => {
-    getToken.mockResolvedValue({ accessToken: "access-123" });
+    // Read twice: before the refresh (an expired token) and after it.
+    getToken
+      .mockResolvedValueOnce({ accessToken: "expired" })
+      .mockResolvedValueOnce({ accessToken: "access-123" });
     upstream.mockResolvedValue(
       Response.json([], {
         headers: { "zeitwide-dataset-release": "2026.10.31.1", "set-cookie": "x=1" },
@@ -52,7 +55,21 @@ describe("/api/zw proxy", () => {
     expect(response.headers.getSetCookie()).toEqual([
       "authjs.session-token=refreshed; Path=/; HttpOnly",
     ]);
-    expect(getToken.mock.calls[0]?.[0].req.headers.cookie).toBe("authjs.session-token=refreshed");
+    expect(getToken.mock.calls[1]?.[0].req.headers.cookie).toBe("authjs.session-token=refreshed");
+  });
+
+  it("doesn't re-issue the session cookie when nothing was refreshed", async () => {
+    // A call still in flight at sign-out must not bring back the cookie sign-out deleted.
+    getToken.mockResolvedValue({ accessToken: "access-123" });
+    upstream.mockResolvedValue(Response.json([]));
+    const response = await GET(
+      new NextRequest("http://localhost:3000/api/zw/v1/calendars", {
+        headers: { cookie: "authjs.session-token=current" },
+      }),
+      context("v1", "calendars"),
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.getSetCookie()).toEqual([]);
   });
 
   it("refuses callers without a session or after a failed refresh", async () => {

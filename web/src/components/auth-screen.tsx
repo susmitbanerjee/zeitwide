@@ -1,12 +1,8 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
-import { auth, signIn } from "@/auth";
-import {
-  DIRECT_IDENTITY_PROVIDERS,
-  type DirectIdentityProvider,
-  identityProviderHint,
-} from "@/auth/identity-providers";
+import { startSignIn } from "@/auth/actions";
+import { defaultLanding, safeCallback } from "@/auth/callback";
+import { DIRECT_IDENTITY_PROVIDERS, type DirectIdentityProvider } from "@/auth/identity-providers";
 import { signInProblem } from "@/auth/messages";
 
 import { Logo, SkipLink } from "./site-chrome";
@@ -18,7 +14,7 @@ const COPY = {
   signin: {
     title: "Welcome back",
     lead: "Sign in to check rails, manage API keys and review changes.",
-    defaultPath: "/app",
+    defaultPath: defaultLanding("/signin"),
     switchLead: "New to Zeitwide?",
     switchLabel: "Create an account",
     switchPath: "/signup",
@@ -26,7 +22,7 @@ const COPY = {
   signup: {
     title: "Create your free account",
     lead: "Free during the public beta. Your first API key is a minute away.",
-    defaultPath: "/app/developers",
+    defaultPath: defaultLanding("/signup"),
     switchLead: "Already have an account?",
     switchLabel: "Sign in",
     switchPath: "/signin",
@@ -42,20 +38,10 @@ const PROOF = [
   ],
 ] as const;
 
-/** Only same-site paths, so the page can't be used to redirect anywhere else. */
-export function safeCallback(value: string | string[] | undefined, fallback: string): string {
-  const path = Array.isArray(value) ? value[0] : value;
-  return path !== undefined && path.startsWith("/") && !path.startsWith("//") ? path : fallback;
-}
-
 async function ProviderForm({ mode, searchParams }: { mode: Mode; searchParams: Props }) {
   const params = await searchParams;
   const copy = COPY[mode];
   const callbackUrl = safeCallback(params.callbackUrl, copy.defaultPath);
-  const session = await auth();
-  if (session !== null && session.error === undefined) {
-    redirect(callbackUrl);
-  }
   const problem = signInProblem(params.error);
   const switchHref =
     params.callbackUrl === undefined
@@ -63,24 +49,22 @@ async function ProviderForm({ mode, searchParams }: { mode: Mode; searchParams: 
       : `${copy.switchPath}?callbackUrl=${encodeURIComponent(callbackUrl)}`;
   return (
     <>
-      <form
-        action={async (form: FormData) => {
-          "use server";
-          await signIn(
-            "keycloak",
-            { redirectTo: callbackUrl },
-            identityProviderHint(form.get("provider")),
-          );
-        }}
-        className="flex flex-col gap-3"
-      >
+      <form action={startSignIn} className="flex flex-col gap-3">
+        <input type="hidden" name="callbackUrl" value={callbackUrl} />
         {problem !== null && (
           <p role="alert" className="rounded-md bg-closed-soft px-3 py-2.5 text-sm text-closed-ink">
             {problem}
           </p>
         )}
         {DIRECT_IDENTITY_PROVIDERS.map(({ alias, name }) => (
-          <Button key={alias} type="submit" name="provider" value={alias} variant="outline">
+          <Button
+            key={alias}
+            type="submit"
+            name="provider"
+            value={alias}
+            variant="outline"
+            tip={`${mode === "signup" ? "Create your account" : "Sign in"} with your ${name} account`}
+          >
             <ProviderIcon provider={alias} />
             Continue with {name}
           </Button>
@@ -90,7 +74,11 @@ async function ProviderForm({ mode, searchParams }: { mode: Mode; searchParams: 
           or
           <span className="h-px flex-1 bg-line" />
         </div>
-        <Button type="submit" variant="outline">
+        <Button
+          type="submit"
+          variant="outline"
+          tip="Sign in with GitHub, or with your company's identity provider"
+        >
           GitHub or company single sign-on
         </Button>
       </form>
@@ -141,11 +129,14 @@ export function AuthScreen({ mode, searchParams }: { mode: Mode; searchParams: P
           </div>
           <p className="font-mono text-xs text-[#8b94a3]">Fedwire · FedACH · FedNow · T2 · CHAPS</p>
         </aside>
-        <main id="main" className="flex flex-col justify-center gap-8 px-4 py-10 sm:px-8 lg:px-16">
+        <main
+          id="main"
+          className="flex flex-col justify-center gap-8 px-4 py-10 sm:px-8 lg:items-center lg:px-16"
+        >
           <Link href="/" className="w-fit text-ink no-underline hover:text-ink lg:hidden">
             <Logo />
           </Link>
-          <div className="flex w-full max-w-sm flex-col gap-5">
+          <div className="flex w-full max-w-sm flex-col gap-5 lg:max-w-md">
             <div className="flex flex-col gap-2">
               <h1 className="text-3xl leading-9 font-bold tracking-[-0.02em]">{copy.title}</h1>
               <p className="text-[15px] text-ink-muted">{copy.lead}</p>

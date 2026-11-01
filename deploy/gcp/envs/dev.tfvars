@@ -8,11 +8,11 @@ github_repository_id = "1436841628"
 receipt_key_id           = "zw-2026-10"
 receipt_public_keys_json = "[{\"key_id\":\"sc-2026-10\",\"public_key\":\"-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAN591c3SENCQArrPMxqG6p9lOf/s39awzcUwcXSSxrgE=\\n-----END PUBLIC KEY-----\\n\",\"valid_from\":\"2026-10-28T09:28:06.69439Z\",\"valid_to\":\"2026-10-31T04:38:22Z\"},{\"key_id\":\"zw-2026-10\",\"public_key\":\"-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAzAEoGKvCz40el8o02+sLdX6VOMot8YHcD+nN4KmlyHs=\\n-----END PUBLIC KEY-----\\n\",\"valid_from\":\"2026-10-31T04:38:22Z\",\"valid_to\":null}]"
 
-# Public pages (Firebase Hosting). Signed-in pages use web_app_origin, which defaults to the
-# web service's run.app URL until app.zeitwide.com is mapped (deploy/firebase/README.md).
-web_origin = "https://zeitwide.com"
-web_app_origin = "https://app.zeitwide.com"
-web_app_domain = "app.zeitwide.com"
+# One host for everything: Cloud Run serves zeitwide.com directly (domain mapping), because
+# Firebase Hosting would strip the sign-in cookies. api.zeitwide.com maps to the API service.
+web_origin     = "https://zeitwide.com"
+web_app_origin = "https://zeitwide.com"
+web_app_domain = "zeitwide.com"
 api_domain     = "api.zeitwide.com"
 
 # The web app's own key (create-web-api-key.sh prints the ID), on the first-party limit.
@@ -29,7 +29,12 @@ budget_amount   = 900
 github_deploy_refs = ["refs/heads/main"]
 
 # Set once custom domains are mapped (README, step 11).
-api_base_url  = "https://api.zeitwide.com"
+api_base_url = "https://api.zeitwide.com"
 # auth_base_url = "https://auth.dev.example.com"
 
 # otlp_endpoint = "https://otlp-gateway-prod-us-central-0.grafana.net/otlp"
+
+# OAuth client IDs for Keycloak's Google and Microsoft sign-in (public; the secrets are in
+# Secret Manager). A running realm also needs keycloak-identity-provider.sh.
+google_client_id    = "18853622142-q9lb6915a8pldfqt4arhib3einmkkvba.apps.googleusercontent.com"
+microsoft_client_id = "89e130c0-2fa4-426a-b847-10fba84277c0"

@@ -74,6 +74,16 @@
     color: var(--accent-hover);
   }
 
+  /* Tailwind 4 gives buttons the default cursor; clickable things should look clickable. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  summary,
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  label:has(input:not(:disabled)) {
+    cursor: pointer;
+  }
+
   :focus-visible {
     outline: 3px solid var(--focus);
     outline-offset: 2px;

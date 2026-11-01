@@ -98,6 +98,14 @@ resource "google_service_account_iam_member" "deployer_acts_as_runtime" {
   member             = google_service_account.this["deployer"].member
 }
 
+# Building the web image prerenders answer pages with the web app's own API key, so the
+# deploy workflow reads that one secret.
+resource "google_secret_manager_secret_iam_member" "deployer_web_api_key" {
+  secret_id = google_secret_manager_secret.this["web-api-key"].id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = google_service_account.this["deployer"].member
+}
+
 # Firebase Hosting has no per-site IAM role, so this one is project-wide.
 resource "google_project_iam_member" "deployer_hosting" {
   project = var.project_id

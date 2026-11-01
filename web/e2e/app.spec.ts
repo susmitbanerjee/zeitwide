@@ -93,7 +93,9 @@ test("A3 evidence lists the sources and verifies the signed receipt", async ({ p
 });
 
 test("A4 planner adds business days across rails and lists what it skipped", async ({ page }) => {
-  await page.goto("/app/calculator");
+  // The form is a client component: until the page has hydrated, Calculate submits it natively
+  // and empties it, so wait for the page to settle before typing.
+  await page.goto("/app/calculator", { waitUntil: "networkidle" });
   await page.getByLabel("You instruct on").fill("2026-12-24");
   await page.getByLabel("Business days to add").fill("2");
   await page.getByRole("button", { name: "Calculate" }).click();

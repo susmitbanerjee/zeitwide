@@ -106,15 +106,25 @@ async function sessionToken(
   if (secret === undefined) {
     return { accessToken: undefined, setCookies };
   }
+  const secureCookie = env.appUrl.startsWith("https://");
+  const original = await getToken({
+    req: { headers: { cookie: request.headers.get("cookie") ?? "" } },
+    secret,
+    secureCookie,
+  });
   const token = await getToken({
     req: {
       headers: { cookie: applySetCookies(request.headers.get("cookie") ?? "", setCookies) },
     },
     secret,
-    secureCookie: env.appUrl.startsWith("https://"),
+    secureCookie,
   });
   const accessToken = token === null || token.error !== undefined ? undefined : token.accessToken;
-  return { accessToken, setCookies };
+  // Auth.js re-issues the session cookie on every read to slide its expiry. Send it back only when
+  // the tokens were really refreshed: a call still in flight when the visitor signs out would
+  // otherwise put the cookie that sign-out just deleted back in the browser.
+  const refreshed = original?.accessToken !== token?.accessToken;
+  return { accessToken, setCookies: refreshed ? setCookies : [] };
 }
 
 async function readBody(request: NextRequest): Promise<ArrayBuffer | null> {

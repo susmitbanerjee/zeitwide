@@ -252,14 +252,18 @@ tofu output -raw github_workload_identity_provider
 tofu output -raw github_deployer_service_account
 ```
 
-In the deploy workflow, set `permissions: id-token: write` and authenticate with
-`google-github-actions/auth`, passing `workload_identity_provider` and
-`service_account`. Pin every action by commit SHA. Only workflows from the configured
-repository ID, running on a ref in `github_deploy_refs`, can get a token.
+Name the variables `GCP_WORKLOAD_IDENTITY_PROVIDER` and `GCP_DEPLOY_SERVICE_ACCOUNT`.
+The `deploy` job in `.github/workflows/ci.yml` reads them, authenticates with
+`google-github-actions/auth` (actions pinned by commit SHA) and runs only on a push to
+`main` once every other job has passed. Only workflows from the configured repository ID,
+running on a ref in `github_deploy_refs`, can get a token.
 
 ### 9. Build and deploy images
 
-Push to `tofu output -raw image_repository`, then deploy with
+Pushing to `main` deploys by itself: the `deploy` job builds and rolls out only the
+components whose folders changed (`api/`, `pipeline/`, `web/`, `deploy/keycloak/`) with
+`deploy-images.sh`, so the API's migrations still run first. To do it by hand, push to
+`tofu output -raw image_repository`, then deploy with
 `gcloud run deploy <service> --image=…` and `gcloud run jobs deploy zeitwide-pipeline-<env> --image=…`.
 When CI can't run (for example, the month's Actions minutes are used up), do the same
 from your machine, from the repository root:
