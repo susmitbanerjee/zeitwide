@@ -1121,85 +1121,6 @@ wheels = [
 ]
 
 [[package]]
-name = "zeitwide"
-version = "0.1.0"
-source = { editable = "../lib-python" }
-
-[package.metadata]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "hypothesis", specifier = ">=6.170.12" },
-    { name = "jsonschema", specifier = ">=4.26.0" },
-    { name = "mypy", specifier = ">=1.18" },
-    { name = "pytest", specifier = ">=8.4" },
-    { name = "pytest-cov", specifier = ">=7.0" },
-    { name = "ruff", specifier = ">=0.14" },
-    { name = "types-jsonschema", specifier = ">=4.26.0.20261006" },
-]
-
-[[package]]
-name = "zeitwide-pipeline"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "google-cloud-storage" },
-    { name = "httpx" },
-    { name = "opentelemetry-api" },
-    { name = "opentelemetry-exporter-otlp-proto-http" },
-    { name = "opentelemetry-sdk" },
-    { name = "pdfplumber" },
-    { name = "procrastinate" },
-    { name = "psycopg", extra = ["binary"] },
-    { name = "pydantic-settings" },
-    { name = "structlog" },
-    { name = "tenacity" },
-    { name = "typer" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "jsonschema" },
-    { name = "mypy" },
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "respx" },
-    { name = "ruff" },
-    { name = "zeitwide" },
-    { name = "testcontainers" },
-    { name = "types-jsonschema" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "google-cloud-storage", specifier = ">=3.17.1" },
-    { name = "httpx", specifier = ">=0.28.1" },
-    { name = "opentelemetry-api", specifier = ">=1.45.1" },
-    { name = "opentelemetry-exporter-otlp-proto-http", specifier = ">=1.45.1" },
-    { name = "opentelemetry-sdk", specifier = ">=1.45.1" },
-    { name = "pdfplumber", specifier = ">=0.11.10" },
-    { name = "procrastinate", specifier = "==3.10.0" },
-    { name = "psycopg", extras = ["binary"], specifier = ">=3.3.6" },
-    { name = "pydantic-settings", specifier = ">=2.16.1" },
-    { name = "structlog", specifier = ">=26.1.0" },
-    { name = "tenacity", specifier = ">=9.2.1" },
-    { name = "typer", specifier = ">=0.27.3" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "jsonschema", specifier = ">=4.26.0" },
-    { name = "mypy", specifier = ">=1.18" },
-    { name = "pytest", specifier = ">=8.4" },
-    { name = "pytest-cov", specifier = ">=7.0" },
-    { name = "respx", specifier = ">=0.23.1" },
-    { name = "ruff", specifier = ">=0.14" },
-    { name = "zeitwide", editable = "../lib-python" },
-    { name = "testcontainers", extras = ["postgres"], specifier = ">=4.15.0" },
-    { name = "types-jsonschema", specifier = ">=4.26.0.20261006" },
-]
-
-[[package]]
 name = "shellingham"
 version = "1.5.4"
 source = { registry = "https://pypi.org/simple" }
@@ -1335,4 +1256,87 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/22/d5/39d5a704650f18799f37841442b464edb81cf2015f006eaef26068acc6ea/wrapt-2.5.1-cp312-cp312-win_amd64.whl", hash = "sha256:c39c7130ea0702c4ab0faf12da1df1e02d5174305c17edf02309e2f058c4114f", size = 106048, upload-time = "2026-10-14T00:37:33.188Z" },
     { url = "https://files.pythonhosted.org/packages/21/bf/65743adeeb5476920c62dad6cded7bc8789e19bd4f9a336d4ac812adb8de/wrapt-2.5.1-cp312-cp312-win_arm64.whl", hash = "sha256:e089a22ff5af1290b8c759a610830bdb2a829ef9c3d7797e4ee32c2f795ed482", size = 103200, upload-time = "2026-10-14T00:37:34.673Z" },
     { url = "https://files.pythonhosted.org/packages/bc/0c/7da7513ddcc8f1d831ec4bfbedc9f7f174ecb91042bc16916fc1e0d06b22/wrapt-2.5.1-py3-none-any.whl", hash = "sha256:c6e6c226b1ca5402d7ae5fb34a0d21f1b49124fe4200e5884d1e19e53c47ac1d", size = 81849, upload-time = "2026-10-14T00:39:37.441Z" },
+]
+
+[[package]]
+name = "zeitwide"
+version = "0.1.0"
+source = { editable = "../lib-python" }
+
+[package.metadata]
+requires-dist = [{ name = "httpx", marker = "extra == 'online'", specifier = ">=0.28.1" }]
+provides-extras = ["online"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "datamodel-code-generator", specifier = "==0.83.0" },
+    { name = "httpx", specifier = ">=0.28.1" },
+    { name = "hypothesis", specifier = ">=6.170.12" },
+    { name = "jsonschema", specifier = ">=4.26.0" },
+    { name = "mypy", specifier = ">=1.18" },
+    { name = "pytest", specifier = ">=8.4" },
+    { name = "pytest-cov", specifier = ">=7.0" },
+    { name = "ruff", specifier = ">=0.14" },
+    { name = "types-jsonschema", specifier = ">=4.26.0.20261006" },
+]
+
+[[package]]
+name = "zeitwide-pipeline"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "google-cloud-storage" },
+    { name = "httpx" },
+    { name = "opentelemetry-api" },
+    { name = "opentelemetry-exporter-otlp-proto-http" },
+    { name = "opentelemetry-sdk" },
+    { name = "pdfplumber" },
+    { name = "procrastinate" },
+    { name = "psycopg", extra = ["binary"] },
+    { name = "pydantic-settings" },
+    { name = "structlog" },
+    { name = "tenacity" },
+    { name = "typer" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "jsonschema" },
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "respx" },
+    { name = "ruff" },
+    { name = "testcontainers" },
+    { name = "types-jsonschema" },
+    { name = "zeitwide" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "google-cloud-storage", specifier = ">=3.17.1" },
+    { name = "httpx", specifier = ">=0.28.1" },
+    { name = "opentelemetry-api", specifier = ">=1.45.1" },
+    { name = "opentelemetry-exporter-otlp-proto-http", specifier = ">=1.45.1" },
+    { name = "opentelemetry-sdk", specifier = ">=1.45.1" },
+    { name = "pdfplumber", specifier = ">=0.11.10" },
+    { name = "procrastinate", specifier = "==3.10.0" },
+    { name = "psycopg", extras = ["binary"], specifier = ">=3.3.6" },
+    { name = "pydantic-settings", specifier = ">=2.16.1" },
+    { name = "structlog", specifier = ">=26.1.0" },
+    { name = "tenacity", specifier = ">=9.2.1" },
+    { name = "typer", specifier = ">=0.27.3" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "jsonschema", specifier = ">=4.26.0" },
+    { name = "mypy", specifier = ">=1.18" },
+    { name = "pytest", specifier = ">=8.4" },
+    { name = "pytest-cov", specifier = ">=7.0" },
+    { name = "respx", specifier = ">=0.23.1" },
+    { name = "ruff", specifier = ">=0.14" },
+    { name = "testcontainers", extras = ["postgres"], specifier = ">=4.15.0" },
+    { name = "types-jsonschema", specifier = ">=4.26.0.20261006" },
+    { name = "zeitwide", editable = "../lib-python" },
 ]
