@@ -12,6 +12,7 @@ import {
 } from "@/api/client";
 
 import { env } from "./env";
+import { withRetry } from "./retry";
 
 /**
  * Cached reads for the public pages, which prerender. Each calendar's days are cached under the
@@ -36,7 +37,7 @@ export async function getCalendars(): Promise<CalendarList> {
   "use cache";
   cacheLife("calendar");
   cacheTag(CALENDARS_TAG);
-  return unwrap(await api().GET("/v1/calendars"));
+  return withRetry(async () => unwrap(await api().GET("/v1/calendars")));
 }
 
 /**
@@ -56,10 +57,12 @@ export async function getDays(
   void revision;
   const query = date === undefined ? {} : { from: date, to: date };
   try {
-    return unwrap(
-      await api().GET("/v1/calendars/{id}/days", {
-        params: { path: { id: calendarId }, query },
-      }),
+    return await withRetry(async () =>
+      unwrap(
+        await api().GET("/v1/calendars/{id}/days", {
+          params: { path: { id: calendarId }, query },
+        }),
+      ),
     );
   } catch (error) {
     if (

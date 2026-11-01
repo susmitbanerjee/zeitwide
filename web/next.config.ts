@@ -11,6 +11,12 @@ const nextConfig: NextConfig = {
     // Prerendering calls the API once per page, and the API's Postgres pool has 4 connections.
     // Seven workers exhausted that pool, so the build runs two.
     cpus: 2,
+    // Each page asks the API about every calendar, and the API's database is far away, so a
+    // call takes seconds. Eight pages at once per worker put dozens of calls in flight at the
+    // same moment and the API timed out; fewer at a time, and a few more tries, keep the build
+    // from failing on a slow moment.
+    staticGenerationMaxConcurrency: 3,
+    staticGenerationRetryCount: 3,
   },
   poweredByHeader: false,
   cacheLife: {
