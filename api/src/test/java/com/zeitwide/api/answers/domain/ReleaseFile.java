@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -68,9 +69,32 @@ public final class ReleaseFile {
             CalendarKind.fromCode(calendar.path("kind").asText()),
             ZoneId.of(calendar.path("timezone").asText()),
             weekend,
-            calendar.path("closes_on_holidays").asBoolean());
+            calendar.path("closes_on_holidays").asBoolean(),
+            hours(calendar.path("operating_hours")));
     return new CalendarHistory(
         rules, stream(calendar.path("entries")).map(ReleaseFile::entry).toList());
+  }
+
+  private static OperatingHours hours(JsonNode hours) {
+    if (hours.isMissingNode() || hours.isNull()) {
+      return OperatingHours.UNPUBLISHED;
+    }
+    return new OperatingHours.Published(
+        hours.path("always_open").asBoolean(),
+        time(hours.path("opens")),
+        time(hours.path("closes")),
+        hours.path("opens_previous_day").asBoolean(),
+        hours.path("note").asText(""),
+        stream(hours.path("cutoffs"))
+            .map(
+                cutoff ->
+                    new OperatingHours.Cutoff(
+                        cutoff.path("name").asText(), time(cutoff.path("deadline"))))
+            .toList());
+  }
+
+  private static LocalTime time(JsonNode node) {
+    return node.isTextual() ? LocalTime.parse(node.asText()) : null;
   }
 
   private static EntryVersion entry(JsonNode entry) {

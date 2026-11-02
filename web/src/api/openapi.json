@@ -2697,6 +2697,73 @@
           },
           "coverage": {
             "$ref": "#/components/schemas/Coverage"
+          },
+          "operating_hours": {
+            "$ref": "#/components/schemas/OperatingHours"
+          }
+        }
+      },
+      "OperatingHours": {
+        "type": "object",
+        "description": "When the calendar settles on a business day, as its operator publishes it. Times are\n`HH:mm` in the calendar's `timezone`. Absent when the operator publishes no hours.\n",
+        "required": [
+          "always_open",
+          "opens_previous_day",
+          "note",
+          "cutoffs"
+        ],
+        "properties": {
+          "always_open": {
+            "type": "boolean",
+            "description": "Open around the clock on every day."
+          },
+          "opens": {
+            "type": "string",
+            "pattern": "^[0-2][0-9]:[0-5][0-9]$",
+            "description": "Absent when only cutoffs are published or the calendar never closes.",
+            "examples": [
+              "06:00"
+            ]
+          },
+          "closes": {
+            "type": "string",
+            "pattern": "^[0-2][0-9]:[0-5][0-9]$",
+            "examples": [
+              "18:00"
+            ]
+          },
+          "opens_previous_day": {
+            "type": "boolean",
+            "description": "The business day opens at `opens` on the calendar day before it (Fedwire)."
+          },
+          "note": {
+            "type": "string"
+          },
+          "cutoffs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Cutoff"
+            }
+          }
+        }
+      },
+      "Cutoff": {
+        "type": "object",
+        "description": "The last time a kind of payment is accepted on a business day.",
+        "required": [
+          "name",
+          "deadline"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "deadline": {
+            "type": "string",
+            "pattern": "^[0-2][0-9]:[0-5][0-9]$",
+            "examples": [
+              "17:40"
+            ]
           }
         }
       },

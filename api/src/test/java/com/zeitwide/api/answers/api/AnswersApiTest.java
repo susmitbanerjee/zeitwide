@@ -158,6 +158,12 @@ class AnswersApiTest {
         .andExpect(jsonPath("$.calendars[?(@.id == 'GB-CHAPS')].coverage.from").value("2022-01-01"))
         .andExpect(jsonPath("$.calendars[?(@.id == 'GB-CHAPS')].coverage.to").value("2028-12-31"))
         .andExpect(
+            jsonPath("$.calendars[?(@.id == 'GB-CHAPS')].operating_hours.opens").value("06:00"))
+        .andExpect(
+            jsonPath("$.calendars[?(@.id == 'US-FEDWIRE')].operating_hours.opens_previous_day")
+                .value(true))
+        .andExpect(jsonPath("$.calendars[?(@.id == 'DE')].operating_hours").doesNotExist())
+        .andExpect(
             jsonPath("$.calendars[?(@.id == 'US-FEDWIRE')].weekend[*]")
                 .value(contains("saturday", "sunday")));
   }

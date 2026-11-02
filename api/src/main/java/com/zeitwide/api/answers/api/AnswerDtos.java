@@ -171,7 +171,20 @@ final class AnswerDtos {
       List<String> weekend,
       boolean closesOnHolidays,
       long revision,
-      Coverage coverage) {}
+      Coverage coverage,
+      @JsonInclude(JsonInclude.Include.NON_NULL) OperatingHours operatingHours) {}
+
+  /** Times are "HH:mm" in the calendar's time zone. */
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  record OperatingHours(
+      boolean alwaysOpen,
+      String opens,
+      String closes,
+      boolean opensPreviousDay,
+      String note,
+      List<Cutoff> cutoffs) {}
+
+  record Cutoff(String name, String deadline) {}
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
   record CalendarList(

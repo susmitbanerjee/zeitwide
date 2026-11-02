@@ -7,6 +7,7 @@ import com.zeitwide.api.answers.domain.CalendarRules;
 import com.zeitwide.api.answers.domain.Dataset;
 import com.zeitwide.api.answers.domain.DatasetRelease;
 import com.zeitwide.api.answers.domain.EntryVersion;
+import com.zeitwide.api.answers.domain.OperatingHours;
 import com.zeitwide.api.answers.domain.ReleaseStamp;
 import com.zeitwide.api.answers.domain.SourceRef;
 import com.zeitwide.api.calendars.domain.Basis;
@@ -17,6 +18,7 @@ import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -51,7 +53,22 @@ class JdbcDatasetSource implements DatasetSource {
   static final String CALENDARS =
       """
       SELECT id, name, kind, timezone, closes_on_holidays,
-             ARRAY(SELECT jsonb_array_elements_text(weekend_rule -> 'days')) AS weekend
+             ARRAY(SELECT jsonb_array_elements_text(weekend_rule -> 'days')) AS weekend,
+             operating_hours IS NOT NULL AS has_hours,
+             COALESCE((operating_hours ->> 'always_open')::boolean, false) AS always_open,
+             (operating_hours ->> 'opens')::time AS opens,
+             (operating_hours ->> 'closes')::time AS closes,
+             COALESCE((operating_hours ->> 'opens_previous_day')::boolean, false)
+                 AS opens_previous_day,
+             COALESCE(operating_hours ->> 'note', '') AS hours_note,
+             ARRAY(SELECT c ->> 'name'
+                   FROM jsonb_array_elements(COALESCE(operating_hours -> 'cutoffs', '[]'))
+                        WITH ORDINALITY AS cutoff(c, n)
+                   ORDER BY n) AS cutoff_names,
+             ARRAY(SELECT c ->> 'deadline'
+                   FROM jsonb_array_elements(COALESCE(operating_hours -> 'cutoffs', '[]'))
+                        WITH ORDINALITY AS cutoff(c, n)
+                   ORDER BY n) AS cutoff_deadlines
       FROM calendar
       ORDER BY id
       """;
@@ -135,7 +152,27 @@ class JdbcDatasetSource implements DatasetSource {
         CalendarKind.fromCode(rs.getString("kind")),
         ZoneId.of(rs.getString("timezone")),
         days,
-        rs.getBoolean("closes_on_holidays"));
+        rs.getBoolean("closes_on_holidays"),
+        hours(rs));
+  }
+
+  private static OperatingHours hours(ResultSet rs) throws SQLException {
+    if (!rs.getBoolean("has_hours")) {
+      return OperatingHours.UNPUBLISHED;
+    }
+    String[] names = (String[]) rs.getArray("cutoff_names").getArray();
+    String[] deadlines = (String[]) rs.getArray("cutoff_deadlines").getArray();
+    List<OperatingHours.Cutoff> cutoffs = new ArrayList<>();
+    for (int i = 0; i < names.length; i++) {
+      cutoffs.add(new OperatingHours.Cutoff(names[i], LocalTime.parse(deadlines[i])));
+    }
+    return new OperatingHours.Published(
+        rs.getBoolean("always_open"),
+        rs.getObject("opens", LocalTime.class),
+        rs.getObject("closes", LocalTime.class),
+        rs.getBoolean("opens_previous_day"),
+        rs.getString("hours_note"),
+        cutoffs);
   }
 
   private static Row row(ResultSet rs, Map<Long, List<SourceRef>> sources) throws SQLException {
