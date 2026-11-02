@@ -5,7 +5,10 @@
 //   node e2e/mock-api/server.mjs          (port 8090, or MOCK_API_PORT)
 
 import { createHash, randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import {
   CALENDARS,
@@ -21,6 +24,9 @@ import {
 } from "./data.mjs";
 
 const PORT = Number(process.env.MOCK_API_PORT ?? 8090);
+// Written by `zeitwide-pipeline site-files` from e2e/mock-api/write-release.mjs.
+const SITE_FILES =
+  process.env.MOCK_SITE_FILES ?? join(dirname(fileURLToPath(import.meta.url)), "..", ".site-files");
 const DAY_MS = 86_400_000;
 let state = freshState();
 
@@ -162,6 +168,7 @@ function summary(calendar) {
     closes_on_holidays: calendar.years !== null,
     revision: 12,
     coverage,
+    ...(calendar.hours === undefined ? {} : { operating_hours: calendar.hours }),
   };
 }
 
@@ -203,6 +210,59 @@ async function route(req, res, url) {
   if (method === "POST" && path === "/__reset") {
     state = freshState();
     return send(res, 204);
+  }
+  // The pipeline's site files (llms.txt, sitemaps, robots.txt), as the public bucket serves them.
+  if (method === "GET" && path.startsWith("/site/")) {
+    const name = path.slice("/site/".length);
+    if (!/^(?:[a-z]+\/)?[A-Za-z0-9][A-Za-z0-9.-]*\.(txt|xml)$/.test(name)) {
+      return send(res, 404);
+    }
+    try {
+      const body = readFileSync(join(SITE_FILES, name));
+      res.writeHead(200, { "Content-Type": "application/octet-stream" });
+      return res.end(body);
+    } catch {
+      return send(res, 404);
+    }
+  }
+  // Linked from llms.txt; the validator only needs them to answer.
+  if (method === "GET" && (path === "/openapi.yaml" || path === "/mcp")) {
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    return res.end("fake\n");
+  }
+  const closures = path.match(/^\/v1\/calendars\/([^/]+)\/closures$/);
+  if (method === "GET" && closures) {
+    const calendar = calendarOr404(res, closures[1]);
+    if (!calendar) return;
+    const from = q.get("from") ?? "";
+    const to = q.get("to") ?? "";
+    if (!covered(calendar, from) || !covered(calendar, to) || to < from) {
+      return problem(res, 422, "out_of_range", `${from} to ${to} is outside ${calendar.id}`);
+    }
+    const list = Object.keys(calendar.holidays)
+      .filter((date) => date >= from && date <= to)
+      .sort()
+      .map((date) => {
+        const day = calendarDay(calendar, date, asOf);
+        return {
+          date,
+          reason: day.reason,
+          basis: day.basis,
+          revision: day.revision,
+          recorded_from: day.recorded_from,
+          sources: day.sources,
+        };
+      });
+    return send(
+      res,
+      200,
+      answered(
+        { calendar_id: calendar.id, from, to, closures: list, calendar_revision: 12 },
+        { path, from, to },
+        [calendar.id],
+        asOf,
+      ),
+    );
   }
   if (method === "GET" && path === "/v1/calendars") {
     const ids = CALENDARS.map((c) => c.id);

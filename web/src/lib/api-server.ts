@@ -12,6 +12,7 @@ import {
 } from "@/api/client";
 
 import { env } from "./env";
+import { yearRange } from "./public-pages";
 import { withRetry } from "./retry";
 
 /**
@@ -55,7 +56,31 @@ export async function getDays(
   cacheLife("calendar");
   cacheTag(CALENDARS_TAG, calendarTag(calendarId));
   void revision;
-  const query = date === undefined ? {} : { from: date, to: date };
+  return fetchDays(calendarId, date === undefined ? {} : { from: date, to: date });
+}
+
+/**
+ * One calendar's days for a whole year (the API leaves out dates it doesn't cover). The year pages,
+ * answer pages and compare pages all read from these, so one cached call serves every date.
+ *
+ * @returns null when the calendar doesn't exist
+ */
+export async function getYearDays(
+  calendarId: string,
+  revision: number,
+  year: number,
+): Promise<DayRange | null> {
+  "use cache";
+  cacheLife("calendar");
+  cacheTag(CALENDARS_TAG, calendarTag(calendarId));
+  void revision;
+  return fetchDays(calendarId, yearRange(year));
+}
+
+async function fetchDays(
+  calendarId: string,
+  query: { from?: string; to?: string },
+): Promise<DayRange | null> {
   try {
     return await withRetry(async () =>
       unwrap(

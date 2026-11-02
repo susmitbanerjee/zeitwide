@@ -36,6 +36,8 @@ export default defineConfig({
       timeout: 120_000,
       env: {
         ZEITWIDE_API_URL: MOCK_API_URL,
+        // The pipeline's site files (llms.txt, sitemaps), written by `make e2e-web`.
+        SITE_FILES_URL: `${MOCK_API_URL}/site`,
         SITE_URL: BASE_URL,
         APP_URL: BASE_URL,
         AUTH_URL: BASE_URL,

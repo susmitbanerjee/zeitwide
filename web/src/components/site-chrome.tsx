@@ -86,8 +86,19 @@ export function SiteFooter() {
   return (
     <footer className="mt-12 border-t border-line bg-surface">
       <div className="mx-auto flex max-w-[1376px] flex-wrap justify-between gap-x-6 gap-y-2 px-4 py-5 text-[13px] leading-5 text-ink-muted sm:px-8">
-        <p>Free during the public beta, including commercial use of the API.</p>
-        <p>Data: Zeitwide open dataset, CC BY-NC 4.0 · Library: MIT</p>
+        <p>
+          <Link href="/pricing" className="inline-flex min-h-11 items-center">
+            Free during the public beta, including commercial use of the API
+          </Link>
+        </p>
+        <p>
+          <Link href="/sources" className="inline-flex min-h-11 items-center">
+            Every date comes from an official source
+          </Link>
+        </p>
+        <p className="inline-flex min-h-11 items-center">
+          Data: Zeitwide open dataset, CC BY-NC 4.0 · Library: MIT
+        </p>
       </div>
     </footer>
   );

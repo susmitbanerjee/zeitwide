@@ -40,9 +40,11 @@ locals {
     ZEITWIDE_API_URL = google_cloud_run_v2_service.api.uri
     ZEITWIDE_MCP_URL = "${local.api_public_url}/mcp"
     SITE_URL         = var.web_origin
-    APP_URL          = local.web_app_origin
-    AUTH_URL         = local.web_app_origin
-    AUTH_TRUST_HOST  = "true"
+    # robots.txt, llms.txt and the sitemaps, written by the pipeline with each release.
+    SITE_FILES_URL  = "https://storage.googleapis.com/${google_storage_bucket.site_files.name}/current"
+    APP_URL         = local.web_app_origin
+    AUTH_URL        = local.web_app_origin
+    AUTH_TRUST_HOST = "true"
     # A sign-in provider is offered only when its client ID is set (secrets are in web_secret_env).
     AUTH_GOOGLE_ID           = var.google_client_id
     AUTH_MICROSOFT_ID        = var.microsoft_client_id
@@ -74,6 +76,9 @@ locals {
     ZEITWIDE_BACKUP_DB_USER     = local.db.backup_user
     ZEITWIDE_BACKUP_DATABASES   = local.db.zeitwide_database
     ZEITWIDE_DATASET_REPOSITORY = var.dataset_repository
+    ZEITWIDE_SITE_FILES_BUCKET  = google_storage_bucket.site_files.name
+    ZEITWIDE_SITE_URL           = var.web_origin
+    ZEITWIDE_API_PUBLIC_URL     = local.api_public_url
   })
 
   pipeline_secret_env = {

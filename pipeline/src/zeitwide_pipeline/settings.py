@@ -44,6 +44,10 @@ class Settings(FetchSettings):
     backup_databases: str = ""
     dataset_repository: str | None = None
     github_token: SecretStr | None = Field(default=None, validation_alias="GITHUB_TOKEN")
+    # Site files (llms.txt, sitemaps, robots.txt) for each release; skipped when unset.
+    site_files_bucket: str | None = None
+    site_url: HttpUrl | None = None
+    api_public_url: HttpUrl | None = None
 
     def databases_to_back_up(self) -> list[str]:
         return [name.strip() for name in self.backup_databases.split(",") if name.strip()]

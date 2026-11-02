@@ -120,6 +120,14 @@ export const CALENDARS = [
     holidays: FED,
     sources: ["frbservices", "frb-k8"],
     years: [2026, 2027],
+    hours: {
+      always_open: false,
+      opens: "21:00",
+      closes: "19:00",
+      opens_previous_day: true,
+      note: "The funds-transfer business day opens at 9:00 p.m. ET on the preceding calendar day.",
+      cutoffs: [{ name: "Customer transfers", deadline: "18:45" }],
+    },
   },
   {
     id: "US-FEDACH",
@@ -157,6 +165,17 @@ export const CALENDARS = [
     holidays: UK,
     sources: ["gov-uk", "boe"],
     years: [2022, 2027],
+    hours: {
+      always_open: false,
+      opens: "06:00",
+      closes: "18:00",
+      opens_previous_day: false,
+      note: "Open Monday to Friday, excluding bank and public holidays in England and Wales.",
+      cutoffs: [
+        { name: "Customer payments", deadline: "17:40" },
+        { name: "Bank-to-bank payments", deadline: "18:00" },
+      ],
+    },
   },
   {
     id: "US-FEDERAL",
@@ -343,5 +362,46 @@ function release(id, asOf) {
     calendar_revisions: Object.fromEntries(
       CALENDARS.map((calendar, index) => [calendar.id, 10 + index]),
     ),
+  };
+}
+
+/** The fake data as a dataset release document (schema_version 2), for the pipeline's site files. */
+export function releaseDocument() {
+  return {
+    schema_version: 2,
+    release: RELEASE,
+    as_of: RELEASE_AS_OF,
+    license: "CC BY-NC 4.0",
+    calendars: CALENDARS.map((calendar) => ({
+      id: calendar.id,
+      name: calendar.name,
+      kind: calendar.kind,
+      timezone: calendar.timezone,
+      weekend: calendar.weekend,
+      closes_on_holidays: calendar.years !== null,
+      observance: null,
+      operating_hours: calendar.hours ?? null,
+      revision: 12,
+      entries: Object.entries(calendar.holidays)
+        .filter(([date]) => {
+          const year = Number(date.slice(0, 4));
+          return calendar.years !== null && year >= calendar.years[0] && year <= calendar.years[1];
+        })
+        .map(([date, reason]) => ({
+          date,
+          is_open: false,
+          reason,
+          basis: "published",
+          revision: 12,
+          recorded_from: recordedFrom(date),
+          recorded_to: null,
+          sources: sourcesFor(calendar, date).map((source, index) => ({
+            source_id: calendar.sources[index],
+            url: source.url,
+            sha256: source.snapshot_sha256,
+            fetched_at: source.retrieved_at,
+          })),
+        })),
+    })),
   };
 }

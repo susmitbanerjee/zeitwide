@@ -11,6 +11,17 @@ def snapshot_key(sha256_hex: str) -> str:
     return f"sha256/{sha256_hex}"
 
 
+def gcs_client(endpoint: str | None = None) -> storage.Client:
+    """Uses Application Default Credentials, or no credentials for a local ``endpoint``."""
+    if endpoint is None:
+        return storage.Client()
+    return storage.Client(
+        project="local",
+        credentials=AnonymousCredentials(),  # type: ignore[no-untyped-call]
+        client_options={"api_endpoint": endpoint},
+    )
+
+
 class SnapshotStore(Protocol):
     def put(self, key: str, content: bytes, content_type: str) -> None:
         """Stores ``content`` under ``key`` once. Storing the same key again is a no-op."""
@@ -25,15 +36,7 @@ class GcsSnapshotStore:
 
     @classmethod
     def connect(cls, bucket: str, endpoint: str | None = None) -> "GcsSnapshotStore":
-        """Uses Application Default Credentials, or no credentials for a local ``endpoint``."""
-        if endpoint is None:
-            return cls(storage.Client(), bucket)
-        client = storage.Client(
-            project="local",
-            credentials=AnonymousCredentials(),  # type: ignore[no-untyped-call]
-            client_options={"api_endpoint": endpoint},
-        )
-        return cls(client, bucket)
+        return cls(gcs_client(endpoint), bucket)
 
     def put(self, key: str, content: bytes, content_type: str) -> None:
         blob = self._bucket.blob(key)

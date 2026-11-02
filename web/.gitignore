@@ -45,3 +45,4 @@ next-env.d.ts
 /test-results
 /.lighthouse
 /e2e/.auth
+/e2e/.site-files/

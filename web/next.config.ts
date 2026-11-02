@@ -34,7 +34,29 @@ const nextConfig: NextConfig = {
   },
   // The Content-Security-Policy is set per request in src/proxy.ts (nonces for signed-in pages).
   headers() {
-    return Promise.resolve([{ source: "/:path*", headers: SECURITY_HEADERS }]);
+    return Promise.resolve([
+      { source: "/:path*", headers: SECURITY_HEADERS },
+      // Public pages have a Markdown twin; the Cloudflare Worker picks one by Accept.
+      {
+        source: "/:path((?!api/|_next/|app/|admin/).*)",
+        headers: [{ key: "Vary", value: "Accept" }],
+      },
+    ]);
+  },
+  // Markdown for every public data page: /calendars/GB-CHAPS.md or /calendars/GB-CHAPS?format=md.
+  rewrites() {
+    return Promise.resolve({
+      beforeFiles: [
+        { source: "/:path((?!api/).+)\\.md", destination: "/api/markdown/:path" },
+        {
+          source: "/:path((?!api/).+)",
+          has: [{ type: "query", key: "format", value: "md" }],
+          destination: "/api/markdown/:path",
+        },
+      ],
+      afterFiles: [],
+      fallback: [],
+    });
   },
 };
 

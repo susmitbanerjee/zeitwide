@@ -96,3 +96,36 @@ export const DECEMBER: DayRange = {
   calendar_revisions: { "GB-CHAPS": 41 },
   receipt: RECEIPT,
 };
+
+/** CHAPS with its published hours, as GET /v1/calendars returns it. */
+export const CHAPS_WITH_HOURS: Calendar = {
+  ...CHAPS,
+  operating_hours: {
+    always_open: false,
+    opens: "06:00",
+    closes: "18:00",
+    opens_previous_day: false,
+    note: "Open Monday to Friday, excluding bank and public holidays in England and Wales.",
+    cutoffs: [
+      { name: "Customer payments", deadline: "17:40" },
+      { name: "Bank-to-bank payments", deadline: "18:00" },
+    ],
+  },
+};
+
+export const FEDWIRE: Calendar = {
+  ...CHAPS,
+  id: "US-FEDWIRE",
+  name: "Fedwire Funds",
+  timezone: "America/New_York",
+  operating_hours: {
+    always_open: false,
+    opens: "21:00",
+    closes: "19:00",
+    opens_previous_day: true,
+    note: "Opens at 9:00 p.m. ET on the preceding calendar day.",
+    cutoffs: [],
+  },
+};
+
+export const T2: Calendar = { ...CHAPS, id: "EU-T2", name: "T2", timezone: "Europe/Berlin" };
