@@ -1,17 +1,41 @@
 [project]
 name = "zeitwide"
 version = "0.1.0"
-description = "Open Zeitwide library: business-day answers from the bundled Zeitwide dataset, plus a local MCP server."
+description = "Is this a business day? Answers with evidence for payment rails and holiday calendars, offline or from the Zeitwide API."
 readme = "README.md"
-requires-python = ">=3.12,<3.13"
-license = "MIT"
-license-files = ["LICENSE"]
-dependencies = []
+requires-python = ">=3.12"
+# The code is MIT; the bundled dataset release is CC BY-NC 4.0 (LICENSE-DATA).
+license = "MIT AND CC-BY-NC-4.0"
+license-files = ["LICENSE", "LICENSE-DATA"]
+keywords = ["business days", "holidays", "fedwire", "target2", "chaps", "mcp"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Financial and Insurance Industry",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Typing :: Typed",
+]
+# Offline answers need only the standard library; httpx is for ZeitWide(key=...).
+dependencies = [
+    "httpx>=0.28.1,<1",
+]
 
 [project.optional-dependencies]
-online = [
-    "httpx>=0.28.1",
+mcp = [
+    "mcp>=2.3,<3",
 ]
+
+[project.urls]
+Homepage = "https://zeitwide.com"
+Source = "https://github.com/susmitbanerjee/zeitwide"
+
+[project.scripts]
+zeitwide = "zeitwide.cli:main"
+
+[tool.uv.workspace]
+members = ["zeitwide-mcp"]
 
 [build-system]
 requires = ["uv_build>=0.9,<0.14"]
@@ -19,10 +43,12 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+  "cryptography>=46",
   "datamodel-code-generator==0.83.0",
   "httpx>=0.28.1",
   "hypothesis>=6.170.12",
   "jsonschema>=4.26.0",
+  "mcp>=2.3,<3",
   "mypy>=1.18",
   "pytest>=8.4",
   "pytest-cov>=7.0",

@@ -1,22 +1,33 @@
-"""Open Zeitwide library: business-day answers from the bundled dataset."""
+"""Open Zeitwide library: business-day answers with their evidence, offline or online.
+
+>>> from datetime import date
+>>> from zeitwide import ZeitWide
+>>> ZeitWide().is_business_day("US-FEDWIRE", date(2026, 11, 26)).is_business_day
+False
+"""
 
 from importlib.metadata import version
 
-from zeitwide.engine import (
-    Combine,
-    OutOfRangeError,
-    Shifted,
-    add_business_days,
-    is_business_day,
-    next_business_day,
+from zeitwide import webhooks
+from zeitwide.answers import (
+    CalendarDay,
+    Closure,
+    ClosureList,
+    DayAnswer,
+    DecidedBy,
+    Receipt,
+    ShiftAnswer,
+    SkippedDay,
+    Source,
 )
+from zeitwide.client import ApiError
+from zeitwide.core import ZeitWide
+from zeitwide.engine import Combine, OutOfRangeError
+from zeitwide.receipts import KeyRing, Verification, verify_receipt
 from zeitwide.release import (
     Basis,
-    Calendar,
-    Entry,
     Release,
     ReleaseError,
-    SourceRef,
     UnknownCalendarError,
     load_release,
     parse_release,
@@ -25,20 +36,28 @@ from zeitwide.release import (
 __version__ = version("zeitwide")
 
 __all__ = [
+    "ApiError",
     "Basis",
-    "Calendar",
+    "CalendarDay",
+    "Closure",
+    "ClosureList",
     "Combine",
-    "Entry",
+    "DayAnswer",
+    "DecidedBy",
+    "KeyRing",
     "OutOfRangeError",
+    "Receipt",
     "Release",
     "ReleaseError",
-    "Shifted",
-    "SourceRef",
+    "ShiftAnswer",
+    "SkippedDay",
+    "Source",
     "UnknownCalendarError",
+    "Verification",
+    "ZeitWide",
     "__version__",
-    "add_business_days",
-    "is_business_day",
     "load_release",
-    "next_business_day",
     "parse_release",
+    "verify_receipt",
+    "webhooks",
 ]

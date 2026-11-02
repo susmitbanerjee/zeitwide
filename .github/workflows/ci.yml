@@ -58,6 +58,19 @@ jobs:
       - uses: astral-sh/setup-uv@v7
       - run: make check-${{ matrix.project }}
 
+  # The open library supports every Python from 3.12 up; the job above tests 3.12.
+  lib-python-versions:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python: ["3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v7
+        with:
+          python-version: ${{ matrix.python }}
+      - run: make check-lib-python
+
   web:
     runs-on: ubuntu-24.04
     steps:
@@ -74,7 +87,7 @@ jobs:
   # Set the two repository variables from `tofu output` first (deploy/gcp/README.md, step 8).
   deploy:
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
-    needs: [hooks, api, python, web]
+    needs: [hooks, api, python, lib-python-versions, web]
     runs-on: ubuntu-24.04
     permissions:
       contents: read

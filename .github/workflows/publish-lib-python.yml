@@ -1,0 +1,107 @@
+name: Publish lib-python
+
+# Tag a release of the open library with `lib-python-v<version>` (for example
+# `lib-python-v0.1.0`); the version must match lib-python/pyproject.toml. This publishes
+# `zeitwide` and its `zeitwide-mcp` launcher to PyPI with trusted publishing (OIDC), so no
+# token is stored anywhere. A PyPI version can never be uploaded twice, so every check runs
+# before anything is published.
+#
+# One-time setup:
+# - On pypi.org, add a pending trusted publisher for `zeitwide` (this repository, workflow
+#   `publish-lib-python.yml`, environment `pypi`) and one for `zeitwide-mcp` (the same, but
+#   environment `pypi-mcp`).
+# - On GitHub, create the environments `pypi` and `pypi-mcp` (Settings > Environments).
+#   Optionally add yourself as a required reviewer on `pypi`, so each release waits for a
+#   click, and limit both to tags matching `lib-python-v*`.
+on:
+  push:
+    tags: ["lib-python-v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-lib-python
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v7
+      - name: Check the tag matches both versions
+        working-directory: lib-python
+        run: |
+          tag="${GITHUB_REF_NAME#lib-python-v}"
+          for project in pyproject.toml zeitwide-mcp/pyproject.toml; do
+            version=$(python3 -c "import sys, tomllib; print(tomllib.load(open(sys.argv[1], 'rb'))['project']['version'])" "$project")
+            if [ "$version" != "$tag" ]; then
+              echo "::error::Tag $GITHUB_REF_NAME does not match version $version in lib-python/$project"
+              exit 1
+            fi
+          done
+      # The same checks as CI: lint, types, tests and the conformance suite, offline, on
+      # every supported Python.
+      - run: make check-lib-python
+      - run: UV_PYTHON=3.13 make check-lib-python
+      - run: UV_PYTHON=3.14 make check-lib-python
+      - name: Build
+        working-directory: lib-python
+        run: uv build --all-packages --out-dir dist
+      - name: Check a plain install pulls only httpx
+        working-directory: lib-python
+        run: |
+          uv venv /tmp/plain --python 3.12
+          uv pip install --python /tmp/plain dist/zeitwide-*.whl
+          installed=$(uv pip list --python /tmp/plain --format json | python3 -c "import json, sys; print(' '.join(sorted(p['name'] for p in json.load(sys.stdin))))")
+          echo "Installed: $installed"
+          # httpx and its own dependencies, nothing else.
+          test "$installed" = "anyio certifi h11 httpcore httpx idna typing-extensions zeitwide"
+          /tmp/plain/bin/zeitwide --version
+      - name: Check the MCP server starts offline from the built wheels
+        working-directory: lib-python
+        run: |
+          uvx --no-cache --find-links dist --from dist/zeitwide_mcp-*.whl zeitwide-mcp --version
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: lib-python/dist/
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04
+    environment:
+      name: pypi
+      url: https://pypi.org/project/zeitwide/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - uses: astral-sh/setup-uv@v7
+      - name: Publish zeitwide
+        run: uv publish --trusted-publishing always dist/zeitwide-*
+
+  # Its own job and environment: PyPI accepts a pending trusted publisher for only one
+  # project per repository, workflow and environment, so the two can't share `pypi`.
+  # After zeitwide, since zeitwide-mcp depends on it.
+  publish-mcp:
+    needs: publish
+    runs-on: ubuntu-24.04
+    environment:
+      name: pypi-mcp
+      url: https://pypi.org/project/zeitwide-mcp/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - uses: astral-sh/setup-uv@v7
+      - name: Publish zeitwide-mcp
+        run: uv publish --trusted-publishing always dist/zeitwide_mcp-*

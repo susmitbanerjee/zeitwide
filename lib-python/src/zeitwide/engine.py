@@ -28,6 +28,10 @@ class Combine(StrEnum):
 class OutOfRangeError(ValueError):
     """The date is outside what the calendar's sources had published: never guessed."""
 
+    # None when the hosted API answered, since its problem details don't name them.
+    calendar_id: str | None
+    day: date | None
+
     def __init__(self, calendar_id: str, day: date) -> None:
         super().__init__(f"{calendar_id} has no source coverage for {day.isoformat()}")
         self.calendar_id = calendar_id
@@ -71,10 +75,18 @@ class _View:
         return all(answers) if self.combine is Combine.ALL_OPEN else any(answers)
 
     def _is_open(self, calendar: Calendar, day: date) -> bool:
-        entry = calendar.entry_at(day, self.moment)
-        if entry is not None:
-            return entry.is_open
-        return day.weekday() not in calendar.weekend
+        return is_open(calendar, day, self.moment)
+
+
+def is_open(calendar: Calendar, day: date, moment: datetime) -> bool:
+    """One calendar's answer: the entry recorded at ``moment`` decides, else the weekend rule.
+
+    Coverage is the caller's to check.
+    """
+    entry = calendar.entry_at(day, moment)
+    if entry is not None:
+        return entry.is_open
+    return day.weekday() not in calendar.weekend
 
 
 def is_business_day(
@@ -146,6 +158,11 @@ def add_business_days(  # noqa: PLR0913 - the question has this many parts
         else:
             skipped.append(current)
     return Shifted(current, tuple(skipped))
+
+
+def check_coverage(release: Release, calendar_id: str, day: date, moment: datetime) -> None:
+    """Raises ``OutOfRangeError`` when ``day`` is outside the calendar's coverage at ``moment``."""
+    _covered(release.calendar(calendar_id), moment).check(day)
 
 
 def _view(

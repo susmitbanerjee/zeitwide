@@ -23,6 +23,9 @@ class ReleaseError(ValueError):
 class UnknownCalendarError(ReleaseError):
     """The release has no calendar with this ID."""
 
+    # None when the hosted API answered, since its problem details don't name it.
+    calendar_id: str | None
+
     def __init__(self, release_id: str, calendar_id: str) -> None:
         super().__init__(f"Release {release_id} has no calendar {calendar_id!r}")
         self.calendar_id = calendar_id
@@ -84,6 +87,18 @@ class Calendar:
     def entry_at(self, day: date, moment: datetime) -> Entry | None:
         """The version of ``day``'s entry recorded at ``moment``, if there was one."""
         return next((e for e in self.entries.get(day, ()) if e.recorded_at(moment)), None)
+
+    def revision_at(self, moment: datetime) -> int:
+        """The latest revision published by ``moment``, or 0: what the API reports."""
+        return max(
+            (
+                version.revision
+                for versions in self.entries.values()
+                for version in versions
+                if version.recorded_from <= moment
+            ),
+            default=0,
+        )
 
     def years_recorded_at(self, moment: datetime) -> tuple[int, int] | None:
         """The first and last year with an entry recorded at ``moment``."""

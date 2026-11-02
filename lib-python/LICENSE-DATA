@@ -1,0 +1,20 @@
+Zeitwide dataset
+================
+
+The dataset releases bundled with this package (src/zeitwide/data/releases/*.json) are
+Copyright (c) 2026 Zeitwide and licensed under the Creative Commons
+Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
+
+  Summary:    https://creativecommons.org/licenses/by-nc/4.0/
+  Legal code: https://creativecommons.org/licenses/by-nc/4.0/legalcode
+
+You may share and adapt the data for non-commercial purposes, if you give appropriate
+credit, link to the license and say whether you made changes. Suggested credit:
+
+  Business-day data from Zeitwide (https://zeitwide.com), CC BY-NC 4.0.
+
+Each entry names the official sources it was built from. Commercial use of the data
+needs a separate agreement, or the hosted Zeitwide API under its terms of service.
+
+The code in this package is under the MIT License (LICENSE). The receipt public keys in
+src/zeitwide/data/zeitwide-keys.json are public verification keys, not licensed content.

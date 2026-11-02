@@ -1,0 +1,27 @@
+# A launcher, so that `uvx zeitwide-mcp --offline` works as written: uvx runs the command
+# named after the package. All the code is in `zeitwide`; keep the versions in step
+# (tests/test_package.py checks).
+[project]
+name = "zeitwide-mcp"
+version = "0.1.0"
+description = "Zeitwide's local MCP server: business-day answers with evidence, offline with --offline."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+dependencies = [
+    "zeitwide[mcp]==0.1.0",
+]
+
+[project.urls]
+Homepage = "https://zeitwide.com"
+Source = "https://github.com/susmitbanerjee/zeitwide"
+
+[project.scripts]
+zeitwide-mcp = "zeitwide.mcp_server:main"
+
+[build-system]
+requires = ["uv_build>=0.9,<0.14"]
+build-backend = "uv_build"
+
+[tool.uv.sources]
+zeitwide = { workspace = true }

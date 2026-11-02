@@ -1,0 +1,2481 @@
+{
+  "as_of": "2026-10-29T03:15:37.300151+00:00",
+  "calendars": [
+    {
+      "closes_on_holidays": true,
+      "entries": [
+        {
+          "basis": "published",
+          "date": "2027-01-01",
+          "is_open": false,
+          "reason": "New Year's Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:45:59.355652+00:00",
+              "sha256": "9c92d62d9dd2b00ef14ece536de184dcb22f947109ec97820bfb42175ab0b68b",
+              "source_id": "bundesbank-holidays",
+              "url": "https://www.bundesbank.de/en/tasks/payment-systems/target/holiday-calendar-764518"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-03-26",
+          "is_open": false,
+          "reason": "Good Friday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:45:59.355652+00:00",
+              "sha256": "9c92d62d9dd2b00ef14ece536de184dcb22f947109ec97820bfb42175ab0b68b",
+              "source_id": "bundesbank-holidays",
+              "url": "https://www.bundesbank.de/en/tasks/payment-systems/target/holiday-calendar-764518"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-03-29",
+          "is_open": false,
+          "reason": "Easter Monday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:45:59.355652+00:00",
+              "sha256": "9c92d62d9dd2b00ef14ece536de184dcb22f947109ec97820bfb42175ab0b68b",
+              "source_id": "bundesbank-holidays",
+              "url": "https://www.bundesbank.de/en/tasks/payment-systems/target/holiday-calendar-764518"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-05-01",
+          "is_open": false,
+          "reason": "Labour Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:45:59.355652+00:00",
+              "sha256": "9c92d62d9dd2b00ef14ece536de184dcb22f947109ec97820bfb42175ab0b68b",
+              "source_id": "bundesbank-holidays",
+              "url": "https://www.bundesbank.de/en/tasks/payment-systems/target/holiday-calendar-764518"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-05-06",
+          "is_open": false,
+          "reason": "Ascension Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:45:59.355652+00:00",
+              "sha256": "9c92d62d9dd2b00ef14ece536de184dcb22f947109ec97820bfb42175ab0b68b",
+              "source_id": "bundesbank-holidays",
+              "url": "https://www.bundesbank.de/en/tasks/payment-systems/target/holiday-calendar-764518"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-05-17",
+          "is_open": false,
+          "reason": "Whit Monday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:45:59.355652+00:00",
+              "sha256": "9c92d62d9dd2b00ef14ece536de184dcb22f947109ec97820bfb42175ab0b68b",
+              "source_id": "bundesbank-holidays",
+              "url": "https://www.bundesbank.de/en/tasks/payment-systems/target/holiday-calendar-764518"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-10-03",
+          "is_open": false,
+          "reason": "Day of German Unity",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:45:59.355652+00:00",
+              "sha256": "9c92d62d9dd2b00ef14ece536de184dcb22f947109ec97820bfb42175ab0b68b",
+              "source_id": "bundesbank-holidays",
+              "url": "https://www.bundesbank.de/en/tasks/payment-systems/target/holiday-calendar-764518"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-12-25",
+          "is_open": false,
+          "reason": "Christmas Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:45:59.355652+00:00",
+              "sha256": "9c92d62d9dd2b00ef14ece536de184dcb22f947109ec97820bfb42175ab0b68b",
+              "source_id": "bundesbank-holidays",
+              "url": "https://www.bundesbank.de/en/tasks/payment-systems/target/holiday-calendar-764518"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-12-26",
+          "is_open": false,
+          "reason": "Boxing Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:45:59.355652+00:00",
+              "sha256": "9c92d62d9dd2b00ef14ece536de184dcb22f947109ec97820bfb42175ab0b68b",
+              "source_id": "bundesbank-holidays",
+              "url": "https://www.bundesbank.de/en/tasks/payment-systems/target/holiday-calendar-764518"
+            }
+          ]
+        }
+      ],
+      "id": "DE",
+      "kind": "public",
+      "name": "Germany: nationwide public holidays",
+      "observance": null,
+      "operating_hours": null,
+      "revision": 1,
+      "timezone": "Europe/Berlin",
+      "weekend": [
+        "saturday",
+        "sunday"
+      ]
+    },
+    {
+      "closes_on_holidays": true,
+      "entries": [
+        {
+          "basis": "published",
+          "date": "2026-01-01",
+          "is_open": false,
+          "reason": "New Year's Day (TARGET closing day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:02:56.482014+00:00",
+              "sha256": "edb754e485678c479a94a577e5612e655b581365c5daacde2beeb729be82cffc",
+              "source_id": "ecb-public-holidays",
+              "url": "https://www.ecb.europa.eu/ecb/contacts/working-hours/html/index.en.html"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-04-03",
+          "is_open": false,
+          "reason": "Good Friday (TARGET closing day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:02:56.482014+00:00",
+              "sha256": "edb754e485678c479a94a577e5612e655b581365c5daacde2beeb729be82cffc",
+              "source_id": "ecb-public-holidays",
+              "url": "https://www.ecb.europa.eu/ecb/contacts/working-hours/html/index.en.html"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-04-06",
+          "is_open": false,
+          "reason": "Easter Monday (TARGET closing day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:02:56.482014+00:00",
+              "sha256": "edb754e485678c479a94a577e5612e655b581365c5daacde2beeb729be82cffc",
+              "source_id": "ecb-public-holidays",
+              "url": "https://www.ecb.europa.eu/ecb/contacts/working-hours/html/index.en.html"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-05-01",
+          "is_open": false,
+          "reason": "Labour Day (TARGET closing day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:02:56.482014+00:00",
+              "sha256": "edb754e485678c479a94a577e5612e655b581365c5daacde2beeb729be82cffc",
+              "source_id": "ecb-public-holidays",
+              "url": "https://www.ecb.europa.eu/ecb/contacts/working-hours/html/index.en.html"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-12-25",
+          "is_open": false,
+          "reason": "Christmas Day (TARGET closing day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:02:56.482014+00:00",
+              "sha256": "edb754e485678c479a94a577e5612e655b581365c5daacde2beeb729be82cffc",
+              "source_id": "ecb-public-holidays",
+              "url": "https://www.ecb.europa.eu/ecb/contacts/working-hours/html/index.en.html"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-12-26",
+          "is_open": false,
+          "reason": "Christmas Holiday (TARGET closing day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:02:56.482014+00:00",
+              "sha256": "edb754e485678c479a94a577e5612e655b581365c5daacde2beeb729be82cffc",
+              "source_id": "ecb-public-holidays",
+              "url": "https://www.ecb.europa.eu/ecb/contacts/working-hours/html/index.en.html"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-01-01",
+          "is_open": false,
+          "reason": "New Year's Day (TARGET closing day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:45:59.355652+00:00",
+              "sha256": "9c92d62d9dd2b00ef14ece536de184dcb22f947109ec97820bfb42175ab0b68b",
+              "source_id": "bundesbank-holidays",
+              "url": "https://www.bundesbank.de/en/tasks/payment-systems/target/holiday-calendar-764518"
+            },
+            {
+              "fetched_at": "2026-10-29T02:02:56.482014+00:00",
+              "sha256": "edb754e485678c479a94a577e5612e655b581365c5daacde2beeb729be82cffc",
+              "source_id": "ecb-public-holidays",
+              "url": "https://www.ecb.europa.eu/ecb/contacts/working-hours/html/index.en.html"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-03-26",
+          "is_open": false,
+          "reason": "Good Friday (TARGET closing day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:45:59.355652+00:00",
+              "sha256": "9c92d62d9dd2b00ef14ece536de184dcb22f947109ec97820bfb42175ab0b68b",
+              "source_id": "bundesbank-holidays",
+              "url": "https://www.bundesbank.de/en/tasks/payment-systems/target/holiday-calendar-764518"
+            },
+            {
+              "fetched_at": "2026-10-29T02:02:56.482014+00:00",
+              "sha256": "edb754e485678c479a94a577e5612e655b581365c5daacde2beeb729be82cffc",
+              "source_id": "ecb-public-holidays",
+              "url": "https://www.ecb.europa.eu/ecb/contacts/working-hours/html/index.en.html"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-03-29",
+          "is_open": false,
+          "reason": "Easter Monday (TARGET closing day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:45:59.355652+00:00",
+              "sha256": "9c92d62d9dd2b00ef14ece536de184dcb22f947109ec97820bfb42175ab0b68b",
+              "source_id": "bundesbank-holidays",
+              "url": "https://www.bundesbank.de/en/tasks/payment-systems/target/holiday-calendar-764518"
+            },
+            {
+              "fetched_at": "2026-10-29T02:02:56.482014+00:00",
+              "sha256": "edb754e485678c479a94a577e5612e655b581365c5daacde2beeb729be82cffc",
+              "source_id": "ecb-public-holidays",
+              "url": "https://www.ecb.europa.eu/ecb/contacts/working-hours/html/index.en.html"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-05-01",
+          "is_open": false,
+          "reason": "Labour Day (TARGET closing day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:45:59.355652+00:00",
+              "sha256": "9c92d62d9dd2b00ef14ece536de184dcb22f947109ec97820bfb42175ab0b68b",
+              "source_id": "bundesbank-holidays",
+              "url": "https://www.bundesbank.de/en/tasks/payment-systems/target/holiday-calendar-764518"
+            },
+            {
+              "fetched_at": "2026-10-29T02:02:56.482014+00:00",
+              "sha256": "edb754e485678c479a94a577e5612e655b581365c5daacde2beeb729be82cffc",
+              "source_id": "ecb-public-holidays",
+              "url": "https://www.ecb.europa.eu/ecb/contacts/working-hours/html/index.en.html"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-12-25",
+          "is_open": false,
+          "reason": "Christmas Day (TARGET closing day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:45:59.355652+00:00",
+              "sha256": "9c92d62d9dd2b00ef14ece536de184dcb22f947109ec97820bfb42175ab0b68b",
+              "source_id": "bundesbank-holidays",
+              "url": "https://www.bundesbank.de/en/tasks/payment-systems/target/holiday-calendar-764518"
+            },
+            {
+              "fetched_at": "2026-10-29T02:02:56.482014+00:00",
+              "sha256": "edb754e485678c479a94a577e5612e655b581365c5daacde2beeb729be82cffc",
+              "source_id": "ecb-public-holidays",
+              "url": "https://www.ecb.europa.eu/ecb/contacts/working-hours/html/index.en.html"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-12-26",
+          "is_open": false,
+          "reason": "Christmas Holiday (TARGET closing day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:45:59.355652+00:00",
+              "sha256": "9c92d62d9dd2b00ef14ece536de184dcb22f947109ec97820bfb42175ab0b68b",
+              "source_id": "bundesbank-holidays",
+              "url": "https://www.bundesbank.de/en/tasks/payment-systems/target/holiday-calendar-764518"
+            },
+            {
+              "fetched_at": "2026-10-29T02:02:56.482014+00:00",
+              "sha256": "edb754e485678c479a94a577e5612e655b581365c5daacde2beeb729be82cffc",
+              "source_id": "ecb-public-holidays",
+              "url": "https://www.ecb.europa.eu/ecb/contacts/working-hours/html/index.en.html"
+            }
+          ]
+        }
+      ],
+      "id": "EU-T2",
+      "kind": "rail",
+      "name": "T2 (TARGET RTGS)",
+      "observance": null,
+      "operating_hours": null,
+      "revision": 1,
+      "timezone": "Europe/Berlin",
+      "weekend": [
+        "saturday",
+        "sunday"
+      ]
+    },
+    {
+      "closes_on_holidays": true,
+      "entries": [
+        {
+          "basis": "projected",
+          "date": "2026-01-01",
+          "is_open": false,
+          "reason": "New Year's Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "projected",
+          "date": "2026-04-03",
+          "is_open": false,
+          "reason": "Good Friday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "projected",
+          "date": "2026-04-06",
+          "is_open": false,
+          "reason": "Easter Monday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "projected",
+          "date": "2026-05-04",
+          "is_open": false,
+          "reason": "Early May bank holiday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "projected",
+          "date": "2026-05-25",
+          "is_open": false,
+          "reason": "Spring bank holiday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "projected",
+          "date": "2026-08-31",
+          "is_open": false,
+          "reason": "Summer bank holiday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "projected",
+          "date": "2026-12-25",
+          "is_open": false,
+          "reason": "Christmas Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "projected",
+          "date": "2026-12-28",
+          "is_open": false,
+          "reason": "Boxing Day (Substitute day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "projected",
+          "date": "2027-01-01",
+          "is_open": false,
+          "reason": "New Year's Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "projected",
+          "date": "2027-03-26",
+          "is_open": false,
+          "reason": "Good Friday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "projected",
+          "date": "2027-03-29",
+          "is_open": false,
+          "reason": "Easter Monday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "projected",
+          "date": "2027-05-03",
+          "is_open": false,
+          "reason": "Early May bank holiday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "projected",
+          "date": "2027-05-31",
+          "is_open": false,
+          "reason": "Spring bank holiday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "projected",
+          "date": "2027-08-30",
+          "is_open": false,
+          "reason": "Summer bank holiday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "projected",
+          "date": "2027-12-27",
+          "is_open": false,
+          "reason": "Christmas Day (Substitute day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "projected",
+          "date": "2027-12-28",
+          "is_open": false,
+          "reason": "Boxing Day (Substitute day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        }
+      ],
+      "id": "GB-CHAPS",
+      "kind": "rail",
+      "name": "CHAPS",
+      "observance": null,
+      "operating_hours": {
+        "always_open": false,
+        "closes": "18:00:00",
+        "cutoffs": [
+          {
+            "deadline": "08:00:00",
+            "name": "Participants open to receive"
+          },
+          {
+            "deadline": "10:00:00",
+            "name": "Participants able to send"
+          },
+          {
+            "deadline": "17:40:00",
+            "name": "Customer payments"
+          },
+          {
+            "deadline": "18:00:00",
+            "name": "Bank-to-bank payments"
+          }
+        ],
+        "note": "Open Monday to Friday, excluding bank and public holidays in England and Wales.",
+        "opens": "06:00:00",
+        "opens_previous_day": false
+      },
+      "revision": 1,
+      "timezone": "Europe/London",
+      "weekend": [
+        "saturday",
+        "sunday"
+      ]
+    },
+    {
+      "closes_on_holidays": true,
+      "entries": [
+        {
+          "basis": "published",
+          "date": "2026-01-01",
+          "is_open": false,
+          "reason": "New Year's Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-04-03",
+          "is_open": false,
+          "reason": "Good Friday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-04-06",
+          "is_open": false,
+          "reason": "Easter Monday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-05-04",
+          "is_open": false,
+          "reason": "Early May bank holiday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-05-25",
+          "is_open": false,
+          "reason": "Spring bank holiday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-08-31",
+          "is_open": false,
+          "reason": "Summer bank holiday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-12-25",
+          "is_open": false,
+          "reason": "Christmas Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-12-28",
+          "is_open": false,
+          "reason": "Boxing Day (Substitute day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-01-01",
+          "is_open": false,
+          "reason": "New Year's Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-03-26",
+          "is_open": false,
+          "reason": "Good Friday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-03-29",
+          "is_open": false,
+          "reason": "Easter Monday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-05-03",
+          "is_open": false,
+          "reason": "Early May bank holiday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-05-31",
+          "is_open": false,
+          "reason": "Spring bank holiday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-08-30",
+          "is_open": false,
+          "reason": "Summer bank holiday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-12-27",
+          "is_open": false,
+          "reason": "Christmas Day (Substitute day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-12-28",
+          "is_open": false,
+          "reason": "Boxing Day (Substitute day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:47.342307+00:00",
+              "sha256": "538b3482c28b85ecd2db606a0d5ae6ad17248900b6498700ce0a48d26a3ecde6",
+              "source_id": "govuk-bank-holidays",
+              "url": "https://www.gov.uk/bank-holidays.json"
+            }
+          ]
+        }
+      ],
+      "id": "GB-EAW",
+      "kind": "public",
+      "name": "England and Wales bank holidays",
+      "observance": null,
+      "operating_hours": null,
+      "revision": 1,
+      "timezone": "Europe/London",
+      "weekend": [
+        "saturday",
+        "sunday"
+      ]
+    },
+    {
+      "closes_on_holidays": true,
+      "entries": [
+        {
+          "basis": "published",
+          "date": "2026-01-01",
+          "is_open": false,
+          "reason": "New Year's Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-01-19",
+          "is_open": false,
+          "reason": "Martin Luther King Jr. Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-02-16",
+          "is_open": false,
+          "reason": "Washington's Birthday (Presidents Day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-05-25",
+          "is_open": false,
+          "reason": "Memorial Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-06-19",
+          "is_open": false,
+          "reason": "Juneteenth National Independence Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-07-04",
+          "is_open": false,
+          "reason": "Independence Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-09-07",
+          "is_open": false,
+          "reason": "Labor Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-10-12",
+          "is_open": false,
+          "reason": "Columbus Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-11-11",
+          "is_open": false,
+          "reason": "Veterans Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-11-26",
+          "is_open": false,
+          "reason": "Thanksgiving Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-12-25",
+          "is_open": false,
+          "reason": "Christmas Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-01-01",
+          "is_open": false,
+          "reason": "New Year's Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-01-18",
+          "is_open": false,
+          "reason": "Martin Luther King Jr. Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-02-15",
+          "is_open": false,
+          "reason": "Washington's Birthday (Presidents Day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-05-31",
+          "is_open": false,
+          "reason": "Memorial Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-06-19",
+          "is_open": false,
+          "reason": "Juneteenth National Independence Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-07-05",
+          "is_open": false,
+          "reason": "Independence Day (observed)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-09-06",
+          "is_open": false,
+          "reason": "Labor Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-10-11",
+          "is_open": false,
+          "reason": "Columbus Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-11-11",
+          "is_open": false,
+          "reason": "Veterans Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-11-25",
+          "is_open": false,
+          "reason": "Thanksgiving Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-12-25",
+          "is_open": false,
+          "reason": "Christmas Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        }
+      ],
+      "id": "US-FEDACH",
+      "kind": "rail",
+      "name": "FedACH Services",
+      "observance": {
+        "note": "Federal Reserve Banks are open the Friday before a Saturday holiday and closed the Monday after a Sunday holiday.",
+        "saturday": "none",
+        "sunday": "following_monday"
+      },
+      "operating_hours": {
+        "always_open": false,
+        "cutoffs": [
+          {
+            "deadline": "10:30:00",
+            "name": "Same-day forward items, window 1",
+            "settles_at": "13:00:00",
+            "settles_on": "same_day"
+          },
+          {
+            "deadline": "14:45:00",
+            "name": "Same-day forward items, window 2",
+            "settles_at": "17:00:00",
+            "settles_on": "same_day"
+          },
+          {
+            "deadline": "16:45:00",
+            "name": "Same-day forward items, window 3",
+            "settles_at": "18:00:00",
+            "settles_on": "same_day"
+          },
+          {
+            "deadline": "10:30:00",
+            "name": "Future-dated forward items, 10:30 a.m. deadline",
+            "settles_at": "08:30:00",
+            "settles_on": "next_business_day"
+          },
+          {
+            "deadline": "14:45:00",
+            "name": "Future-dated forward items, 2:45 p.m. deadline",
+            "settles_at": "08:30:00",
+            "settles_on": "next_business_day"
+          },
+          {
+            "deadline": "16:45:00",
+            "name": "Future-dated forward items, 4:45 p.m. deadline",
+            "settles_at": "08:30:00",
+            "settles_on": "next_business_day"
+          },
+          {
+            "deadline": "20:00:00",
+            "name": "Future-dated forward items, 8:00 p.m. deadline",
+            "settles_at": "08:30:00",
+            "settles_on": "next_business_day"
+          },
+          {
+            "deadline": "22:45:00",
+            "name": "Future-dated forward items, 10:45 p.m. deadline",
+            "settles_at": "08:30:00",
+            "settles_on": "next_business_day"
+          },
+          {
+            "deadline": "02:15:00",
+            "name": "Future-dated forward items, 2:15 a.m. deadline",
+            "settles_at": "08:30:00",
+            "settles_on": "next_business_day"
+          }
+        ],
+        "note": "FedACH Processing Schedule effective September 12, 2022: transmission deadlines and settlement times. Processing pauses around each holiday as shown on the holiday schedule.",
+        "opens_previous_day": false
+      },
+      "revision": 1,
+      "timezone": "America/New_York",
+      "weekend": [
+        "saturday",
+        "sunday"
+      ]
+    },
+    {
+      "closes_on_holidays": true,
+      "entries": [
+        {
+          "basis": "published",
+          "date": "2026-01-01",
+          "is_open": false,
+          "reason": "New Year's Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-01-19",
+          "is_open": false,
+          "reason": "Birthday of Martin Luther King, Jr.",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-02-16",
+          "is_open": false,
+          "reason": "Washington's Birthday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-05-25",
+          "is_open": false,
+          "reason": "Memorial Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-06-19",
+          "is_open": false,
+          "reason": "Juneteenth National Independence Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-07-03",
+          "is_open": false,
+          "reason": "Independence Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-09-07",
+          "is_open": false,
+          "reason": "Labor Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-10-12",
+          "is_open": false,
+          "reason": "Columbus Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-11-11",
+          "is_open": false,
+          "reason": "Veterans Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-11-26",
+          "is_open": false,
+          "reason": "Thanksgiving Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-12-25",
+          "is_open": false,
+          "reason": "Christmas Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-01-01",
+          "is_open": false,
+          "reason": "New Year's Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-01-18",
+          "is_open": false,
+          "reason": "Birthday of Martin Luther King, Jr.",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-02-15",
+          "is_open": false,
+          "reason": "Washington's Birthday",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-05-31",
+          "is_open": false,
+          "reason": "Memorial Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-06-18",
+          "is_open": false,
+          "reason": "Juneteenth National Independence Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-07-05",
+          "is_open": false,
+          "reason": "Independence Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-09-06",
+          "is_open": false,
+          "reason": "Labor Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-10-11",
+          "is_open": false,
+          "reason": "Columbus Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-11-11",
+          "is_open": false,
+          "reason": "Veterans Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-11-25",
+          "is_open": false,
+          "reason": "Thanksgiving Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-12-24",
+          "is_open": false,
+          "reason": "Christmas Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-12-31",
+          "is_open": false,
+          "reason": "New Year's Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-28T15:46:59.380680+00:00",
+              "sha256": "3797368151ea3b4264f54287097a2120ea9391715fd2b6e6ab7266e4c6bf2e92",
+              "source_id": "opm-federal-holidays",
+              "url": "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+            }
+          ]
+        }
+      ],
+      "id": "US-FEDERAL",
+      "kind": "public",
+      "name": "US federal holidays",
+      "observance": {
+        "note": "Under 5 U.S.C. 6103(b), a holiday on a Saturday is observed on the Friday before and one on a Sunday on the Monday after. OPM publishes the observed dates.",
+        "saturday": "preceding_friday",
+        "sunday": "following_monday"
+      },
+      "operating_hours": null,
+      "revision": 1,
+      "timezone": "America/New_York",
+      "weekend": [
+        "saturday",
+        "sunday"
+      ]
+    },
+    {
+      "closes_on_holidays": false,
+      "entries": [],
+      "id": "US-FEDNOW",
+      "kind": "rail",
+      "name": "FedNow Service",
+      "observance": null,
+      "operating_hours": {
+        "always_open": true,
+        "cutoffs": [],
+        "note": "A 24-hour business day each day of the week, including weekends and holidays.",
+        "opens_previous_day": false
+      },
+      "revision": 0,
+      "timezone": "America/New_York",
+      "weekend": []
+    },
+    {
+      "closes_on_holidays": true,
+      "entries": [
+        {
+          "basis": "published",
+          "date": "2026-01-01",
+          "is_open": false,
+          "reason": "New Year's Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-01-19",
+          "is_open": false,
+          "reason": "Martin Luther King Jr. Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-02-16",
+          "is_open": false,
+          "reason": "Washington's Birthday (Presidents Day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-05-25",
+          "is_open": false,
+          "reason": "Memorial Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-06-19",
+          "is_open": false,
+          "reason": "Juneteenth National Independence Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-07-04",
+          "is_open": false,
+          "reason": "Independence Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-09-07",
+          "is_open": false,
+          "reason": "Labor Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-10-12",
+          "is_open": false,
+          "reason": "Columbus Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-11-11",
+          "is_open": false,
+          "reason": "Veterans Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-11-26",
+          "is_open": false,
+          "reason": "Thanksgiving Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2026-12-25",
+          "is_open": false,
+          "reason": "Christmas Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-01-01",
+          "is_open": false,
+          "reason": "New Year's Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-01-18",
+          "is_open": false,
+          "reason": "Martin Luther King Jr. Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-02-15",
+          "is_open": false,
+          "reason": "Washington's Birthday (Presidents Day)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-05-31",
+          "is_open": false,
+          "reason": "Memorial Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-06-19",
+          "is_open": false,
+          "reason": "Juneteenth National Independence Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-07-05",
+          "is_open": false,
+          "reason": "Independence Day (observed)",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-09-06",
+          "is_open": false,
+          "reason": "Labor Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-10-11",
+          "is_open": false,
+          "reason": "Columbus Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-11-11",
+          "is_open": false,
+          "reason": "Veterans Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-11-25",
+          "is_open": false,
+          "reason": "Thanksgiving Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        },
+        {
+          "basis": "published",
+          "date": "2027-12-25",
+          "is_open": false,
+          "reason": "Christmas Day",
+          "recorded_from": "2026-10-29T02:03:13.894546+00:00",
+          "revision": 1,
+          "sources": [
+            {
+              "fetched_at": "2026-10-29T02:03:00.007366+00:00",
+              "sha256": "4e11b0a30725d485a68f7aa5dfbd53e8ac94a59b3d08a3ef3786cf2df136cf52",
+              "source_id": "federalreserve-k8",
+              "url": "https://www.federalreserve.gov/aboutthefed/k8.htm"
+            },
+            {
+              "fetched_at": "2026-10-29T02:03:03.744837+00:00",
+              "sha256": "b96bdd4ae39c758cbb6969407e1e594a7084b7fc5d7b50e561c8b768de6896da",
+              "source_id": "frbservices-holiday-schedules",
+              "url": "https://www.frbservices.org/about/holiday-schedules/"
+            }
+          ]
+        }
+      ],
+      "id": "US-FEDWIRE",
+      "kind": "rail",
+      "name": "Fedwire Funds Service",
+      "observance": {
+        "note": "Federal Reserve Banks are open the Friday before a Saturday holiday and closed the Monday after a Sunday holiday.",
+        "saturday": "none",
+        "sunday": "following_monday"
+      },
+      "operating_hours": {
+        "always_open": false,
+        "closes": "19:00:00",
+        "cutoffs": [
+          {
+            "deadline": "17:00:00",
+            "name": "Tax payments"
+          },
+          {
+            "deadline": "17:00:00",
+            "name": "Special account transfers"
+          },
+          {
+            "deadline": "18:45:00",
+            "name": "Customer transfers"
+          },
+          {
+            "deadline": "19:00:00",
+            "name": "Bank transfers and other value messages"
+          },
+          {
+            "deadline": "19:15:00",
+            "name": "Other nonvalue messages"
+          }
+        ],
+        "note": "The funds-transfer business day opens at 9:00 p.m. ET on the preceding calendar day, even when that day is a holiday. The Reserve Banks may extend cutoffs.",
+        "opens": "21:00:00",
+        "opens_previous_day": true
+      },
+      "revision": 1,
+      "timezone": "America/New_York",
+      "weekend": [
+        "saturday",
+        "sunday"
+      ]
+    }
+  ],
+  "license": "CC BY-NC 4.0",
+  "release": "2026.10.29.1",
+  "schema_version": 1
+}

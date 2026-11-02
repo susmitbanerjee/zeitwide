@@ -1262,17 +1262,25 @@ wheels = [
 name = "zeitwide"
 version = "0.1.0"
 source = { editable = "../lib-python" }
+dependencies = [
+    { name = "httpx" },
+]
 
 [package.metadata]
-requires-dist = [{ name = "httpx", marker = "extra == 'online'", specifier = ">=0.28.1" }]
-provides-extras = ["online"]
+requires-dist = [
+    { name = "httpx", specifier = ">=0.28.1,<1" },
+    { name = "mcp", marker = "extra == 'mcp'", specifier = ">=2.3,<3" },
+]
+provides-extras = ["mcp"]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "cryptography", specifier = ">=46" },
     { name = "datamodel-code-generator", specifier = "==0.83.0" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "hypothesis", specifier = ">=6.170.12" },
     { name = "jsonschema", specifier = ">=4.26.0" },
+    { name = "mcp", specifier = ">=2.3,<3" },
     { name = "mypy", specifier = ">=1.18" },
     { name = "pytest", specifier = ">=8.4" },
     { name = "pytest-cov", specifier = ">=7.0" },

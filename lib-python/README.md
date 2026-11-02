@@ -1,33 +1,117 @@
 # zeitwide
 
-The open Zeitwide library (MIT) and, later, the local MCP server
-(`uvx zeitwide-mcp --offline`) running on the bundled dataset release.
+Is this a business day, and what is the next one? Answers for payment rails (Fedwire,
+FedACH, FedNow, T2, CHAPS) and public holiday calendars, each with the entry that decided
+it and the official sources behind it.
+
+```bash
+pip install zeitwide            # needs only httpx
+pip install "zeitwide[mcp]"     # adds the local MCP server
+```
+
+## Offline
+
+`ZeitWide()` answers from the dataset release bundled with the library. It never touches
+the network, and it passes the same conformance suite as the hosted API.
 
 ```python
 from datetime import date
-from pathlib import Path
+from zeitwide import ZeitWide
 
-from zeitwide import add_business_days, load_release
-
-release = load_release(Path("2026.10.29.1.json"))
-add_business_days(release, ["US-FEDWIRE", "EU-T2"], date(2026, 11, 24), 2).date
-# datetime.date(2026, 11, 27)
+zw = ZeitWide()
+zw.is_business_day("US-FEDWIRE", date(2026, 11, 26)).is_business_day  # False
+answer = zw.next_business_day(["US-FEDWIRE", "EU-T2"], date(2026, 11, 25))
+answer.date, [day.date for day in answer.skipped]  # 2026-11-27, [2026-11-26]
+zw.add_business_days("GB-CHAPS", date(2026, 12, 24), 2).date  # 2026-12-30
+zw.explain_date("US-FEDWIRE", date(2026, 11, 26)).calendars[0].reason  # 'Thanksgiving Day'
+zw.list_closures("EU-T2", date(2026, 1, 1), date(2026, 12, 31)).closures
 ```
 
-Offline answers need only the standard library. The online client for the hosted API, with
-the evidence behind every answer, needs `pip install "zeitwide[online]"`:
+Every answer names its `dataset_release`, the `calendar_revisions` it used and the
+`as_of` instant it answers for. Pass `as_of=` to ask what Zeitwide had recorded at an
+earlier moment. A date outside a calendar's published coverage raises `OutOfRangeError`:
+the library never guesses. `combine="any_open"` asks whether at least one calendar is open
+instead of all of them.
+
+## Online
+
+With an API key (free from the Zeitwide app), the same calls ask the hosted API. They
+return the same types, with the latest data, `as_of` back to the first recorded version,
+and a signed receipt with every answer.
 
 ```python
-from zeitwide.client import ZeitwideClient
-
-with ZeitwideClient(api_key="zw_live_…") as api:
-    api.day("US-FEDWIRE", date(2026, 11, 26))["is_business_day"]  # False
+with ZeitWide(key="zw_live_…") as zw:
+    answer = zw.is_business_day("US-FEDWIRE", date(2026, 11, 26))
+    answer.receipt.id  # 'rcpt_…'
 ```
 
-Its types (`zeitwide.api_types`) are generated from `api/openapi.yaml` by
-`make generate-clients`; never edit them by hand.
+The online types come from `api/openapi.yaml` through the generated `zeitwide.api_types`
+(`make generate-clients`; never edit them by hand).
+
+## Receipts
+
+Check a receipt offline: its hash, ID, Ed25519 signature, and that its key was valid when
+it was issued. The public keys are a bundled copy of `/.well-known/zeitwide-keys.json`
+(`--keys` or `KeyRing.parse(...)` to use a newer ring).
 
 ```bash
-uv sync
-uv run pytest
+zeitwide verify answer.json      # a receipt, or an answer that carries one; '-' for stdin
 ```
+
+```python
+from zeitwide import verify_receipt
+
+verify_receipt(answer.receipt)  # Verification(valid=True, …), falsy when invalid
+```
+
+## Webhooks
+
+```python
+from zeitwide import webhooks
+
+event = webhooks.verify(request.body, request.headers["Zeitwide-Signature"], secret)
+```
+
+It checks the HMAC-SHA256 signature over the raw body and refuses deliveries signed more
+than five minutes from now. It returns the event only once verified, and raises
+`WebhookVerificationError` otherwise.
+
+## Local MCP server
+
+```bash
+uvx zeitwide-mcp --offline
+```
+
+`--offline` answers from the bundled release. Without it, the server asks the hosted API
+with the key in `ZEITWIDE_API_KEY`. With the library installed, `zeitwide mcp --offline`
+runs the same server. In an MCP client:
+
+```json
+{ "mcpServers": { "zeitwide": { "command": "uvx", "args": ["zeitwide-mcp", "--offline"] } } }
+```
+
+Tools: `is_business_day`, `next_business_day`, `add_business_days`, `explain_date` and
+`list_closures`, with the same names, arguments and answers as the hosted server at
+`/mcp` (offline answers have no receipt), plus `verify_webhook`.
+
+## Licenses
+
+The code is MIT ([LICENSE](LICENSE)). The bundled dataset is under CC BY-NC 4.0
+([LICENSE-DATA](LICENSE-DATA)); commercial use of the data needs the hosted API or a
+separate agreement.
+
+## Development
+
+```bash
+uv sync --all-packages
+uv run python -m ruff format . && uv run python -m ruff check .
+uv run python -m mypy
+uv run python -m pytest --cov
+```
+
+The bundled release in `src/zeitwide/data/releases/` must be the newest file in
+`dataset/releases/` (a test checks); copy a new release there when one is cut. The
+`zeitwide-mcp/` folder is a launcher package so `uvx zeitwide-mcp` works; keep its version
+in step. Tag `lib-python-v<version>` to publish both to PyPI
+(`.github/workflows/publish-lib-python.yml`). The library supports Python 3.12 and later,
+and CI tests 3.12, 3.13 and 3.14.

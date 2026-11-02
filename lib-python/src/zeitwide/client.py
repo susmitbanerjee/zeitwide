@@ -1,4 +1,4 @@
-"""Online client for the hosted Zeitwide API: ``pip install "zeitwide[online]"``.
+"""Low-level client for the hosted Zeitwide API; ``ZeitWide(key=...)`` is built on it.
 
 The request and response types are generated from ``api/openapi.yaml`` into
 ``zeitwide.api_types``. The API answers with the same engine and conformance suite as this
@@ -23,6 +23,8 @@ from zeitwide.api_types import (
     Problem,
     Shifted,
 )
+from zeitwide.engine import OutOfRangeError
+from zeitwide.release import UnknownCalendarError
 
 DEFAULT_BASE_URL = "https://api.zeitwide.com"
 DEFAULT_TIMEOUT = httpx.Timeout(10.0, connect=5.0)
@@ -32,8 +34,11 @@ class ApiError(Exception):
     """The API answered with problem details, such as ``out_of_range`` or ``rate_limited``."""
 
     def __init__(self, problem: Problem) -> None:
-        super().__init__(
-            f"{problem['status']} {problem['code']}: {problem.get('detail', problem['title'])}"
+        # Not super(): the subclasses below also inherit the offline errors, whose
+        # constructors take other arguments.
+        Exception.__init__(
+            self,
+            f"{problem['status']} {problem['code']}: {problem.get('detail', problem['title'])}",
         )
         self.problem = problem
 
@@ -44,6 +49,23 @@ class ApiError(Exception):
     @property
     def status(self) -> int:
         return self.problem["status"]
+
+
+class ApiOutOfRangeError(ApiError, OutOfRangeError):
+    """``out_of_range`` from the API: caught by ``except OutOfRangeError`` as offline."""
+
+    def __init__(self, problem: Problem) -> None:
+        super().__init__(problem)
+        self.calendar_id = None
+        self.day = None
+
+
+class ApiUnknownCalendarError(ApiError, UnknownCalendarError):
+    """``unknown_calendar`` from the API: caught by ``except UnknownCalendarError`` as offline."""
+
+    def __init__(self, problem: Problem) -> None:
+        super().__init__(problem)
+        self.calendar_id = None
 
 
 class ZeitwideClient:
@@ -147,10 +169,25 @@ class ZeitwideClient:
 
 
 def _json(response: httpx.Response) -> object:
-    payload: object = response.json()
+    try:
+        payload: object = response.json()
+    except ValueError:
+        if response.is_success:
+            raise
+        # A proxy in front of the API can fail with an HTML page instead of problem details.
+        payload = {
+            "title": response.reason_phrase or "Error",
+            "status": response.status_code,
+            "code": "internal_error",
+        }
     if response.is_success:
         return payload
-    raise ApiError(cast(Problem, payload))
+    problem = cast(Problem, payload)
+    if problem.get("code") == "out_of_range":
+        raise ApiOutOfRangeError(problem)
+    if problem.get("code") == "unknown_calendar":
+        raise ApiUnknownCalendarError(problem)
+    raise ApiError(problem)
 
 
 def _as_of(as_of: datetime | None) -> dict[str, str]:

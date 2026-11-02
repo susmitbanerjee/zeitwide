@@ -21,7 +21,6 @@ dependencies = [
 ]
 
 [project.scripts]
-zeitwide = "zeitwide_pipeline.cli:main"
 zeitwide-pipeline = "zeitwide_pipeline.cli:main"
 
 [build-system]
