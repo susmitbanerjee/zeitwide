@@ -1,13 +1,17 @@
 package com.zeitwide.api.answers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zeitwide.api.answers.domain.CalendarHistory;
 import com.zeitwide.api.answers.domain.CalendarRules;
 import com.zeitwide.api.answers.domain.ConformanceRunner;
 import com.zeitwide.api.answers.domain.Dataset;
 import com.zeitwide.api.answers.domain.EntryVersion;
+import com.zeitwide.api.answers.domain.OperatingHours;
 import com.zeitwide.api.answers.domain.SourceRef;
 import java.time.ZoneOffset;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,6 +24,7 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 public final class GoldenDatabase {
 
   public static final Dataset GOLDEN = ConformanceRunner.goldenDataset();
+  private static final ObjectMapper JSON = new ObjectMapper();
   private static final int HTTP_OK = 200;
 
   private final JdbcClient jdbc;
@@ -72,8 +77,9 @@ public final class GoldenDatabase {
     jdbc.sql(
             """
             INSERT INTO calendar (id, name, kind, timezone, weekend_rule, closes_on_holidays,
-                                  current_revision)
-            VALUES (:id, :name, :kind, :timezone, CAST(:weekend AS jsonb), :closes, :revision)
+                                  operating_hours, current_revision)
+            VALUES (:id, :name, :kind, :timezone, CAST(:weekend AS jsonb), :closes,
+                    CAST(:hours AS jsonb), :revision)
             """)
         .param("id", rules.id().value())
         .param("name", rules.name())
@@ -81,8 +87,36 @@ public final class GoldenDatabase {
         .param("timezone", rules.timezone().getId())
         .param("weekend", weekend)
         .param("closes", rules.closesOnHolidays())
+        .param("hours", hoursJson(rules.hours()))
         .param("revision", calendar.revisionAt(GOLDEN.asOf()))
         .update();
+  }
+
+  /** The release file's operating_hours object, or null when none are published. */
+  private static String hoursJson(OperatingHours hours) {
+    if (!(hours instanceof OperatingHours.Published published)) {
+      return null;
+    }
+    Map<String, Object> json = new LinkedHashMap<>();
+    json.put("always_open", published.alwaysOpen());
+    json.put("opens_previous_day", published.opensPreviousDay());
+    json.put("note", published.note());
+    if (published.opens() != null) {
+      json.put("opens", published.opens().toString());
+    }
+    if (published.closes() != null) {
+      json.put("closes", published.closes().toString());
+    }
+    json.put(
+        "cutoffs",
+        published.cutoffs().stream()
+            .map(c -> Map.of("name", c.name(), "deadline", c.deadline().toString()))
+            .toList());
+    try {
+      return JSON.writeValueAsString(json);
+    } catch (JsonProcessingException e) {
+      throw new IllegalStateException("Can't write operating hours", e);
+    }
   }
 
   private void insertEntry(CalendarHistory calendar, EntryVersion version) {

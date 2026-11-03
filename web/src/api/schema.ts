@@ -744,6 +744,32 @@ export interface components {
             closes_on_holidays: boolean;
             revision: number;
             coverage: components["schemas"]["Coverage"];
+            operating_hours?: components["schemas"]["OperatingHours"];
+        };
+        /**
+         * @description When the calendar settles on a business day, as its operator publishes it. Times are
+         *     `HH:mm` in the calendar's `timezone`. Absent when the operator publishes no hours.
+         */
+        OperatingHours: {
+            /** @description Open around the clock on every day. */
+            always_open: boolean;
+            /**
+             * @description Absent when only cutoffs are published or the calendar never closes.
+             * @example 06:00
+             */
+            opens?: string;
+            /** @example 18:00 */
+            closes?: string;
+            /** @description The business day opens at `opens` on the calendar day before it (Fedwire). */
+            opens_previous_day: boolean;
+            note: string;
+            cutoffs: components["schemas"]["Cutoff"][];
+        };
+        /** @description The last time a kind of payment is accepted on a business day. */
+        Cutoff: {
+            name: string;
+            /** @example 17:40 */
+            deadline: string;
         };
         CalendarList: {
             calendars: components["schemas"]["Calendar"][];

@@ -8,10 +8,13 @@ import com.zeitwide.api.answers.domain.Combine;
 import com.zeitwide.api.answers.domain.Coverage;
 import com.zeitwide.api.answers.domain.DayAnswer;
 import com.zeitwide.api.answers.domain.EntryVersion;
+import com.zeitwide.api.answers.domain.OperatingHours;
 import com.zeitwide.api.answers.domain.Shifted;
 import com.zeitwide.api.answers.domain.SourceRef;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,6 +26,7 @@ final class AnswerMapper {
 
   private static final String BY_ENTRY = "entry";
   private static final String BY_WEEKEND_RULE = "weekend_rule";
+  private static final DateTimeFormatter CLOCK_TIME = DateTimeFormatter.ofPattern("HH:mm");
 
   private AnswerMapper() {}
 
@@ -141,7 +145,28 @@ final class AnswerMapper {
             .toList(),
         rules.closesOnHolidays(),
         summary.revision(),
-        coverage(summary.coverage()));
+        coverage(summary.coverage()),
+        hours(rules.hours()));
+  }
+
+  private static AnswerDtos.OperatingHours hours(OperatingHours hours) {
+    return switch (hours) {
+      case OperatingHours.Unpublished unpublished -> null;
+      case OperatingHours.Published published ->
+          new AnswerDtos.OperatingHours(
+              published.alwaysOpen(),
+              clock(published.opens()),
+              clock(published.closes()),
+              published.opensPreviousDay(),
+              published.note(),
+              published.cutoffs().stream()
+                  .map(cutoff -> new AnswerDtos.Cutoff(cutoff.name(), clock(cutoff.deadline())))
+                  .toList());
+    };
+  }
+
+  private static String clock(LocalTime time) {
+    return time == null ? null : CLOCK_TIME.format(time);
   }
 
   private static AnswerDtos.Coverage coverage(Coverage coverage) {

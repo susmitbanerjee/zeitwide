@@ -53,6 +53,9 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   response.headers.set("content-security-policy", policy);
   if (isPrivate || (appOrigin !== siteOrigin && host === new URL(appOrigin).host)) {
     response.headers.set("x-robots-tag", "noindex, nofollow");
+  } else {
+    // Public pages have a Markdown twin, which the Cloudflare Worker picks by Accept.
+    response.headers.append("vary", "Accept");
   }
   return response;
 }

@@ -11,7 +11,7 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["src/**/*.test.{ts,tsx}"],
+    include: ["src/**/*.test.{ts,tsx}", "eslint-rules/**/*.test.mjs"],
     coverage: {
       provider: "v8",
       // Logic and route handlers are unit-tested here. Pages and components (*.tsx) render in
@@ -26,7 +26,7 @@ export default defineConfig({
         "src/auth.ts",
         "src/proxy.ts",
         "src/lib/api-server.ts",
-        "src/lib/answer-data.ts",
+        "src/lib/public-data.ts",
         "src/lib/api-browser.ts",
         "src/lib/queries.ts",
         // Types only, generated from api/openapi.yaml.

@@ -4,6 +4,7 @@ Each step runs even if an earlier one failed, so one broken step can't stop the 
 the job still exits with an error so the failure alerts.
 """
 
+import json
 from collections.abc import Callable
 from contextlib import AbstractContextManager
 from dataclasses import dataclass, field
@@ -20,6 +21,7 @@ from zeitwide_pipeline.release import (
     revisions_changed,
 )
 from zeitwide_pipeline.review_db import PostgresReviewStore
+from zeitwide_pipeline.site import SiteFileStore, SiteLinks, build_site_files
 from zeitwide_pipeline.storage import SnapshotStore
 from zeitwide_pipeline.telemetry import Telemetry
 
@@ -40,6 +42,8 @@ class DailyJob:
     backup: DatabaseBackup | None
     telemetry: Telemetry
     clock: Clock
+    site_files: SiteFileStore | None = None
+    site_links: SiteLinks | None = None
 
     def run(self) -> "DailyResult":
         result = DailyResult()
@@ -87,10 +91,20 @@ class DailyJob:
 
     def _distribute(self, export: ReleaseExport, result: "DailyResult") -> None:
         self.releases.put(export.object_key, export.content, "application/json")
+        self._publish_site_files(export)
         if self.dataset_repository is None:
             log.warning("release_pull_request_skipped", release=export.id, reason="not configured")
             return
         result.pull_request = self.dataset_repository.propose_release(export.id, export.content)
+
+    def _publish_site_files(self, export: ReleaseExport) -> None:
+        """llms.txt, llms-full.txt, sitemaps and robots.txt for this release."""
+        if self.site_files is None or self.site_links is None:
+            log.warning("site_files_skipped", release=export.id, reason="not configured")
+            return
+        files = build_site_files(json.loads(export.content), self.site_links)
+        self.site_files.publish(export.id, files)
+        log.info("site_files_published", release=export.id, files=len(files))
 
     def _backup(self, result: "DailyResult") -> None:
         if self.backup is None:

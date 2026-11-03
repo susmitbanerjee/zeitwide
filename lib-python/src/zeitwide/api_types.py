@@ -174,15 +174,13 @@ Coverage = TypedDict(
 )
 
 
-class Calendar(TypedDict):
-    id: CalendarId
+class Cutoff(TypedDict):
+    """
+    The last time a kind of payment is accepted on a business day.
+    """
+
     name: str
-    kind: Literal['rail', 'public', 'exchange']
-    timezone: str
-    weekend: list[Literal['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']]
-    closes_on_holidays: bool
-    revision: int
-    coverage: Coverage
+    deadline: str
 
 
 class AlertRuleConfiguration(TypedDict):
@@ -445,12 +443,28 @@ ClosureList = TypedDict(
 )
 
 
-class CalendarList(TypedDict):
-    calendars: list[Calendar]
-    as_of: str
-    dataset_release: DatasetRelease
-    calendar_revisions: CalendarRevisions
-    receipt: Receipt
+class OperatingHours(TypedDict):
+    """
+    When the calendar settles on a business day, as its operator publishes it. Times are
+    `HH:mm` in the calendar's `timezone`. Absent when the operator publishes no hours.
+
+    """
+
+    always_open: bool
+    """
+    Open around the clock on every day.
+    """
+    opens: NotRequired[str]
+    """
+    Absent when only cutoffs are published or the calendar never closes.
+    """
+    closes: NotRequired[str]
+    opens_previous_day: bool
+    """
+    The business day opens at `opens` on the calendar day before it (Fedwire).
+    """
+    note: str
+    cutoffs: list[Cutoff]
 
 
 class CreatedWebhook(WebhookSubscription):
@@ -462,3 +476,23 @@ class ChangePage(TypedDict):
     next_cursor: str | None
     since: str
     limit: int
+
+
+class Calendar(TypedDict):
+    id: CalendarId
+    name: str
+    kind: Literal['rail', 'public', 'exchange']
+    timezone: str
+    weekend: list[Literal['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']]
+    closes_on_holidays: bool
+    revision: int
+    coverage: Coverage
+    operating_hours: NotRequired[OperatingHours]
+
+
+class CalendarList(TypedDict):
+    calendars: list[Calendar]
+    as_of: str
+    dataset_release: DatasetRelease
+    calendar_revisions: CalendarRevisions
+    receipt: Receipt

@@ -30,6 +30,21 @@ resource "google_storage_bucket_iam_member" "pipeline_backups_create" {
   member = google_service_account.this["pipeline"].member
 }
 
+# Pipeline: replaces the served copy (current/) of the site files with each release, so it
+# needs overwrite (objectUser), on this bucket only.
+resource "google_storage_bucket_iam_member" "pipeline_site_files_write" {
+  bucket = google_storage_bucket.site_files.name
+  role   = "roles/storage.objectUser"
+  member = google_service_account.this["pipeline"].member
+}
+
+# Web: reads the site files it serves (robots.txt, llms.txt, sitemaps), and nothing else.
+resource "google_storage_bucket_iam_member" "web_site_files_read" {
+  bucket = google_storage_bucket.site_files.name
+  role   = "roles/storage.objectViewer"
+  member = google_service_account.this["web"].member
+}
+
 # API: reads snapshots for the evidence screen.
 resource "google_storage_bucket_iam_member" "api_snapshots_read" {
   bucket = google_storage_bucket.snapshots.name

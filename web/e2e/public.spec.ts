@@ -1,6 +1,9 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 import { expectAccessible, watchConsole } from "./support";
+
+/** The visible lead: after a client navigation Next keeps the previous page mounted, hidden. */
+const lead = (page: Page) => page.locator("[data-answer-lead]").filter({ visible: true });
 
 test.describe("A1 public answer page", () => {
   test("answers whether a date is a business day, with sources and neighbours", async ({
@@ -16,27 +19,34 @@ test.describe("A1 public answer page", () => {
         name: "Is Monday 28 December 2026 a CHAPS business day?",
       }),
     ).toBeVisible();
-    await expect(page.getByText("No.", { exact: true })).toBeVisible();
-    await expect(page.getByText("CHAPS is closed: Boxing Day (substitute day).")).toBeVisible();
+    await expect(lead(page)).toContainText(
+      "No: Monday 28 December 2026 is not a CHAPS business day, because CHAPS is closed for Boxing Day (substitute day)",
+    );
+    await expect(lead(page)).toContainText(
+      "CHAPS reopens on Tuesday 29 December 2026 at 06:00 Europe/London",
+    );
     await expect(page.getByRole("link", { name: "GOV.UK · UK bank holidays" })).toHaveAttribute(
       "href",
       "https://www.gov.uk/bank-holidays",
     );
-    const next = page.getByRole("link", { name: "Tue 29 Dec 2026" }).first();
+    const next = page.getByRole("link", { name: "CHAPS reopens Tue 29 Dec 2026" }).first();
     await expect(next).toHaveAttribute("href", "/calendars/GB-CHAPS/2026-12-29");
-    await expect(page.getByRole("link", { name: "Thu 24 Dec 2026" }).first()).toBeVisible();
 
-    // Other calendars that day, and the strip around it.
-    const others = page.getByRole("table");
-    await expect(others.getByRole("row", { name: /Fedwire Funds/ })).toContainText("Open");
-    await expect(page.getByRole("link", { name: /Friday 25 December 2026: closed/ })).toBeVisible();
+    // The Zeitband and other calendars that day, as tables.
+    await expect(
+      page.getByRole("link", { name: "CHAPS closed Fri 25 Dec 2026: Christmas Day" }).first(),
+    ).toBeAttached();
+    const others = page.getByRole("table", { name: /on 7 other calendars/ });
+    await expect(others.getByRole("row", { name: /Fedwire Funds/ })).toContainText("open");
+    await expect(page.locator("details")).toHaveCount(3);
+    await expect(page.getByText("Zeitwide (2026). GB-CHAPS on 2026-12-28.")).toBeVisible();
 
     await next.click();
-    await expect(page.getByText("Yes.", { exact: true })).toBeVisible();
+    await expect(lead(page)).toContainText("Yes: Tuesday 29 December 2026 is a CHAPS business day");
     expect(problems).toEqual([]);
   });
 
-  test("is search-ready: canonical, JSON-LD, sitemap and people also check", async ({
+  test("is search-ready: canonical, JSON-LD with the FAQ, sitemap and robots", async ({
     page,
     request,
   }) => {
@@ -50,18 +60,39 @@ test.describe("A1 public answer page", () => {
     ) as { "@type": string; mainEntity?: { name: string }[] }[];
     expect(jsonLd.map((item) => item["@type"])).toEqual(["FAQPage", "BreadcrumbList"]);
     expect(jsonLd[0]?.mainEntity?.[0]?.name).toContain("28 December 2026");
+    expect(jsonLd[0]?.mainEntity).toHaveLength(4);
 
-    const also = page.getByRole("complementary", { name: "People also check" });
-    await expect(also.getByRole("link")).toHaveCount(6);
-    await expect(also.getByRole("link", { name: /Next CHAPS closure/ })).toHaveAttribute(
-      "href",
-      "/calendars/GB-CHAPS/2027-01-01",
+    // The pipeline's files for the release: a sitemap index, per-calendar sitemaps, robots.txt.
+    const index = await request.get("/sitemap.xml");
+    expect(index.headers()["cache-control"]).toBe("public, max-age=3600");
+    expect(await index.text()).toContain(
+      "<loc>http://localhost:3000/sitemaps/GB-CHAPS.xml</loc><lastmod>2025-12-01</lastmod>",
     );
-
-    const sitemap = await (await request.get("/sitemap.xml")).text();
-    expect(sitemap).toContain("<loc>http://localhost:3000/calendars/GB-CHAPS/2026-12-28</loc>");
+    const chaps = await (await request.get("/sitemaps/GB-CHAPS.xml")).text();
+    expect(chaps).toContain("<loc>http://localhost:3000/calendars/GB-CHAPS/2026-12-28</loc>");
+    expect(chaps).toContain("<loc>http://localhost:3000/calendars/GB-CHAPS/2027</loc>");
+    const pages = await (await request.get("/sitemaps/pages.xml")).text();
+    expect(pages).toContain("<loc>http://localhost:3000/compare/EU-T2-vs-GB-CHAPS/2027</loc>");
     const robots = await (await request.get("/robots.txt")).text();
-    expect(robots).toContain("Disallow: /app");
+    expect(robots).toContain("Disallow: /app/");
+    expect(robots).toContain("User-agent: Claude-User");
+    expect(robots).toContain("Sitemap: http://localhost:3000/sitemap.xml");
+    expect(await (await request.get("/llms.txt")).text()).toMatch(/^# Zeitwide\n\n> /);
+  });
+
+  test("lists a year of closures and compares two calendars", async ({ page }) => {
+    await page.goto("/calendars/EU-T2/2027");
+    await expect(
+      page.getByRole("heading", { level: 1, name: "T2 closures in 2027" }),
+    ).toBeVisible();
+    await expect(lead(page)).toContainText(/T2 has \d+ closing days in 2027/);
+    await page.getByRole("link", { name: /^T2 and CHAPS share/ }).click();
+    await expect(page).toHaveURL("/compare/EU-T2-vs-GB-CHAPS/2027");
+    await expect(lead(page)).toContainText(/^In 2027 T2 closes on/);
+
+    // One URL per pair: the other order redirects permanently.
+    await page.goto("/compare/GB-CHAPS-vs-EU-T2/2027");
+    await expect(page).toHaveURL("/compare/EU-T2-vs-GB-CHAPS/2027");
   });
 
   test("is served with CDN cache headers and strict security headers", async ({ request }) => {
@@ -103,6 +134,10 @@ test.describe("A1 public answer page", () => {
     "/calendars",
     "/calendars/GB-CHAPS",
     "/calendars/GB-CHAPS/2026-12-28",
+    "/calendars/GB-CHAPS/2027",
+    "/compare/EU-T2-vs-GB-CHAPS/2027",
+    "/sources",
+    "/pricing",
     "/docs",
     "/docs/api",
     "/signin",

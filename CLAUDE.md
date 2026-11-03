@@ -47,7 +47,9 @@ formatting; `make setup` installs the pre-commit hooks and dependencies.
 `api/openapi.yaml` is the API contract: after changing it, `make generate-clients`
 regenerates `web/src/api/schema.ts` and `lib-python/src/zeitwide/api_types.py` (tests in
 both fail while they are stale, and an `api/` test fails if the controllers and the file
-disagree).
+disagree). The public docs are `docs/site/*.md` (front matter: title, description,
+updated): after editing one, `make sync-docs` copies them into web, lib-python
+(`zeitwide.docs`) and the pipeline (llms-full.txt); tests in all three fail while stale.
 
 **Local stack** (Postgres 18 on 5432, fake GCS on 4443):
 

@@ -23,6 +23,7 @@ export type CreatedWebhook = Schemas["CreatedWebhook"];
 export type DayAnswer = Schemas["DayAnswer"];
 export type DayRange = Schemas["DayRange"];
 export type EntryState = Schemas["EntryState"];
+export type OperatingHours = Schemas["OperatingHours"];
 export type Problem = Schemas["Problem"];
 export type RangeDay = Schemas["RangeDay"];
 export type Receipt = Schemas["Receipt"];

@@ -8,7 +8,7 @@ False
 
 from importlib.metadata import version
 
-from zeitwide import webhooks
+from zeitwide import docs, webhooks
 from zeitwide.answers import (
     CalendarDay,
     Closure,
@@ -56,6 +56,7 @@ __all__ = [
     "Verification",
     "ZeitWide",
     "__version__",
+    "docs",
     "load_release",
     "parse_release",
     "verify_receipt",

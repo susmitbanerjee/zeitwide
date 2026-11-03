@@ -1,0 +1,14 @@
+# robots.txt for the public site. The pipeline writes it with each release; edit this file,
+# not code, to change who is named or what is closed.
+
+# Closed to every crawler.
+disallow = ["/app/", "/internal/", "/api/keys"]
+
+# Named so their operators can see they are welcome. Each gets the same rules as everyone.
+[[groups]]
+comment = "AI search crawlers: they index pages to cite in answers."
+agents = ["OAI-SearchBot", "Claude-SearchBot", "PerplexityBot"]
+
+[[groups]]
+comment = "AI user-fetch agents: they read a page when a person asks about it."
+agents = ["ChatGPT-User", "Claude-User", "Perplexity-User"]

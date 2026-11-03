@@ -11,6 +11,7 @@ import java.util.Set;
  *
  * @param closesOnHolidays false for calendars that close on no holiday (FedNow), which have no
  *     coverage limit
+ * @param hours when the calendar settles on a business day, for people to read
  */
 public record CalendarRules(
     CalendarId id,
@@ -18,10 +19,12 @@ public record CalendarRules(
     CalendarKind kind,
     ZoneId timezone,
     Set<DayOfWeek> weekend,
-    boolean closesOnHolidays) {
+    boolean closesOnHolidays,
+    OperatingHours hours) {
 
   public CalendarRules {
     Objects.requireNonNull(id, "id");
+    Objects.requireNonNull(hours, "hours");
     Objects.requireNonNull(name, "name");
     Objects.requireNonNull(kind, "kind");
     Objects.requireNonNull(timezone, "timezone");
@@ -29,5 +32,16 @@ public record CalendarRules(
     if (name.isBlank()) {
       throw new IllegalArgumentException("name must not be blank");
     }
+  }
+
+  /** A calendar whose operator publishes no hours. */
+  public CalendarRules(
+      CalendarId id,
+      String name,
+      CalendarKind kind,
+      ZoneId timezone,
+      Set<DayOfWeek> weekend,
+      boolean closesOnHolidays) {
+    this(id, name, kind, timezone, weekend, closesOnHolidays, OperatingHours.UNPUBLISHED);
   }
 }

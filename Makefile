@@ -15,7 +15,7 @@ endif
 PY := uv run --no-sync python -m
 
 .PHONY: check check-hooks check-api check-pipeline check-lib-python check-web \
-        fmt generate-clients setup up down
+        fmt generate-clients sync-docs setup up down
 
 check: check-hooks check-api check-pipeline check-lib-python check-web
 
@@ -38,6 +38,9 @@ check-web:
 # web/e2e/mock-api, signing in with the app's test-only sign-in.
 e2e-web:
 	cd web && npx playwright install chromium
+	cd web && node e2e/mock-api/write-release.mjs
+	cd pipeline && $(PY) zeitwide_pipeline site-files --release ../web/e2e/.site-files/release.json \
+		--out ../web/e2e/.site-files --site-url http://localhost:3000 --api-url http://127.0.0.1:8090
 	cd web && npm run e2e:build
 	cd web && npm run e2e && npm run lighthouse
 
@@ -55,6 +58,11 @@ generate-clients:
 		--target-python-version 3.12 --disable-timestamp --use-standard-collections \
 		--use-union-operator --use-schema-description --use-field-description \
 		--no-use-closed-typed-dict --formatters builtin
+	cd web && node scripts/sync-docs.mjs
+
+# The public docs (docs/site/*.md) into web, lib-python and pipeline. Their tests fail when stale.
+sync-docs:
+	cd web && node scripts/sync-docs.mjs
 
 setup:
 	pre-commit install

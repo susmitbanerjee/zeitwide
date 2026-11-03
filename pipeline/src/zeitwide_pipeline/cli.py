@@ -4,6 +4,8 @@ Jobs: ``run-due`` (every 15 minutes) and ``daily``. People: ``review``, ``seed``
 ``resume-source``, ``dry-run`` and ``save-fixture``.
 """
 
+import json
+import os
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from functools import partial
@@ -41,8 +43,11 @@ from zeitwide_pipeline.review_db import (
 )
 from zeitwide_pipeline.seed import PostgresSeedStore, Seeder
 from zeitwide_pipeline.settings import FetchSettings, Settings
+from zeitwide_pipeline.site import SiteLinks, build_site_files
+from zeitwide_pipeline.site.store import DirectorySiteFileStore, GcsSiteFileStore
+from zeitwide_pipeline.site.validate import validate_site
 from zeitwide_pipeline.sources import builtin_registry
-from zeitwide_pipeline.storage import GcsSnapshotStore
+from zeitwide_pipeline.storage import GcsSnapshotStore, gcs_client
 from zeitwide_pipeline.telemetry import configure_telemetry
 
 EXIT_FAILED = 1
@@ -128,6 +133,8 @@ def daily(
                 backup=None if skip_backup else _backup(settings),
                 telemetry=telemetry,
                 clock=utc_now,
+                site_files=_site_file_store(settings),
+                site_links=_site_links(settings),
             )
             result = job.run()
     finally:
@@ -182,6 +189,38 @@ def resume_source(source_id: str) -> None:
             log.error("source_not_suspended", source_id=source_id)
             raise typer.Exit(EXIT_NOT_FOUND)
     log.info("source_resumed", source_id=source_id)
+
+
+@app.command("site-files")
+def site_files_command(
+    release: Annotated[Path, typer.Option(help="A release JSON file, as the daily job exports.")],
+    out: Annotated[Path, typer.Option(help="Folder to write into.")],
+    site_url: Annotated[str, typer.Option(help="The public site's origin.")],
+    api_url: Annotated[str, typer.Option(help="The public API's origin.")],
+) -> None:
+    """Write a release's site files (llms.txt, sitemaps, robots.txt) into a folder."""
+    document = json.loads(release.read_text(encoding="utf-8"))
+    files = build_site_files(document, SiteLinks(site_url, api_url))
+    DirectorySiteFileStore(out).publish(str(document["release"]), files)
+    log.info("site_files_written", out=str(out), files=len(files))
+
+
+@app.command("validate-site")
+def validate_site_command(
+    site_url: Annotated[str, typer.Option(help="The site to check, such as https://zeitwide.com.")],
+    api_url: Annotated[str, typer.Option(help="Its API, for the closure counts.")],
+) -> None:
+    """Check llms.txt, llms-full.txt and the sitemaps on a live site; exit 1 on any problem."""
+    headers = (
+        {"Authorization": f"Bearer {key}"} if (key := os.environ.get("ZEITWIDE_API_KEY")) else {}
+    )
+    with httpx.Client(timeout=httpx.Timeout(30, connect=5), headers=headers) as client:
+        problems = validate_site(client, site_url, api_url, log=typer.echo)
+    for problem in problems:
+        typer.echo(f"FAIL {problem}")
+    if problems:
+        raise typer.Exit(EXIT_FAILED)
+    typer.echo("ok: llms.txt, llms-full.txt and the sitemaps are valid")
 
 
 @app.command("dry-run")
@@ -274,6 +313,18 @@ def _fetch_settings() -> FetchSettings:
 
 def _user_agent(settings: FetchSettings) -> str:
     return user_agent(version("zeitwide-pipeline"), str(settings.bot_contact_url))
+
+
+def _site_file_store(settings: Settings) -> GcsSiteFileStore | None:
+    if settings.site_files_bucket is None:
+        return None
+    return GcsSiteFileStore(gcs_client(settings.gcs_endpoint), settings.site_files_bucket)
+
+
+def _site_links(settings: Settings) -> SiteLinks | None:
+    if settings.site_url is None or settings.api_public_url is None:
+        return None
+    return SiteLinks(str(settings.site_url).rstrip("/"), str(settings.api_public_url).rstrip("/"))
 
 
 def _object_store(settings: Settings, bucket: str) -> GcsSnapshotStore:

@@ -41,6 +41,8 @@ const formats = {
     day: "numeric",
     month: "short",
   }),
+  // 1 Jan
+  dayMonth: new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", day: "numeric", month: "short" }),
   weekday: new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", weekday: "short" }),
   day: new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", day: "numeric" }),
   month: new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", month: "long", year: "numeric" }),
