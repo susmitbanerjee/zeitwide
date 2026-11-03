@@ -68,6 +68,15 @@
               "value": "public, max-age=3600"
             }
           ]
+        },
+        {
+          "source": "/downloads/**",
+          "headers": [
+            {
+              "key": "Cache-Control",
+              "value": "public, max-age=3600"
+            }
+          ]
         }
       ]
     },
@@ -133,6 +142,15 @@
         },
         {
           "source": "/sitemaps/**",
+          "headers": [
+            {
+              "key": "Cache-Control",
+              "value": "public, max-age=3600"
+            }
+          ]
+        },
+        {
+          "source": "/downloads/**",
           "headers": [
             {
               "key": "Cache-Control",

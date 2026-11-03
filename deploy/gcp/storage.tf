@@ -39,10 +39,11 @@ resource "google_storage_bucket" "backups" {
   depends_on = [google_project_service.this]
 }
 
-# Files for crawlers and AI agents (robots.txt, llms.txt, llms-full.txt, sitemaps), written by
-# the pipeline with each dataset release: every release under its ID, the served copy under
-# current/. Private: only the web app reads it and serves current/ at zeitwide.com, so nobody
-# can download from the bucket directly and run up egress (see iam.tf).
+# Files for crawlers and AI agents (robots.txt, llms.txt, llms-full.txt, sitemaps) and each
+# calendar's CSV, JSON and iCalendar downloads, written by the pipeline with each dataset
+# release: every release under its ID, the served copy under current/. Private: only the web
+# app reads it and serves current/ at zeitwide.com, so nobody can download from the bucket
+# directly and run up egress (see iam.tf).
 resource "google_storage_bucket" "site_files" {
   name     = "${var.project_id}-${local.prefix}-site-files"
   location = var.region

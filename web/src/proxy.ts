@@ -63,7 +63,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 export const config = {
   matcher: [
     {
-      source: "/((?!_next/static|_next/image|favicon.ico|icon.svg|api/zw|api/health).*)",
+      source: "/((?!_next/static|_next/image|favicon.ico|icon.svg|logo.png|api/zw|api/health).*)",
       missing: [
         { type: "header", key: "next-router-prefetch" },
         { type: "header", key: "purpose", value: "prefetch" },

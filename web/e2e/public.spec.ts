@@ -56,11 +56,22 @@ test.describe("A1 public answer page", () => {
       "http://localhost:3000/calendars/GB-CHAPS/2026-12-28",
     );
     const jsonLd = JSON.parse(
-      (await page.locator('script[type="application/ld+json"]').textContent()) ?? "[]",
-    ) as { "@type": string; mainEntity?: { name: string }[] }[];
-    expect(jsonLd.map((item) => item["@type"])).toEqual(["FAQPage", "BreadcrumbList"]);
-    expect(jsonLd[0]?.mainEntity?.[0]?.name).toContain("28 December 2026");
-    expect(jsonLd[0]?.mainEntity).toHaveLength(4);
+      (await page.locator('script[type="application/ld+json"]').textContent()) ?? "{}",
+    ) as { "@graph": { "@type": string; name?: string; mainEntity?: unknown }[] };
+    const nodes = jsonLd["@graph"];
+    expect(nodes.map((node) => node["@type"])).toEqual([
+      "Organization",
+      "WebSite",
+      "WebPage",
+      "Question",
+      "FAQPage",
+      "BreadcrumbList",
+    ]);
+    expect(nodes.find((node) => node["@type"] === "Question")?.name).toContain("28 December 2026");
+    expect(nodes.find((node) => node["@type"] === "FAQPage")?.mainEntity).toHaveLength(3);
+    const csv = await request.get("/downloads/GB-CHAPS.csv");
+    expect(csv.headers()["content-type"]).toBe("text/csv; charset=utf-8");
+    expect(await csv.text()).toMatch(/^date,is_open,reason,basis,source_urls\r\n/);
 
     // The pipeline's files for the release: a sitemap index, per-calendar sitemaps, robots.txt.
     const index = await request.get("/sitemap.xml");

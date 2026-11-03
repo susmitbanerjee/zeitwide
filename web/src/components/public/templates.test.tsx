@@ -1,3 +1,4 @@
+import { JSDOM } from "jsdom";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
@@ -15,6 +16,8 @@ import {
   type PageModel,
 } from "@/lib/page-models";
 import { compareYear, summarizeYear } from "@/lib/public-pages";
+import { checkStructuredData } from "@/lib/structured-data-check";
+import { PublicShell } from "@/components/site-chrome";
 
 import { PublicPageView } from "./public-page";
 
@@ -72,6 +75,17 @@ function expectInOrder(text: string, needles: string[]) {
     `missing one of ${needles.join(" | ")}`,
   ).toBe(true);
   expect([...positions].sort((a, b) => a - b)).toEqual(positions);
+}
+
+/** The page in its header and footer, as served, checked against its own JSON-LD. */
+function expectStructuredDataShown(model: PageModel) {
+  const html = renderToStaticMarkup(
+    <PublicShell>
+      <PublicPageView model={model} />
+    </PublicShell>,
+  );
+  const { document } = new JSDOM(`<!doctype html><body>${html}</body>`).window;
+  expect(checkStructuredData(document, model.url)).toEqual([]);
 }
 
 function expectParity({ html, markdown }: { html: string; markdown: string }, model: PageModel) {
@@ -141,7 +155,13 @@ describe("answer page", () => {
     expect(page.markdown).toContain(
       "CHAPS closed Mon 28 Dec 2026: Boxing Day (substitute day) (this date)",
     );
+    expect(page.markdown).toContain("CHAPS revision 41, published 28 Oct 2026, 07:29 UTC.");
     expect(page.markdown).toMatchSnapshot();
+  });
+
+  it("marks up only what it shows: the question, its answer, the FAQ and the trail", () => {
+    expectStructuredDataShown(model);
+    expect(page.html).toContain('<time dateTime="2026-10-28T07:29:18.079663Z">');
   });
 });
 
@@ -178,6 +198,10 @@ describe("year page", () => {
     );
     expect(page.markdown).toMatchSnapshot();
   });
+
+  it("is about the calendar's dataset, by @id", () => {
+    expectStructuredDataShown(model);
+  });
 });
 
 describe("calendar page", () => {
@@ -206,7 +230,16 @@ describe("calendar page", () => {
   it("gives the same facts as Markdown", () => {
     expectParity(page, model);
     expect(page.markdown).toContain("| Customer payments | 17:40 |");
+    expect(page.markdown).toContain(
+      "[CHAPS as CSV (text/csv)](https://zeitwide.example/downloads/GB-CHAPS.csv)",
+    );
     expect(page.markdown).toMatchSnapshot();
+  });
+
+  it("describes the dataset with the coverage, revision, license and files it shows", () => {
+    expectStructuredDataShown(model);
+    expect(page.html).toContain('href="/downloads/GB-CHAPS.ics"');
+    expect(page.html).toContain('<time dateTime="2026-01-01">1 January 2026</time>');
   });
 });
 
@@ -237,6 +270,10 @@ describe("compare page", () => {
     expect(page.markdown).toContain("| Date | T2 | CHAPS |");
     expect(page.markdown).toMatchSnapshot();
   });
+
+  it("is about both calendars' datasets, by @id", () => {
+    expectStructuredDataShown(model);
+  });
 });
 
 describe("list pages", () => {
@@ -256,6 +293,7 @@ describe("list pages", () => {
     ]) {
       const page = render(model);
       expectParity(page, model);
+      expectStructuredDataShown(model);
       expect(page.markdown).toMatchSnapshot(model.type);
     }
   });

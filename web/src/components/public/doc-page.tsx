@@ -2,13 +2,24 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { JsonLd } from "@/components/json-ld";
 import { MarkdownDoc } from "@/components/markdown-doc";
+import { Breadcrumbs } from "@/components/site-chrome";
 import { buttonVariants } from "@/components/ui/button";
 import { docPath, findDoc } from "@/lib/docs";
 import { env } from "@/lib/env";
 import { formatDate } from "@/lib/format";
+import { HOME_CRUMB, type Crumb } from "@/lib/page-models";
 import { markdownUrl } from "@/lib/public-routes";
 import { absoluteUrl } from "@/lib/seo";
+import { contentGraph } from "@/lib/structured-data";
+
+/** Home, then Developers (the docs index), then the page itself. */
+export function docCrumbs(title: string | null): Crumb[] {
+  return title === null
+    ? [HOME_CRUMB, { label: "Developers" }]
+    : [HOME_CRUMB, { href: "/docs", label: "Developers" }, { label: title }];
+}
 
 /** One page of docs/site, rendered from its Markdown. */
 export function DocPage({ slug }: { slug: string }) {
@@ -16,8 +27,12 @@ export function DocPage({ slug }: { slug: string }) {
   if (doc === undefined) {
     notFound();
   }
+  const crumbs = docCrumbs(slug === "index" ? null : doc.title);
+  const url = absoluteUrl(env.siteUrl, docPath(slug));
   return (
     <article className="flex flex-col gap-6">
+      <JsonLd data={contentGraph({ url, title: doc.title, crumbs }, env.siteUrl)} />
+      <Breadcrumbs items={crumbs} />
       <MarkdownDoc body={doc.body} />
       <p className="text-sm text-ink-muted">Updated {formatDate(doc.updated, "plain")}.</p>
       {slug === "index" && (

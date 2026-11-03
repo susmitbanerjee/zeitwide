@@ -5,20 +5,32 @@ import { JsonLd } from "@/components/json-ld";
 import { Breadcrumbs } from "@/components/site-chrome";
 import { Card, Code, SectionTitle } from "@/components/ui/primitives";
 import { cn } from "@/lib/cn";
-import type { Cell, LinkList, PageModel, SourceItem, TableBlock } from "@/lib/page-models";
+import {
+  revisionSentence,
+  type Cell,
+  type DatasetBlock,
+  type DatedText,
+  type LinkList,
+  type PageModel,
+  type RevisionFact,
+  type SourceItem,
+  type TableBlock,
+} from "@/lib/page-models";
+import { pageGraph } from "@/lib/structured-data";
 
 import { ZeitbandTable } from "./zeitband-table";
 
 /**
  * Every public data page, rendered from its PageModel: the same model toMarkdown renders, so the
  * HTML and Markdown state the same facts. Answer pages add the Zeitband, citation, FAQ and API
- * example in the order the answer template sets. No fact needs JavaScript.
+ * example in the order the answer template sets. No fact needs JavaScript. The JSON-LD graph is
+ * built from the same model, so it states only what the page shows.
  */
 export function PublicPageView({ model }: { model: PageModel }) {
   const answer = model.type === "answer" ? model : null;
   return (
     <article className="flex flex-col gap-10">
-      {answer !== null && <JsonLd data={answer.jsonLd} />}
+      <JsonLd data={pageGraph(model, new URL(model.url).origin)} />
       <header className="flex flex-col gap-4">
         <Breadcrumbs items={model.crumbs} />
         <h1 className="max-w-4xl text-3xl leading-tight font-bold tracking-[-0.02em] sm:text-4xl">
@@ -67,6 +79,8 @@ export function PublicPageView({ model }: { model: PageModel }) {
         </Card>
       )}
 
+      {model.type === "calendar" && <DatasetSection dataset={model.dataset} />}
+
       {model.lists.map((list) => (
         <LinkListSection key={list.id} list={list} />
       ))}
@@ -90,6 +104,11 @@ export function PublicPageView({ model }: { model: PageModel }) {
                   </Link>
                 </>
               )}
+            </p>
+          )}
+          {answer !== null && (
+            <p className="text-sm text-ink-muted">
+              <RevisionText fact={answer.revision} />
             </p>
           )}
           {model.cite !== undefined && <CiteBlock text={model.cite} />}
@@ -246,6 +265,56 @@ function SourceList({ sources }: { sources: SourceItem[] }) {
         </li>
       ))}
     </ul>
+  );
+}
+
+function Dated({ value }: { value: DatedText }) {
+  return <time dateTime={value.iso}>{value.text}</time>;
+}
+
+/** The revision sentence, with its date marked up for the JSON-LD's dateModified. */
+function RevisionText({ fact }: { fact: RevisionFact }) {
+  if (fact.published === null) {
+    return <>{revisionSentence(fact)}</>;
+  }
+  return (
+    <>
+      {fact.calendarName} revision {fact.revision}, published <Dated value={fact.published} />.
+    </>
+  );
+}
+
+/** What the calendar's files hold, the dates they cover, their revision, license and links. */
+function DatasetSection({ dataset }: { dataset: DatasetBlock }) {
+  return (
+    <section aria-labelledby="data" className="flex flex-col gap-3">
+      <SectionTitle id="data">{dataset.heading}</SectionTitle>
+      <p className="max-w-3xl">{dataset.statusNote}</p>
+      <p className="max-w-3xl text-ink-muted">
+        {dataset.coverage === null ? (
+          dataset.coverageNote
+        ) : (
+          <>
+            Covers <Dated value={dataset.coverage.from} /> to <Dated value={dataset.coverage.to} />.
+          </>
+        )}{" "}
+        <RevisionText fact={dataset.revision} /> Licensed under{" "}
+        <a href={dataset.license.url} rel="license noopener noreferrer" target="_blank">
+          {dataset.license.name}
+        </a>
+        .
+      </p>
+      <ul className="flex flex-col gap-1">
+        {dataset.downloads.map((download) => (
+          // A file, not a page: a plain link, so the router never tries to render it.
+          <li key={download.href}>
+            <a href={download.href} className="inline-flex min-h-11 items-center">
+              {download.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

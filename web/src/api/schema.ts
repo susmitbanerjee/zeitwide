@@ -743,6 +743,11 @@ export interface components {
             weekend: ("monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday")[];
             closes_on_holidays: boolean;
             revision: number;
+            /**
+             * Format: date-time
+             * @description When `revision` was published; absent at revision 0.
+             */
+            revised_at?: string;
             coverage: components["schemas"]["Coverage"];
             operating_hours?: components["schemas"]["OperatingHours"];
         };

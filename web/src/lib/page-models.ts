@@ -23,7 +23,8 @@ import {
   type Faq,
   type SourceSummary,
 } from "./public-pages";
-import { absoluteUrl, answerJsonLd, answerPath, answerQuestion } from "./seo";
+import { absoluteUrl, answerPath, answerQuestion } from "./seo";
+import { DATASET_LICENSE, NODE_IDS } from "./site-identity";
 
 /**
  * One model per public page type, built from API data. React renders it as HTML and toMarkdown
@@ -67,6 +68,42 @@ export interface SourceItem {
 export interface Crumb {
   label: string;
   href?: string;
+}
+
+/** A moment the page shows and its JSON-LD states: the words people read and the ISO value. */
+export interface DatedText {
+  iso: string;
+  text: string;
+}
+
+/** Which revision of a calendar a page shows, and when it was published. */
+export interface RevisionFact {
+  calendarName: string;
+  revision: number;
+  /** Null at revision 0, before anything was published. */
+  published: DatedText | null;
+}
+
+export interface Download {
+  text: string;
+  /** Site-relative: "/downloads/GB-CHAPS.csv". */
+  href: string;
+  encodingFormat: string;
+}
+
+/** The calendar page's dataset section: what the files hold, their range, revision and terms. */
+export interface DatasetBlock {
+  /** The stable JSON-LD @id of this calendar's Dataset. */
+  id: string;
+  heading: string;
+  /** What each file states; names the measured variable, "business day status". */
+  statusNote: string;
+  coverage: { from: DatedText; to: DatedText } | null;
+  /** Said instead of a range when there is none. */
+  coverageNote: string;
+  revision: RevisionFact;
+  license: { name: string; url: string };
+  downloads: Download[];
 }
 
 export interface LinkList {
@@ -113,7 +150,9 @@ export interface AnswerPageModel extends PageModelBase {
   band: { heading: string; caption: string; calendarName: string; days: BandDay[] };
   evidence: PageLink;
   api: { curl: string; json: string };
-  jsonLd: unknown;
+  /** The JSON-LD @id of the calendar's Dataset, which this page is about. */
+  datasetId: string;
+  revision: RevisionFact;
   /** The facts the Markdown and HTML must agree on. */
   facts: {
     date: string;
@@ -126,15 +165,18 @@ export interface AnswerPageModel extends PageModelBase {
 
 export interface YearPageModel extends PageModelBase {
   type: "year";
+  datasetId: string;
 }
 
 export interface CalendarPageModel extends PageModelBase {
   type: "calendar";
   today: PageLink | null;
+  dataset: DatasetBlock;
 }
 
 export interface ComparePageModel extends PageModelBase {
   type: "compare";
+  datasetIds: [string, string];
 }
 
 export interface ListPageModel extends PageModelBase {
@@ -147,7 +189,62 @@ export interface ListPageModel extends PageModelBase {
 export type PageModel =
   AnswerPageModel | YearPageModel | CalendarPageModel | ComparePageModel | ListPageModel;
 
-const BASE = { crumbs: [], tables: [], lists: [], notes: [], faqs: [], sources: [] };
+const BASE = { tables: [], lists: [], notes: [], faqs: [], sources: [] };
+
+/** Every trail starts at the home page; the last crumb is the page itself, without a link. */
+export const HOME_CRUMB: Crumb = { href: "/", label: "Home" };
+
+function revisionFact(calendar: Calendar): RevisionFact {
+  return {
+    calendarName: calendar.name,
+    revision: calendar.revision,
+    published:
+      calendar.revised_at === undefined
+        ? null
+        : { iso: calendar.revised_at, text: formatInstant(calendar.revised_at) },
+  };
+}
+
+/** "CHAPS revision 41, published 28 Oct 2026, 07:29 UTC." */
+export function revisionSentence(fact: RevisionFact): string {
+  return fact.published === null
+    ? `${fact.calendarName} has no published revision yet.`
+    : `${fact.calendarName} revision ${fact.revision}, published ${fact.published.text}.`;
+}
+
+const DOWNLOAD_FORMATS = [
+  { label: "CSV", extension: "csv", encodingFormat: "text/csv" },
+  { label: "JSON", extension: "json", encodingFormat: "application/json" },
+  { label: "iCalendar", extension: "ics", encodingFormat: "text/calendar" },
+] as const;
+
+function datasetBlock(calendar: Calendar, siteUrl: string): DatasetBlock {
+  const { coverage } = calendar;
+  const id = encodeURIComponent(calendar.id);
+  return {
+    id: NODE_IDS.dataset(siteUrl, calendar.id),
+    heading: "Download the data",
+    statusNote: `The CSV and JSON give the business day status of every date ${calendar.name} has an entry for, with its reason, basis and sources, and the iCalendar file lists its closures. The weekend rule decides every other date.`,
+    coverage:
+      coverage.type === "years" && coverage.from !== undefined && coverage.to !== undefined
+        ? {
+            from: { iso: coverage.from, text: formatDate(coverage.from, "plain") },
+            to: { iso: coverage.to, text: formatDate(coverage.to, "plain") },
+          }
+        : null,
+    coverageNote:
+      coverage.type === "unlimited"
+        ? `${calendar.name} closes on no holiday, so it covers every date.`
+        : `${calendar.name} has no published dates yet.`,
+    revision: revisionFact(calendar),
+    license: DATASET_LICENSE,
+    downloads: DOWNLOAD_FORMATS.map((format) => ({
+      text: `${calendar.name} as ${format.label} (${format.encodingFormat})`,
+      href: `/downloads/${id}.${format.extension}`,
+      encodingFormat: format.encodingFormat,
+    })),
+  };
+}
 
 function sourceItems(
   sources: { publisher: string; url: string; retrieved_at: string }[],
@@ -217,6 +314,7 @@ export function answerPageModel(data: AnswerPageData, siteUrl: string): AnswerPa
     lead,
     open: day.is_open,
     crumbs: [
+      HOME_CRUMB,
       { href: "/calendars", label: "Calendars" },
       { href: calendarPath(calendar.id), label: calendar.name },
       { href: yearPath(calendar.id, year), label: String(year) },
@@ -286,7 +384,8 @@ export function answerPageModel(data: AnswerPageData, siteUrl: string): AnswerPa
         2,
       ),
     },
-    jsonLd: answerJsonLd(siteUrl, calendar, day, lead, faqs),
+    datasetId: NODE_IDS.dataset(siteUrl, calendar.id),
+    revision: revisionFact(calendar),
     facts: {
       date: day.date,
       calendarId: calendar.id,
@@ -333,10 +432,12 @@ export function yearPageModel(data: YearPageData, siteUrl: string): YearPageMode
     title: `${calendar.name} closures in ${year}`,
     lead: `${yearSentence(calendar, summary)}. ${weekendSentence(calendar)} Every date below is from Zeitwide release ${release}.`,
     crumbs: [
+      HOME_CRUMB,
       { href: "/calendars", label: "Calendars" },
       { href: calendarPath(calendar.id), label: calendar.name },
       { label: String(year) },
     ],
+    datasetId: NODE_IDS.dataset(siteUrl, calendar.id),
     tables: [
       {
         id: "closures",
@@ -408,7 +509,8 @@ export function calendarPageModel(data: CalendarPageData, siteUrl: string): Cale
     ]
       .filter((part) => part !== undefined)
       .join(" "),
-    crumbs: [{ href: "/calendars", label: "Calendars" }, { label: calendar.name }],
+    crumbs: [HOME_CRUMB, { href: "/calendars", label: "Calendars" }, { label: calendar.name }],
+    dataset: datasetBlock(calendar, siteUrl),
     today:
       todayAnswer === undefined
         ? null
@@ -459,9 +561,11 @@ export function comparePageModel(data: CompareModelData, siteUrl: string): Compa
     title: `${a.name} vs ${b.name}: closures in ${year}`,
     lead: compareSentence(a, b, comparison),
     crumbs: [
+      HOME_CRUMB,
       { href: "/calendars", label: "Calendars" },
       { label: `${a.name} and ${b.name}, ${year}` },
     ],
+    datasetIds: [NODE_IDS.dataset(siteUrl, a.id), NODE_IDS.dataset(siteUrl, b.id)],
     tables: [
       {
         id: "side-by-side",
@@ -503,6 +607,7 @@ export function calendarsPageModel(
     type: "calendars",
     url: absoluteUrl(siteUrl, "/calendars"),
     title: "Calendars",
+    crumbs: [HOME_CRUMB, { label: "Calendars" }],
     lead: `Zeitwide covers ${plural(entries.length, "calendar")}; dates outside a calendar's coverage are never guessed.`,
     tables: groupCalendars(entries.map((entry) => entry.calendar)).map((group) => ({
       id: group.label.toLowerCase().replace(/\s+/g, "-"),
@@ -554,6 +659,7 @@ export function sourcesPageModel(
     type: "sources",
     url: absoluteUrl(siteUrl, "/sources"),
     title: "Sources",
+    crumbs: [HOME_CRUMB, { label: "Sources" }],
     lead: `Zeitwide answers from ${plural(sources.length, "official source")}, listed here for closures in ${listOf(years.map(String))}. A change is published only after two independent sources agree and a reviewer signs it off; this list is from release ${release}.`,
     sources: summarySources(sources, true),
     bullets: [],
@@ -569,6 +675,7 @@ export function pricingPageModel(siteUrl: string): ListPageModel {
     type: "pricing",
     url: absoluteUrl(siteUrl, "/pricing"),
     title: "Pricing",
+    crumbs: [HOME_CRUMB, { label: "Pricing" }],
     lead: "Zeitwide is free during the beta, with every feature included on every account.",
     bulletsHeading: "Free",
     bullets: [

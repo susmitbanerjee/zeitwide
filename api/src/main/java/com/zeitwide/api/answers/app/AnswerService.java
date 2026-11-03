@@ -175,6 +175,10 @@ public class AnswerService {
   }
 
   private static CalendarSummary summary(CalendarHistory calendar, Instant at) {
-    return new CalendarSummary(calendar.rules(), calendar.revisionAt(at), calendar.coverageAt(at));
+    return new CalendarSummary(
+        calendar.rules(),
+        calendar.revisionAt(at),
+        calendar.revisedAt(at).orElse(null),
+        calendar.coverageAt(at));
   }
 }

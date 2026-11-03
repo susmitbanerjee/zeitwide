@@ -38,6 +38,17 @@ class Closure:
 
 
 @dataclass(frozen=True, slots=True)
+class DayEntry:
+    """A current entry: a closure, or an opening on a day the weekend rule would close."""
+
+    date: date
+    is_open: bool
+    reason: str
+    basis: str
+    source_urls: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class CalendarView:
     id: str
     name: str
@@ -51,6 +62,8 @@ class CalendarView:
     closures: tuple[Closure, ...]
     # Years with any current entry; the API's coverage for calendars that close on holidays.
     entry_years: tuple[int, ...]
+    # Every current entry in date order: the closures plus any openings.
+    entries: tuple[DayEntry, ...] = ()
 
     def covered_years(self, open_years: Sequence[int]) -> list[int]:
         """The years the calendar answers for; ``open_years`` for one that never closes."""
@@ -122,10 +135,11 @@ def _calendar(raw: object) -> CalendarView:
     changes = [_instant(str(entry["recorded_from"])) for entry in entries] + [
         _instant(str(entry["recorded_to"])) for entry in entries if entry.get("recorded_to")
     ]
-    closures = sorted(
+    day_entries = sorted(
         (
-            Closure(
+            DayEntry(
                 date=date.fromisoformat(str(entry["date"])),
+                is_open=entry.get("is_open") is True,
                 reason=str(entry["reason"]),
                 basis=str(entry["basis"]),
                 source_urls=tuple(
@@ -137,10 +151,14 @@ def _calendar(raw: object) -> CalendarView:
                 ),
             )
             for entry in current
-            if entry.get("is_open") is False
         ),
-        key=lambda closure: closure.date,
+        key=lambda entry: entry.date,
     )
+    closures = [
+        Closure(entry.date, entry.reason, entry.basis, entry.source_urls)
+        for entry in day_entries
+        if not entry.is_open
+    ]
     return CalendarView(
         id=_text(raw, "id"),
         name=_text(raw, "name"),
@@ -151,6 +169,7 @@ def _calendar(raw: object) -> CalendarView:
         revision=int(raw.get("revision", 0)),
         revised_at=max(changes, default=None),
         closures=tuple(closures),
+        entries=tuple(day_entries),
         entry_years=tuple(sorted({date.fromisoformat(str(e["date"])).year for e in current})),
     )
 

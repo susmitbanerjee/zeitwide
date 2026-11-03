@@ -164,6 +164,10 @@ class AnswersApiTest {
                 .value(true))
         .andExpect(jsonPath("$.calendars[?(@.id == 'DE')].operating_hours").doesNotExist())
         .andExpect(
+            jsonPath("$.calendars[?(@.id == 'GB-CHAPS')].revised_at")
+                .value("2026-10-28T07:29:18.079663Z"))
+        .andExpect(jsonPath("$.calendars[?(@.id == 'US-FEDNOW')].revised_at").doesNotExist())
+        .andExpect(
             jsonPath("$.calendars[?(@.id == 'US-FEDWIRE')].weekend[*]")
                 .value(contains("saturday", "sunday")));
   }

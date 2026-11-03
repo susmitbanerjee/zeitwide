@@ -10,6 +10,7 @@ export const CHAPS: Calendar = {
   weekend: ["saturday", "sunday"],
   closes_on_holidays: true,
   revision: 41,
+  revised_at: "2026-10-28T07:29:18.079663Z",
   coverage: { type: "years", from: "2026-01-01", to: "2027-12-31" },
 };
 

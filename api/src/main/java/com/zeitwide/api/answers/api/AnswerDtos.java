@@ -171,6 +171,7 @@ final class AnswerDtos {
       List<String> weekend,
       boolean closesOnHolidays,
       long revision,
+      @JsonInclude(JsonInclude.Include.NON_NULL) Instant revisedAt,
       Coverage coverage,
       @JsonInclude(JsonInclude.Include.NON_NULL) OperatingHours operatingHours) {}
 

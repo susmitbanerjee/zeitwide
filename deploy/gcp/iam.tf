@@ -38,7 +38,7 @@ resource "google_storage_bucket_iam_member" "pipeline_site_files_write" {
   member = google_service_account.this["pipeline"].member
 }
 
-# Web: reads the site files it serves (robots.txt, llms.txt, sitemaps), and nothing else.
+# Web: reads the site files it serves (robots.txt, llms.txt, sitemaps, downloads), nothing else.
 resource "google_storage_bucket_iam_member" "web_site_files_read" {
   bucket = google_storage_bucket.site_files.name
   role   = "roles/storage.objectViewer"

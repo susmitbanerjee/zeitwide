@@ -1,6 +1,7 @@
 """The site files written with each dataset release, for crawlers and AI agents.
 
-robots.txt, llms.txt, llms-full.txt, docs/llms-full.txt and the sitemaps are pure
+robots.txt, llms.txt, llms-full.txt, docs/llms-full.txt, the sitemaps and each calendar's
+downloads (CSV, JSON and iCalendar) are pure
 functions of the release document, the public docs and the OpenAPI document (both synced
 into this package by ``make sync-docs``). The same release always gives the same bytes, so
 the files change only when the data does.
@@ -12,6 +13,15 @@ from typing import Protocol
 
 from zeitwide_pipeline.site.api_reference import api_reference
 from zeitwide_pipeline.site.docs import Doc, load_docs, load_openapi
+from zeitwide_pipeline.site.downloads import (
+    CSV_TYPE,
+    ICS_TYPE,
+    JSON_TYPE,
+    calendar_csv,
+    calendar_ics,
+    calendar_json,
+    download_name,
+)
 from zeitwide_pipeline.site.links import SiteLinks
 from zeitwide_pipeline.site.llms import Discovery, docs_full_txt, llms_full_txt, llms_txt
 from zeitwide_pipeline.site.release_view import read_release
@@ -70,4 +80,18 @@ def build_site_files(
     files += [
         SiteFile(sitemap.name, render_sitemap(sitemap, links).encode(), XML) for sitemap in sitemaps
     ]
+    for calendar in release.calendars:
+        files += [
+            SiteFile(download_name(calendar.id, "csv"), calendar_csv(calendar).encode(), CSV_TYPE),
+            SiteFile(
+                download_name(calendar.id, "json"),
+                calendar_json(release, calendar, links).encode(),
+                JSON_TYPE,
+            ),
+            SiteFile(
+                download_name(calendar.id, "ics"),
+                calendar_ics(release, calendar, links).encode(),
+                ICS_TYPE,
+            ),
+        ]
     return files

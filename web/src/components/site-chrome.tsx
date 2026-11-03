@@ -1,5 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+
+import { DATASET_LICENSE, ORGANIZATION } from "@/lib/site-identity";
 
 /** The Zeitband: seven days, one closed, two weekend. */
 export function Logo({ inverted = false }: { inverted?: boolean }) {
@@ -82,10 +85,29 @@ export function SiteHeader() {
   );
 }
 
+/** Says who publishes the site, where its code lives and the data's license: what the JSON-LD
+ * Organization states on every page. */
 export function SiteFooter() {
   return (
     <footer className="mt-12 border-t border-line bg-surface">
       <div className="mx-auto flex max-w-[1376px] flex-wrap justify-between gap-x-6 gap-y-2 px-4 py-5 text-[13px] leading-5 text-ink-muted sm:px-8">
+        <p>
+          <Link href="/" className="inline-flex min-h-11 items-center gap-2 text-ink">
+            <Image src={ORGANIZATION.logoPath} alt="" width={20} height={20} unoptimized />
+            {ORGANIZATION.name}
+          </Link>
+        </p>
+        {ORGANIZATION.profiles.map((profile) => (
+          <p key={profile.href}>
+            <a
+              href={profile.href}
+              rel="noopener noreferrer"
+              className="inline-flex min-h-11 items-center"
+            >
+              {profile.text}
+            </a>
+          </p>
+        ))}
         <p>
           <Link href="/pricing" className="inline-flex min-h-11 items-center">
             Free during the public beta, including commercial use of the API
@@ -97,7 +119,11 @@ export function SiteFooter() {
           </Link>
         </p>
         <p className="inline-flex min-h-11 items-center">
-          Data: Zeitwide open dataset, CC BY-NC 4.0 · Library: MIT
+          Data: Zeitwide open dataset,&nbsp;
+          <a href={DATASET_LICENSE.url} rel="license noopener noreferrer">
+            {DATASET_LICENSE.name}
+          </a>
+          &nbsp;· Library: MIT
         </p>
       </div>
     </footer>

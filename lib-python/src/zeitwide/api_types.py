@@ -486,6 +486,10 @@ class Calendar(TypedDict):
     weekend: list[Literal['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']]
     closes_on_holidays: bool
     revision: int
+    revised_at: NotRequired[str]
+    """
+    When `revision` was published; absent at revision 0.
+    """
     coverage: Coverage
     operating_hours: NotRequired[OperatingHours]
 

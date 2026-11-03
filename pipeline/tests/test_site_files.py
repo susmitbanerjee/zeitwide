@@ -307,6 +307,57 @@ def test_the_real_release_and_docs_make_valid_files() -> None:
     assert closure_rows(files["llms-full.txt"]) == {c.id: len(c.closures) for c in view.calendars}
 
 
+def test_downloads_hold_each_calendars_current_entries() -> None:
+    files = {file.name: file for file in build_site_files(RELEASE, LINKS)}
+
+    csv_file = files["downloads/GB-CHAPS.csv"]
+    assert csv_file.content_type == "text/csv; charset=utf-8"
+    assert csv_file.content.decode().splitlines() == [
+        "date,is_open,reason,basis,source_urls",
+        "2026-12-25,false,Christmas Day,published,https://www.gov.uk/bank-holidays",
+        "2026-12-28,false,Boxing Day (substitute day),published,https://www.gov.uk/bank-holidays",
+        "2027-01-01,false,New Year's Day,published,https://www.gov.uk/bank-holidays",
+    ]
+
+    document = json.loads(files["downloads/GB-CHAPS.json"].content)
+    assert document["dataset_release"] == "2026.11.02.1"
+    assert document["license"]["name"] == "CC BY-NC 4.0"
+    assert document["calendar"]["coverage"] == {
+        "type": "years",
+        "from": "2026-01-01",
+        "to": "2027-12-31",
+    }
+    assert [entry["date"] for entry in document["entries"]] == [
+        "2026-12-25",
+        "2026-12-28",
+        "2027-01-01",
+    ]
+    fednow = json.loads(files["downloads/US-FEDNOW.json"].content)
+    assert fednow["calendar"]["coverage"] == {"type": "unlimited"}
+    assert fednow["entries"] == []
+
+
+def test_ics_has_one_all_day_event_per_closure_with_escaped_folded_lines() -> None:
+    long_reason = "Boxing Day, observed; " + "very long holiday name " * 4
+    release = {
+        **RELEASE,
+        "calendars": [_calendar("GB-CHAPS", "CHAPS", [_entry("2026-12-28", long_reason)])],
+    }
+    files = {file.name: file for file in build_site_files(release, LINKS)}
+    raw = files["downloads/GB-CHAPS.ics"].content
+
+    lines = raw.decode().split("\r\n")
+    assert lines[0] == "BEGIN:VCALENDAR"
+    assert lines[-2:] == ["END:VCALENDAR", ""]
+    assert all(len(line.encode()) <= 75 for line in lines)
+    assert "DTSTART;VALUE=DATE:20261228" in lines
+    assert "DTEND;VALUE=DATE:20261229" in lines
+    assert "DTSTAMP:20261102T060000Z" in lines
+    unfolded = raw.decode().replace("\r\n ", "")
+    assert "SUMMARY:CHAPS closed: Boxing Day\\, observed\\; very long" in unfolded
+    assert "URL:https://zeitwide.example/calendars/GB-CHAPS/2026-12-28" in unfolded
+
+
 @dataclass
 class _Blob:
     name: str
