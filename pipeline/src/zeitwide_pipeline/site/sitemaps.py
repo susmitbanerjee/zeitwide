@@ -23,6 +23,8 @@ from zeitwide_pipeline.site.release_view import CalendarView, ReleaseView
 SITEMAP_NAMESPACE = "http://www.sitemaps.org/schemas/sitemap/0.9"
 MAX_URLS_PER_SITEMAP = 50_000
 PAGES_SITEMAP = "sitemaps/pages.xml"
+# Answer pages listed after the release's date, as the web app prebuilds them.
+UPCOMING_DAYS = 90
 
 
 @dataclass(frozen=True, slots=True)
@@ -84,16 +86,18 @@ def _pages(release: ReleaseView, docs: Sequence[Doc]) -> Sitemap:
 
 
 def _calendar(release: ReleaseView, calendar: CalendarView) -> Sitemap:
-    """The calendar page, its year pages and an answer page for every covered date."""
+    """The calendar page, its year pages, and the answer pages worth crawling: every closure
+    it covers, plus the release's date and the 90 days after it (the pages the web app
+    prebuilds). Other dates are answered on request but not listed."""
     revised = _revised(calendar)
     years = calendar.covered_years(release.build_years)
     urls = [SitemapUrl(calendar_path(calendar.id), revised)]
     urls += [SitemapUrl(year_path(calendar.id, year), revised) for year in years]
-    for year in years:
-        day = date(year, 1, 1)
-        while day.year == year:
-            urls.append(SitemapUrl(answer_path(calendar.id, day), revised))
-            day += timedelta(days=1)
+    upcoming = (release.today + timedelta(days=offset) for offset in range(UPCOMING_DAYS + 1))
+    days = {closure.date for closure in calendar.closures} | {
+        day for day in upcoming if day.year in years
+    }
+    urls += [SitemapUrl(answer_path(calendar.id, day), revised) for day in sorted(days)]
     return Sitemap(calendar_sitemap_name(calendar.id), tuple(urls))
 
 

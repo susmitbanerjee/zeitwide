@@ -40,8 +40,10 @@ locals {
     ZEITWIDE_API_URL = google_cloud_run_v2_service.api.uri
     ZEITWIDE_MCP_URL = "${local.api_public_url}/mcp"
     SITE_URL         = var.web_origin
-    # robots.txt, llms.txt and the sitemaps, written by the pipeline with each release.
+    # robots.txt, llms.txt and the sitemaps, written by the pipeline with each release. The
+    # bucket is private: the web app reads it as its own service account.
     SITE_FILES_URL  = "https://storage.googleapis.com/${google_storage_bucket.site_files.name}/current"
+    SITE_FILES_AUTH = "gcp-metadata"
     APP_URL         = local.web_app_origin
     AUTH_URL        = local.web_app_origin
     AUTH_TRUST_HOST = "true"

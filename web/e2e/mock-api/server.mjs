@@ -225,11 +225,6 @@ async function route(req, res, url) {
       return send(res, 404);
     }
   }
-  // Linked from llms.txt; the validator only needs them to answer.
-  if (method === "GET" && (path === "/openapi.yaml" || path === "/mcp")) {
-    res.writeHead(200, { "Content-Type": "text/plain" });
-    return res.end("fake\n");
-  }
   const closures = path.match(/^\/v1\/calendars\/([^/]+)\/closures$/);
   if (method === "GET" && closures) {
     const calendar = calendarOr404(res, closures[1]);

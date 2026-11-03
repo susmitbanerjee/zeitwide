@@ -23,6 +23,8 @@ const nextConfig: NextConfig = {
     // Answer data: a calendar changes only when a release is cut, and the cache key holds its
     // revision, so a new revision is fetched as soon as the calendar list shows it.
     calendar: { stale: 300, revalidate: 300, expire: 86_400 },
+    // robots.txt, llms.txt and the sitemaps: they change once a release, at most daily.
+    siteFiles: { stale: 300, revalidate: 3600, expire: 86_400 },
   },
   turbopack: {
     rules: {

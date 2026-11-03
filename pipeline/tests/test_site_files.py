@@ -220,7 +220,10 @@ def test_sitemaps_validate_and_date_pages_by_the_calendars_last_change() -> None
         "<loc>https://zeitwide.example/calendars/GB-CHAPS/2026-12-28</loc><lastmod>2026-10-20</lastmod>"
         in chaps
     )
-    assert chaps.count("<url>") == 1 + 2 + 365 + 365
+    # Calendar page, two year pages, then 2 Nov 2026 to 31 Jan 2027, which holds every closure.
+    assert chaps.count("<url>") == 1 + 2 + 91
+    assert "/calendars/GB-CHAPS/2027-01-31<" in chaps
+    assert "/calendars/GB-CHAPS/2027-02-01<" not in chaps
     assert (
         "<loc>https://zeitwide.example/sitemaps/GB-CHAPS.xml</loc><lastmod>2026-10-20</lastmod>"
         in files["sitemap.xml"]
@@ -453,7 +456,9 @@ def test_validator_passes_a_good_site_and_names_each_problem() -> None:
             validate_site(client, "https://zeitwide.example", "https://api.zeitwide.example") == []
         )
     links = llms_links(files["llms.txt"])
-    assert "https://api.zeitwide.example/openapi.yaml" in links
+    assert "https://zeitwide.example/pricing.md" in links
+    # The API and MCP lines are endpoints, not pages: not checked.
+    assert not any(link.startswith("https://api.") for link in links)
     broken = frozenset({"https://zeitwide.example/pricing.md"})
     with httpx.Client(transport=_site(files, {"GB-CHAPS": 4, "EU-T2": 2}, broken)) as client:
         problems = validate_site(client, "https://zeitwide.example", "https://api.zeitwide.example")

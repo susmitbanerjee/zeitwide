@@ -41,22 +41,16 @@ resource "google_storage_bucket" "backups" {
 
 # Files for crawlers and AI agents (robots.txt, llms.txt, llms-full.txt, sitemaps), written by
 # the pipeline with each dataset release: every release under its ID, the served copy under
-# current/. Public on purpose: the web app passes current/ through at zeitwide.com, and nothing
-# here is more than the public pages already say.
+# current/. Private: only the web app reads it and serves current/ at zeitwide.com, so nobody
+# can download from the bucket directly and run up egress (see iam.tf).
 resource "google_storage_bucket" "site_files" {
   name     = "${var.project_id}-${local.prefix}-site-files"
   location = var.region
 
   storage_class               = "STANDARD"
   uniform_bucket_level_access = true
-  public_access_prevention    = "inherited"
+  public_access_prevention    = "enforced"
   force_destroy               = false
 
   depends_on = [google_project_service.this]
-}
-
-resource "google_storage_bucket_iam_member" "site_files_public_read" {
-  bucket = google_storage_bucket.site_files.name
-  role   = "roles/storage.objectViewer"
-  member = "allUsers"
 }

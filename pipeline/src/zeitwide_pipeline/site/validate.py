@@ -20,7 +20,6 @@ from zeitwide_pipeline.site.llms import CLOSURE_TABLE_HEADER, MAX_LLMS_TXT_BYTES
 
 SECTIONS = ("Answers", "Calendars", "Compare", "Docs", "Discovery", "Optional")
 _BULLET = re.compile(r"^- \[(?P<title>[^\]]+)\]\((?P<url>[^)\s]+)\)(?P<rest>.*)$")
-_LINK = re.compile(r"\[[^\]]*\]\((?P<url>[^)\s]+)\)|(?P<bare>https?://[^\s)<>]+)")
 _CALENDAR_HEADING = re.compile(r"^## .+ \((?P<id>[A-Z0-9-]+)\)$")
 _YEARS_PER_REQUEST = 1
 
@@ -53,9 +52,15 @@ def check_llms_txt(text: str) -> list[str]:
 
 
 def llms_links(text: str) -> list[str]:
-    """Every URL in an llms.txt, in order, once each."""
-    urls = [match["url"] or match["bare"] for match in _LINK.finditer(text)]
-    return list(dict.fromkeys(url.rstrip(".;,") for url in urls))
+    """The URL of every link bullet in an llms.txt, in order, once each.
+
+    The lines naming the API and MCP endpoints are not pages: an API base path or an MCP
+    server need not answer a plain GET, so only the bullets' links must answer 200.
+    """
+    urls = [
+        match["url"] for line in text.splitlines() if (match := _BULLET.match(line)) is not None
+    ]
+    return list(dict.fromkeys(urls))
 
 
 def closure_rows(full_text: str) -> dict[str, int]:
