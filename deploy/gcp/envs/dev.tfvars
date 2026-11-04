@@ -14,6 +14,9 @@ web_origin     = "https://zeitwide.com"
 web_app_origin = "https://zeitwide.com"
 web_app_domain = "zeitwide.com"
 api_domain     = "api.zeitwide.com"
+# Cloudflare proxies api.zeitwide.com (deploy/cloudflare), so it and Cloud Run's front end both
+# append to X-Forwarded-For.
+api_trusted_proxies = 2
 
 # The web app's own key (create-web-api-key.sh prints the ID), on the first-party limit.
 first_party_api_key_ids = ["a324246f-affc-4c94-a7d1-5adcb20456e8"]

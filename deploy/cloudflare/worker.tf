@@ -56,6 +56,8 @@ resource "cloudflare_workers_script_subdomain" "edge" {
   previews_enabled = false
 }
 
+# Set to fail open in the dashboard (README, step 7; the provider has no field for it). If this
+# route is ever replaced, set it again: Cloudflare's default is fail closed (error 1027).
 resource "cloudflare_workers_route" "edge" {
   zone_id = local.zone_id
   pattern = "${var.zone_name}/*"

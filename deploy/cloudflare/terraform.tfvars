@@ -1,6 +1,6 @@
 # Not secret: IDs and public DNS only. The API token is CLOUDFLARE_API_TOKEN; the Worker's two
 # secrets are set with wrangler (README).
-account_id  = "00000000000000000000000000000000" # set to your Cloudflare account ID (README, step 1)
+account_id  = "45ea7df7a19134249a7f75eb0abb5b65" # set to your Cloudflare account ID (README, step 1)
 zone_name   = "zeitwide.com"
 environment = "dev"
 
@@ -21,6 +21,11 @@ other_records = {
     type    = "TXT"
     name    = "zeitwide.com"
     content = "\"hosting-site=zeit-dev-6eaae4e0\""
+  }
+  acme_challenge = {
+    type    = "TXT"
+    name    = "_acme-challenge.zeitwide.com"
+    content = "\"Aks5Ee6oicG7gCPswzf3Lus0GmeQo1crJoh8NJ-VGr4\""
   }
   dmarc = {
     type    = "TXT"

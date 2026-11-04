@@ -6,6 +6,8 @@
 #   scripts/curl-matrix.sh                       # http://localhost:8787
 #   scripts/curl-matrix.sh https://zeitwide.com
 #   RATE=1 scripts/curl-matrix.sh                # also send 61 GPTBot requests and expect a 429
+#   CURL_EXTRA="--resolve zeitwide.com:443:<cloudflare ip>" scripts/curl-matrix.sh https://zeitwide.com
+#                                                # pin to the edge while resolvers still cache old DNS
 set -euo pipefail
 
 BASE="${1:-http://localhost:8787}"
@@ -21,7 +23,7 @@ check() {
   shift 4
   local headers body
   headers="$(mktemp)"
-  body="$(curl -sS --compressed -D "$headers" -o - "$@")"
+  body="$(curl -sS --compressed ${CURL_EXTRA:-} -D "$headers" -o - "$@")"
   local status type vary labels
   status="$(awk 'toupper($1) ~ /^HTTP/ {code=$2} END {print code}' "$headers")"
   type="$(grep -i '^content-type:' "$headers" | tail -1 | cut -d' ' -f2- | tr -d '\r')"
