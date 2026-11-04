@@ -25,6 +25,8 @@ export default defineConfig({
         "src/**/*.d.ts",
         "src/auth.ts",
         "src/proxy.ts",
+        // Next.js calls it at startup; its pieces in src/lib/telemetry are unit-tested.
+        "src/instrumentation.ts",
         "src/lib/api-server.ts",
         "src/lib/public-data.ts",
         "src/lib/api-browser.ts",

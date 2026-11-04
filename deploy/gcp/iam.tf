@@ -38,7 +38,7 @@ resource "google_storage_bucket_iam_member" "pipeline_site_files_write" {
   member = google_service_account.this["pipeline"].member
 }
 
-# Web: reads the site files it serves (robots.txt, llms.txt, sitemaps), and nothing else.
+# Web: reads the site files it serves (robots.txt, llms.txt, sitemaps, downloads), nothing else.
 resource "google_storage_bucket_iam_member" "web_site_files_read" {
   bucket = google_storage_bucket.site_files.name
   role   = "roles/storage.objectViewer"
@@ -124,4 +124,18 @@ resource "google_project_iam_member" "deployer_hosting" {
   project = var.project_id
   role    = "roles/firebasehosting.admin"
   member  = google_service_account.this["deployer"].member
+}
+
+# The Grafana workflow (.github/workflows/grafana.yml) applies deploy/grafana with this token,
+# and keeps that configuration's state in its own bucket, so it can't touch this one's.
+resource "google_secret_manager_secret_iam_member" "deployer_grafana_token" {
+  secret_id = google_secret_manager_secret.this["grafana-token"].id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = google_service_account.this["deployer"].member
+}
+
+resource "google_storage_bucket_iam_member" "deployer_grafana_state" {
+  bucket = google_storage_bucket.grafana_state.name
+  role   = "roles/storage.objectUser"
+  member = google_service_account.this["deployer"].member
 }

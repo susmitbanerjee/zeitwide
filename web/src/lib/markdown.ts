@@ -1,4 +1,12 @@
-import type { Cell, PageLink, PageModel, SourceItem, TableBlock } from "./page-models";
+import {
+  revisionSentence,
+  type Cell,
+  type DatasetBlock,
+  type PageLink,
+  type PageModel,
+  type SourceItem,
+  type TableBlock,
+} from "./page-models";
 
 /**
  * A page model as GitHub-flavoured Markdown, for AI systems and anyone who wants the facts without
@@ -36,6 +44,9 @@ export function toMarkdown(model: PageModel): string {
       ]),
     );
   }
+  if (model.type === "calendar") {
+    blocks.push(datasetSection(model.dataset, model.url));
+  }
   for (const list of model.lists) {
     blocks.push(section(list.heading, [links(list.links, model.url)]));
   }
@@ -64,7 +75,24 @@ function sourcesBlock(model: PageModel): string[] {
   if (model.release !== undefined) {
     lines.push(`Zeitwide release ${escapeText(model.release)}.`);
   }
+  if (model.type === "answer") {
+    lines.push(escapeText(revisionSentence(model.revision)));
+  }
   return lines;
+}
+
+function datasetSection(dataset: DatasetBlock, base: string): string {
+  const coverage =
+    dataset.coverage === null
+      ? dataset.coverageNote
+      : `Covers ${dataset.coverage.from.text} to ${dataset.coverage.to.text}.`;
+  return section(dataset.heading, [
+    escapeText(dataset.statusNote),
+    escapeText(
+      `${coverage} ${revisionSentence(dataset.revision)} Licensed under ${dataset.license.name}: `,
+    ) + `<${dataset.license.url}>`,
+    links(dataset.downloads, base),
+  ]);
 }
 
 function sourceLine(source: SourceItem): string {

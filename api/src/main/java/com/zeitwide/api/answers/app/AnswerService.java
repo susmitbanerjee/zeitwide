@@ -13,6 +13,9 @@ import com.zeitwide.api.answers.domain.EntryVersion;
 import com.zeitwide.api.answers.domain.Shifted;
 import com.zeitwide.api.calendars.domain.CalendarId;
 import com.zeitwide.api.web.RequestValidationException;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.cache.CaffeineCacheMetrics;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -29,6 +32,9 @@ import org.springframework.stereotype.Service;
  * from it.
  *
  * <p>No transaction here: a cached answer needs no database connection.
+ *
+ * <p>Counts answers by operation and calendar. Calendar IDs are safe labels: an unknown one fails
+ * before it is counted, so the label set is the dataset's calendars.
  */
 @Service
 public class AnswerService {
@@ -39,17 +45,31 @@ public class AnswerService {
   /** Covers the default window (up to 456 days) with room to spare. */
   public static final int MAX_RANGE_DAYS = 500;
 
+  static final String ANSWERS_METRIC = "zeitwide.answers";
+  static final String CACHE_NAME = "answers";
+
+  /** The calendar label of an answer about every calendar, such as the calendar list. */
+  static final String ALL_CALENDARS = "all";
+
   private final AnswerEngine engine;
   private final CurrentDataset current;
   private final Clock clock;
   private final Cache<AnswerKey, Answered<?>> cache;
+  private final MeterRegistry meters;
 
   AnswerService(
-      AnswerEngine engine, CurrentDataset current, Clock clock, AnswerProperties properties) {
+      AnswerEngine engine,
+      CurrentDataset current,
+      Clock clock,
+      AnswerProperties properties,
+      MeterRegistry meters) {
     this.engine = engine;
     this.current = current;
     this.clock = clock;
-    this.cache = Caffeine.newBuilder().maximumSize(properties.cacheMaxEntries()).build();
+    this.meters = meters;
+    this.cache =
+        Caffeine.newBuilder().maximumSize(properties.cacheMaxEntries()).recordStats().build();
+    CaffeineCacheMetrics.monitor(meters, cache, CACHE_NAME);
   }
 
   /** The request, with as_of already capped at the release's, plus the release itself. */
@@ -58,6 +78,7 @@ public class AnswerService {
   public Answered<List<CalendarSummary>> calendars(AsOf asOf) {
     return answer(
         "calendars",
+        List.of(),
         List.of(),
         asOf,
         (dataset, at) ->
@@ -72,6 +93,7 @@ public class AnswerService {
       List<CalendarId> calendars, Combine combine, LocalDate date, AsOf asOf) {
     return answer(
         "check",
+        calendars,
         List.of(calendars, combine, date),
         asOf,
         (dataset, at) ->
@@ -83,6 +105,7 @@ public class AnswerService {
       List<CalendarId> calendars, Combine combine, LocalDate date, int days, AsOf asOf) {
     return answer(
         "add",
+        calendars,
         List.of(calendars, combine, date, days),
         asOf,
         (dataset, at) ->
@@ -94,6 +117,7 @@ public class AnswerService {
       List<CalendarId> calendars, Combine combine, LocalDate date, AsOf asOf) {
     return answer(
         "next",
+        calendars,
         List.of(calendars, combine, date),
         asOf,
         (dataset, at) ->
@@ -105,6 +129,7 @@ public class AnswerService {
       CalendarId calendar, LocalDate from, LocalDate to, AsOf asOf) {
     return answer(
         "closures",
+        List.of(calendar),
         List.of(calendar, from, to),
         asOf,
         (dataset, at) -> engine.closures(dataset, calendar, from, to, at),
@@ -127,6 +152,7 @@ public class AnswerService {
     }
     return answer(
         "days",
+        List.of(calendar),
         List.of(calendar, start, end, today),
         asOf,
         (dataset, at) ->
@@ -142,6 +168,7 @@ public class AnswerService {
   @SuppressWarnings("unchecked")
   private <T> Answered<T> answer(
       String operation,
+      List<CalendarId> asked,
       List<Object> request,
       AsOf asOf,
       Question<T> question,
@@ -149,15 +176,34 @@ public class AnswerService {
     Dataset dataset = current.get();
     Instant at = cappedAsOf(asOf, dataset);
     AnswerKey key = new AnswerKey(operation, List.of(request, at), dataset.release());
-    return (Answered<T>)
-        cache.get(
-            key,
-            k ->
-                new Answered<>(
-                    question.ask(dataset, at),
-                    dataset.release(),
-                    at,
-                    revisions(dataset, calendarsUsed.apply(dataset), at)));
+    Answered<T> answered =
+        (Answered<T>)
+            cache.get(
+                key,
+                k ->
+                    new Answered<>(
+                        question.ask(dataset, at),
+                        dataset.release(),
+                        at,
+                        revisions(dataset, calendarsUsed.apply(dataset), at)));
+    countAnswer(operation, asked);
+    return answered;
+  }
+
+  private void countAnswer(String operation, List<CalendarId> asked) {
+    if (asked.isEmpty()) {
+      answersCounter(operation, ALL_CALENDARS).increment();
+      return;
+    }
+    asked.forEach(calendar -> answersCounter(operation, calendar.value()).increment());
+  }
+
+  private Counter answersCounter(String operation, String calendar) {
+    return Counter.builder(ANSWERS_METRIC)
+        .description("Answers served, by operation and calendar")
+        .tag("operation", operation)
+        .tag("calendar", calendar)
+        .register(meters);
   }
 
   // A release holds what was recorded up to its as_of; a later instant would claim more.
@@ -175,6 +221,10 @@ public class AnswerService {
   }
 
   private static CalendarSummary summary(CalendarHistory calendar, Instant at) {
-    return new CalendarSummary(calendar.rules(), calendar.revisionAt(at), calendar.coverageAt(at));
+    return new CalendarSummary(
+        calendar.rules(),
+        calendar.revisionAt(at),
+        calendar.revisedAt(at).orElse(null),
+        calendar.coverageAt(at));
   }
 }

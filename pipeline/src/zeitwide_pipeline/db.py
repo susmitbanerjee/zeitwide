@@ -46,6 +46,20 @@ class SourceState:
 
 
 @dataclass(frozen=True, slots=True)
+class SourceHealth:
+    last_success_at: datetime | None
+    consecutive_failures: int
+    suspended: bool
+
+
+@dataclass(frozen=True, slots=True)
+class ReviewQueue:
+    pending: int
+    oldest_created_at: datetime | None
+    soonest_entry_date: date | None
+
+
+@dataclass(frozen=True, slots=True)
 class DiffOutcome:
     candidate_ids: tuple[int, ...]
     new_candidates: int
@@ -108,6 +122,10 @@ class PipelineStore(Protocol):
     ) -> None: ...
 
     def resume(self, slug: str) -> bool: ...
+
+    def load_health(self) -> dict[str, SourceHealth]: ...
+
+    def review_queue(self) -> ReviewQueue: ...
 
 
 @contextmanager
@@ -391,6 +409,40 @@ class PostgresPipelineStore:
             (slug,),
         )
         return cursor.rowcount > 0
+
+    def load_health(self) -> dict[str, SourceHealth]:
+        """Every enabled source, including those never checked."""
+        rows = self._db.execute(
+            """
+            SELECT s.slug, st.last_success_at, coalesce(st.consecutive_failures, 0),
+                   st.suspended_at IS NOT NULL
+            FROM source AS s LEFT JOIN source_state AS st ON st.source_id = s.id
+            WHERE s.enabled
+            """
+        ).fetchall()
+        return {
+            str(row[0]): SourceHealth(
+                last_success_at=row[1] if isinstance(row[1], datetime) else None,
+                consecutive_failures=_int(row[2]),
+                suspended=bool(row[3]),
+            )
+            for row in rows
+        }
+
+    def review_queue(self) -> ReviewQueue:
+        row = _required(
+            self._db.execute(
+                """
+                SELECT count(*), min(created_at), min(entry_date)
+                FROM candidate_change WHERE status = 'pending'
+                """
+            ).fetchone()
+        )
+        return ReviewQueue(
+            pending=_int(row[0]),
+            oldest_created_at=row[1] if isinstance(row[1], datetime) else None,
+            soonest_entry_date=row[2] if isinstance(row[2], date) else None,
+        )
 
     def record_observations(
         self, snapshot_id: int, parser_version: str, observations: Sequence[Observation]

@@ -2695,6 +2695,11 @@
             "type": "integer",
             "minimum": 0
           },
+          "revised_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When `revision` was published; absent at revision 0."
+          },
           "coverage": {
             "$ref": "#/components/schemas/Coverage"
           },

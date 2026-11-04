@@ -145,6 +145,7 @@ final class AnswerMapper {
             .toList(),
         rules.closesOnHolidays(),
         summary.revision(),
+        summary.revisedAt(),
         coverage(summary.coverage()),
         hours(rules.hours()));
   }

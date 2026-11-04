@@ -52,8 +52,9 @@ class RecordingTelemetry:
     def span_names(self) -> list[str]:
         return [span.name for span in self.finished_spans()]
 
-    def metric(self, name: str, source_id: str) -> float | None:
-        """The latest value of a metric for one source, or None if never recorded."""
+    def metric(self, name: str, source_id: str | None = None) -> float | None:
+        """The latest value of a metric for one source (or with no source), or None if
+        never recorded."""
         data = self.metrics.get_metrics_data()
         if data is None:
             return None
@@ -63,6 +64,7 @@ class RecordingTelemetry:
                     if metric.name != name:
                         continue
                     for point in metric.data.data_points:
-                        if point.attributes and point.attributes.get(SOURCE_ATTRIBUTE) == source_id:
+                        attributes = point.attributes or {}
+                        if attributes.get(SOURCE_ATTRIBUTE) == source_id:
                             return float(point.value)  # type: ignore[union-attr]
         return None

@@ -22,10 +22,11 @@ output "github_deployer_service_account" {
 }
 
 output "buckets" {
-  description = "Snapshot and backup bucket names."
+  description = "Snapshot, backup and Grafana state bucket names."
   value = {
-    snapshots = google_storage_bucket.snapshots.name
-    backups   = google_storage_bucket.backups.name
+    snapshots     = google_storage_bucket.snapshots.name
+    backups       = google_storage_bucket.backups.name
+    grafana_state = google_storage_bucket.grafana_state.name
   }
 }
 

@@ -1,6 +1,8 @@
 package com.zeitwide.api.webhooks.app;
 
 import com.zeitwide.api.webhooks.domain.WebhookRetryPolicy;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Clock;
 import java.util.List;
 import org.slf4j.Logger;
@@ -13,12 +15,15 @@ public class OutboxDrainService {
   private static final Logger log = LoggerFactory.getLogger(OutboxDrainService.class);
   private static final int OUTBOX_BATCH_SIZE = 100;
   private static final int DELIVERY_BATCH_SIZE = 50;
+  static final String DELIVERIES_METRIC = "zeitwide.webhooks.deliveries";
+  private static final String SUCCEEDED = "succeeded";
   private final OutboxPreparation outbox;
   private final WebhookDeliveryQueue deliveries;
   private final WebhookSecretCipher secretCipher;
   private final WebhookTargetGuard targetGuard;
   private final WebhookDeliveryClient deliveryClient;
   private final Clock clock;
+  private final MeterRegistry meters;
 
   public OutboxDrainService(
       OutboxPreparation outbox,
@@ -26,13 +31,15 @@ public class OutboxDrainService {
       WebhookSecretCipher secretCipher,
       WebhookTargetGuard targetGuard,
       WebhookDeliveryClient deliveryClient,
-      Clock clock) {
+      Clock clock,
+      MeterRegistry meters) {
     this.outbox = outbox;
     this.deliveries = deliveries;
     this.secretCipher = secretCipher;
     this.targetGuard = targetGuard;
     this.deliveryClient = deliveryClient;
     this.clock = clock;
+    this.meters = meters;
   }
 
   public DrainResult drain() {
@@ -61,6 +68,7 @@ public class OutboxDrainService {
       int status = deliveryClient.send(target, delivery.envelope(), secret);
       if (status >= 200 && status < 300) {
         deliveries.succeeded(delivery.deliveryId(), delivery.claimToken(), status, clock.instant());
+        countAttempt(SUCCEEDED, SUCCEEDED);
         return Attempt.success();
       }
       return retry(delivery, status, "http_status");
@@ -93,7 +101,21 @@ public class OutboxDrainService {
         .addKeyValue("error_code", errorCode)
         .addKeyValue("terminal", decision.failed())
         .log("Webhook delivery attempt failed");
+    countAttempt(decision.failed() ? "failed" : "retrying", errorCode);
     return decision.failed() ? Attempt.terminal() : Attempt.retrying();
+  }
+
+  /**
+   * One delivery attempt. The reason is a fixed error code, never a subscription or URL, so the
+   * label set stays small.
+   */
+  private void countAttempt(String outcome, String reason) {
+    Counter.builder(DELIVERIES_METRIC)
+        .description("Webhook delivery attempts, by outcome and reason")
+        .tag("outcome", outcome)
+        .tag("reason", reason)
+        .register(meters)
+        .increment();
   }
 
   private record Attempt(boolean succeeded, boolean failed) {

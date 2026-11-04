@@ -73,6 +73,20 @@ public final class CalendarHistory {
         .orElse(0);
   }
 
+  /**
+   * When the calendar's revision at {@code moment} was published: the first instant any of its
+   * versions was recorded. Empty at revision 0, before anything was published.
+   */
+  public Optional<Instant> revisedAt(Instant moment) {
+    long revision = revisionAt(moment);
+    return versionsByDate.values().stream()
+        .flatMap(List::stream)
+        .filter(version -> version.revision() == revision)
+        .map(EntryVersion::recordedFrom)
+        .filter(recorded -> !moment.isBefore(recorded))
+        .min(Comparator.naturalOrder());
+  }
+
   /** What this calendar can answer for at {@code moment} (see dataset/README.md). */
   public Coverage coverageAt(Instant moment) {
     if (!rules.closesOnHolidays()) {

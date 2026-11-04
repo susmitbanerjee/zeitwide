@@ -7,6 +7,8 @@ import com.zeitwide.api.answers.app.DatasetUnavailableException;
 import com.zeitwide.api.answers.domain.OutOfRangeException;
 import com.zeitwide.api.answers.domain.UnknownCalendarException;
 import com.zeitwide.api.web.RequestValidationException;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;
 import java.util.ArrayList;
@@ -19,11 +21,14 @@ import org.springframework.stereotype.Component;
 @Component
 public final class McpToolSupport {
 
+  static final String TOOL_CALLS_METRIC = "zeitwide.mcp.tool.calls";
   private static final TypeReference<Map<String, Object>> OBJECT_MAP = new TypeReference<>() {};
   private final ObjectMapper json;
+  private final MeterRegistry meters;
 
-  public McpToolSupport(ObjectMapper json) {
+  public McpToolSupport(ObjectMapper json, MeterRegistry meters) {
     this.json = json;
+    this.meters = meters;
   }
 
   public McpServerFeatures.SyncToolSpecification tool(
@@ -38,8 +43,23 @@ public final class McpToolSupport {
         McpSchema.Tool.builder().name(name).description(description).inputSchema(schema).build();
     return McpServerFeatures.SyncToolSpecification.builder()
         .tool(tool)
-        .callHandler((exchange, request) -> handler.apply(request.arguments()))
+        .callHandler(
+            (exchange, request) -> {
+              McpSchema.CallToolResult result = handler.apply(request.arguments());
+              countCall(name, Boolean.TRUE.equals(result.isError()) ? "error" : "ok");
+              return result;
+            })
         .build();
+  }
+
+  // Tool names are fixed in code, so they are safe labels.
+  private void countCall(String tool, String outcome) {
+    Counter.builder(TOOL_CALLS_METRIC)
+        .description("MCP tool calls, by tool and outcome")
+        .tag("tool", tool)
+        .tag("outcome", outcome)
+        .register(meters)
+        .increment();
   }
 
   public McpSchema.CallToolResult invoke(java.util.function.Supplier<?> action) {

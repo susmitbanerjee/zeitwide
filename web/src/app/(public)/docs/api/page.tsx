@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 
 import spec from "@/api/openapi.json";
+import { JsonLd } from "@/components/json-ld";
+import { docCrumbs } from "@/components/public/doc-page";
+import { Breadcrumbs } from "@/components/site-chrome";
 import { Card, Table, Td, Th } from "@/components/ui/primitives";
 import { env } from "@/lib/env";
 import { anchor, operations, schemaNames, typeLabel, type OpenApi } from "@/lib/openapi";
 import { absoluteUrl } from "@/lib/seo";
+import { contentGraph } from "@/lib/structured-data";
 
 const api = spec as unknown as OpenApi;
 
@@ -18,6 +22,7 @@ export const metadata: Metadata = {
 /** C4: the API reference, generated at build time from api/openapi.yaml (via openapi.json). */
 export default function ApiReferencePage() {
   const all = operations(api);
+  const crumbs = docCrumbs("API reference");
   const tags = [...new Set(all.map((operation) => operation.tag))].filter(
     (tag) => tag !== "webhooks",
   );
@@ -44,6 +49,18 @@ export default function ApiReferencePage() {
       </nav>
       <div className="flex min-w-0 flex-col gap-10">
         <header className="flex flex-col gap-2">
+          <JsonLd
+            data={contentGraph(
+              {
+                url: absoluteUrl(env.siteUrl, "/docs/api"),
+                title: "API reference",
+                crumbs,
+                describesApi: { name: api.info.title },
+              },
+              env.siteUrl,
+            )}
+          />
+          <Breadcrumbs items={crumbs} />
           <h1 className="text-4xl font-bold tracking-[-0.02em]">API reference</h1>
           <p className="text-ink-muted">
             {api.info.title} {api.info.version}. Generated from the OpenAPI contract, so it always

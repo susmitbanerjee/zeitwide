@@ -10,6 +10,8 @@ COPY . .
 # never lands in a layer. A missing secret fails the build here, not with confusing 401s later.
 ARG ZEITWIDE_API_URL
 ARG SITE_URL
+# Grafana Faro's collector URL (public: browsers post to it). Empty leaves Faro out.
+ARG ZEITWIDE_FARO_URL
 RUN --mount=type=secret,id=zeitwide_api_key,required=true \
     ZEITWIDE_API_KEY="$(cat /run/secrets/zeitwide_api_key)" npm run build
 
@@ -21,6 +23,7 @@ ENV NODE_ENV=production \
     PORT=8080
 COPY --from=build --chown=node:node /app/.next/standalone ./
 COPY --from=build --chown=node:node /app/.next/static ./.next/static
+COPY --from=build --chown=node:node /app/public ./public
 USER node
 EXPOSE 8080
 CMD ["node", "server.js"]

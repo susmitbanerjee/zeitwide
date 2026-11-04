@@ -88,7 +88,9 @@ def health() -> None:
 def run_due_command() -> None:
     """Check every source that is due, then exit."""
     settings = _settings()
-    telemetry, shutdown = configure_telemetry(export=settings.otlp_endpoint is not None)
+    telemetry, shutdown = configure_telemetry(
+        export=settings.otlp_endpoint is not None, sample_ratio=settings.traces_sample_ratio
+    )
     try:
         with new_client() as client:
             calendars = load_catalog()
@@ -103,6 +105,7 @@ def run_due_command() -> None:
                     utc_now,
                     calendars,
                 ),
+                telemetry=telemetry,
                 clock=utc_now,
             )
             connector = procrastinate.PsycopgConnector(
@@ -121,7 +124,9 @@ def daily(
 ) -> None:
     """Publish approved changes, cut a release if anything changed, back up, clean up."""
     settings = _settings()
-    telemetry, shutdown = configure_telemetry(export=settings.otlp_endpoint is not None)
+    telemetry, shutdown = configure_telemetry(
+        export=settings.otlp_endpoint is not None, sample_ratio=settings.traces_sample_ratio
+    )
     try:
         with httpx.Client() as client:
             job = DailyJob(

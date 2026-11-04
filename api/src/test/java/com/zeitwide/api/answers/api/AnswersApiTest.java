@@ -39,6 +39,8 @@ import com.zeitwide.api.receipts.ReceiptTestConfiguration;
 import com.zeitwide.api.review.app.ReviewService;
 import com.zeitwide.api.webhooks.app.OutboxDrainService;
 import com.zeitwide.api.webhooks.app.WebhookSubscriptionService;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -108,6 +110,12 @@ class AnswersApiTest {
                 ApiKeyService.class
               }))
   static class UseCases {
+    // A web slice has no metrics auto-configuration; the answer service and MCP tools count.
+    @Bean
+    MeterRegistry meterRegistry() {
+      return new SimpleMeterRegistry();
+    }
+
     @Bean
     AuthProperties mcpAuthProperties() {
       return new AuthProperties(
@@ -163,6 +171,10 @@ class AnswersApiTest {
             jsonPath("$.calendars[?(@.id == 'US-FEDWIRE')].operating_hours.opens_previous_day")
                 .value(true))
         .andExpect(jsonPath("$.calendars[?(@.id == 'DE')].operating_hours").doesNotExist())
+        .andExpect(
+            jsonPath("$.calendars[?(@.id == 'GB-CHAPS')].revised_at")
+                .value("2026-10-28T07:29:18.079663Z"))
+        .andExpect(jsonPath("$.calendars[?(@.id == 'US-FEDNOW')].revised_at").doesNotExist())
         .andExpect(
             jsonPath("$.calendars[?(@.id == 'US-FEDWIRE')].weekend[*]")
                 .value(contains("saturday", "sunday")));

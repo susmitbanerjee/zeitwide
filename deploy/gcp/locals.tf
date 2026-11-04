@@ -56,8 +56,13 @@ locals {
     # Signs and checks the short-lived tokens the web app sends the API (add-secret.sh).
     "api-token-secret" = ["api", "web"]
     # The web app's own API key (create-web-api-key.sh), for prerendering answer pages.
-    "web-api-key"          = ["web"]
-    "otlp-headers"         = ["api", "pipeline", "web"]
+    "web-api-key" = ["web"]
+    # Grafana Cloud OTLP: the gateway URL, and the Authorization header for it.
+    "otlp-endpoint" = ["api", "pipeline", "web"]
+    "otlp-headers"  = ["api", "pipeline", "web"]
+    # Grafana service account token: only the deploy workflow reads it (iam.tf), to apply
+    # deploy/grafana. No runtime service gets it.
+    "grafana-token"        = []
     "github-release-token" = ["pipeline"]
   }
 
@@ -83,9 +88,20 @@ locals {
   # A fixed audience avoids a cycle: the API can't reference its own URL.
   outbox_drain_audience = "${local.prefix}-outbox-drain"
 
+  # The endpoint and its auth header come from Secret Manager (otel_secret_env). Every span is
+  # recorded; each service keeps 10% of traces plus every trace with an error, decided by trace
+  # ID so all three keep the same ones.
   otel_env = {
-    OTEL_EXPORTER_OTLP_ENDPOINT = var.otlp_endpoint
-    OTEL_RESOURCE_ATTRIBUTES    = "deployment.environment=${local.env}"
+    # Grafana Cloud makes service.namespace/service.name the job label, so dashboards and
+    # alerts can pick one environment: job="zeitwide-prod/zeitwide-api".
+    OTEL_RESOURCE_ATTRIBUTES     = "service.namespace=${local.prefix},deployment.environment=${local.env}"
+    OTEL_TRACES_SAMPLER          = "always_on"
+    ZEITWIDE_TRACES_SAMPLE_RATIO = "0.1"
+  }
+
+  otel_secret_env = {
+    OTEL_EXPORTER_OTLP_ENDPOINT = "otlp-endpoint"
+    OTEL_EXPORTER_OTLP_HEADERS  = "otlp-headers"
   }
 }
 

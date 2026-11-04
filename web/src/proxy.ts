@@ -5,10 +5,12 @@ import { defaultLanding, safeCallback } from "@/auth/callback";
 
 import { hasSessionCookie, hostRedirect, isPrivatePath, needsSession } from "@/lib/routing";
 import { contentSecurityPolicy } from "@/lib/security-headers";
+import { faroOrigin } from "@/lib/telemetry/faro-options";
 
 const siteOrigin = new URL(process.env.SITE_URL ?? "http://localhost:3000").origin;
 const appOrigin = new URL(process.env.APP_URL ?? siteOrigin).origin;
 const development = process.env.NODE_ENV === "development";
+const faro = faroOrigin(process.env.ZEITWIDE_FARO_URL);
 
 /**
  * Runs before every page: sends signed-in routes to the app host, asks for sign-in where a page
@@ -46,6 +48,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     ...(nonce === undefined ? {} : { nonce }),
     development,
     https: appOrigin.startsWith("https:"),
+    connectOrigins: faro === undefined ? [] : [faro],
   });
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("content-security-policy", policy);
@@ -63,7 +66,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 export const config = {
   matcher: [
     {
-      source: "/((?!_next/static|_next/image|favicon.ico|icon.svg|api/zw|api/health).*)",
+      source: "/((?!_next/static|_next/image|favicon.ico|icon.svg|logo.png|api/zw|api/health).*)",
       missing: [
         { type: "header", key: "next-router-prefetch" },
         { type: "header", key: "purpose", value: "prefetch" },

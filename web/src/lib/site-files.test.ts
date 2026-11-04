@@ -28,6 +28,15 @@ describe("site files from the release bucket", () => {
     fetchMock.mockResolvedValue(new Response("<urlset/>"));
     const sitemap = await serveSiteFile("sitemaps/GB-CHAPS.xml");
     expect(sitemap.headers.get("content-type")).toBe("application/xml; charset=utf-8");
+
+    for (const [name, type] of [
+      ["downloads/GB-CHAPS.csv", "text/csv; charset=utf-8"],
+      ["downloads/GB-CHAPS.json", "application/json; charset=utf-8"],
+      ["downloads/GB-CHAPS.ics", "text/calendar; charset=utf-8"],
+    ] as const) {
+      fetchMock.mockResolvedValue(new Response("x"));
+      expect((await serveSiteFile(name)).headers.get("content-type"), name).toBe(type);
+    }
   });
 
   it("reads the private bucket with the service account's token, fetched once", async () => {
@@ -56,7 +65,7 @@ describe("site files from the release bucket", () => {
     vi.stubEnv("SITE_FILES_URL", "");
     expect((await serveSiteFile("llms.txt")).status).toBe(404);
     vi.stubEnv("SITE_FILES_URL", "https://storage.example/site");
-    for (const name of ["../secret.txt", "a/b/c.txt", "llms.json", ".hidden.txt"]) {
+    for (const name of ["../secret.txt", "a/b/c.txt", "llms.html", ".hidden.txt"]) {
       expect((await serveSiteFile(name)).status, name).toBe(404);
     }
     expect(fetchMock).not.toHaveBeenCalled();

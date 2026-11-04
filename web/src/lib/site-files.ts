@@ -4,8 +4,8 @@ import { cacheLife, cacheTag } from "next/cache";
 import { connection } from "next/server";
 
 /**
- * Files the pipeline writes with each dataset release (robots.txt, llms.txt, llms-full.txt and
- * the sitemaps), read from the private site-files bucket and passed through. Each instance keeps
+ * Files the pipeline writes with each dataset release (robots.txt, llms.txt, llms-full.txt, the
+ * sitemaps and each calendar's CSV, JSON and iCalendar downloads), read from the private site-files bucket and passed through. Each instance keeps
  * a file for an hour, so most requests never reach the bucket; nobody can read it but us.
  */
 
@@ -21,10 +21,13 @@ const TOKEN_MARGIN_MS = 60_000;
 const TYPES = {
   txt: "text/plain; charset=utf-8",
   xml: "application/xml; charset=utf-8",
+  csv: "text/csv; charset=utf-8",
+  json: "application/json; charset=utf-8",
+  ics: "text/calendar; charset=utf-8",
 } as const;
 
 /** Names the pipeline writes: letters, digits, dashes and dots, in at most one folder. */
-const SAFE_NAME = /^(?:[a-z]+\/)?[A-Za-z0-9][A-Za-z0-9.-]*\.(txt|xml)$/;
+const SAFE_NAME = /^(?:[a-z]+\/)?[A-Za-z0-9][A-Za-z0-9.-]*\.(txt|xml|csv|json|ics)$/;
 
 class UpstreamError extends Error {}
 

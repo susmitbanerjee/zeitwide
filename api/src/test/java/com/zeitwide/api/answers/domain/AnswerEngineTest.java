@@ -265,6 +265,15 @@ class AnswerEngineTest {
     assertThat(fedwire.revisionAt(AS_OF)).isEqualTo(1);
   }
 
+  @Test
+  void shouldDateTheRevisionByItsFirstRecordedVersion() {
+    CalendarHistory fedwire = DATASET.calendar(FEDWIRE);
+
+    assertThat(fedwire.revisedAt(RECORDED.minusSeconds(1))).isEmpty();
+    assertThat(fedwire.revisedAt(AS_OF)).contains(RECORDED);
+    assertThat(DATASET.calendar(FEDNOW).revisedAt(AS_OF)).isEmpty();
+  }
+
   static CalendarRules rules(CalendarId id, Set<DayOfWeek> weekend, boolean closesOnHolidays) {
     return new CalendarRules(
         id,

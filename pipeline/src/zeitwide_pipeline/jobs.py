@@ -14,8 +14,10 @@ from zeitwide_pipeline.calendars import CalendarDefinition
 from zeitwide_pipeline.check import CheckResult, SourceChecker
 from zeitwide_pipeline.clock import Clock
 from zeitwide_pipeline.db import PipelineStore, RegisteredSource, SourceState
+from zeitwide_pipeline.health import report_health
 from zeitwide_pipeline.schedule import is_due
 from zeitwide_pipeline.sources import Source, SourceRegistry
+from zeitwide_pipeline.telemetry import Telemetry
 
 QUEUE = "sources"
 CHECK_SOURCE_TASK = "check_source"
@@ -31,6 +33,7 @@ class PipelineContext:
     calendars: Mapping[str, CalendarDefinition]
     open_store: StoreFactory
     checker: SourceChecker
+    telemetry: Telemetry
     clock: Clock
 
 
@@ -98,6 +101,14 @@ async def run_due(
             listen_notify=False,
             concurrency=1,
             install_signal_handlers=install_signal_handlers,
+        )
+    with context.open_store() as store:
+        report_health(
+            context.telemetry,
+            context.registry,
+            store.load_health(),
+            store.review_queue(),
+            context.clock(),
         )
     log.info("run_due_finished", deferred=len(due))
     return due

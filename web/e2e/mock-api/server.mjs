@@ -167,6 +167,7 @@ function summary(calendar) {
     weekend: calendar.weekend,
     closes_on_holidays: calendar.years !== null,
     revision: 12,
+    revised_at: "2025-12-01T06:00:00Z",
     coverage,
     ...(calendar.hours === undefined ? {} : { operating_hours: calendar.hours }),
   };
@@ -214,7 +215,7 @@ async function route(req, res, url) {
   // The pipeline's site files (llms.txt, sitemaps, robots.txt), as the public bucket serves them.
   if (method === "GET" && path.startsWith("/site/")) {
     const name = path.slice("/site/".length);
-    if (!/^(?:[a-z]+\/)?[A-Za-z0-9][A-Za-z0-9.-]*\.(txt|xml)$/.test(name)) {
+    if (!/^(?:[a-z]+\/)?[A-Za-z0-9][A-Za-z0-9.-]*\.(txt|xml|csv|json|ics)$/.test(name)) {
       return send(res, 404);
     }
     try {

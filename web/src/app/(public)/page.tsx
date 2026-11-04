@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { JsonLd } from "@/components/json-ld";
 import { CheckADate } from "@/components/landing/check-a-date";
 import { Zeitband } from "@/components/landing/zeitband";
 import { buttonVariants } from "@/components/ui/button";
@@ -12,9 +13,12 @@ import { cn } from "@/lib/cn";
 import { env } from "@/lib/env";
 import { formatDate } from "@/lib/format";
 import { bandRails, checkData, pickRails, upcomingClosures, type RailRange } from "@/lib/landing";
-import { answerPath } from "@/lib/seo";
+import { absoluteUrl, answerPath } from "@/lib/seo";
+import { contentGraph } from "@/lib/structured-data";
 
 export const metadata: Metadata = { alternates: { canonical: env.siteUrl } };
+
+const TITLE = "Business days you can prove.";
 
 const h2 = "text-[40px] leading-[46px] font-bold tracking-[-0.025em] text-balance";
 const lead = "text-lg leading-7 text-ink-muted";
@@ -94,6 +98,13 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col gap-16 pb-4 sm:gap-20">
+      {/* The home page is the root of every trail, so it has no breadcrumbs of its own. */}
+      <JsonLd
+        data={contentGraph(
+          { url: absoluteUrl(env.siteUrl, "/"), title: TITLE, crumbs: [] },
+          env.siteUrl,
+        )}
+      />
       <section aria-labelledby="m-title" className="flex flex-col gap-8 sm:gap-10">
         {/* Copy and the live answer sit side by side from a laptop's width and are centred on
             each other, so neither leaves an empty corner; they stack on a phone. */}
@@ -103,7 +114,7 @@ export default async function HomePage() {
               id="m-title"
               className="max-w-[11em] text-[2.75rem] leading-[1.05] font-bold tracking-[-0.035em] text-balance sm:text-6xl sm:leading-[1.05] xl:text-7xl xl:leading-[76px]"
             >
-              Business days you can prove.
+              {TITLE}
             </h1>
             <p className="max-w-[38em] text-lg leading-[28px] text-pretty text-ink-muted sm:text-xl sm:leading-[31px]">
               Zeitwide tells you when Fedwire, FedACH, FedNow, T2 and CHAPS are open, cites the

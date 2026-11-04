@@ -4,7 +4,6 @@ import { CHAPS, DECEMBER } from "./fixtures.test-data";
 import {
   absoluteUrl,
   answerDescription,
-  answerJsonLd,
   answerPath,
   answerQuestion,
   answerSentence,
@@ -41,24 +40,6 @@ describe("urls and structured data", () => {
     expect(absoluteUrl("https://zeitwide.com", "/calendars")).toBe(
       "https://zeitwide.com/calendars",
     );
-  });
-
-  it("describes the page as an FAQ with breadcrumbs", () => {
-    const [faq, crumbs] = answerJsonLd("https://zeitwide.com", CHAPS, boxingDay, "No: closed.", [
-      { question: "When does CHAPS reopen?", answer: "Tuesday." },
-    ]);
-    expect(faq).toMatchObject({
-      "@type": "FAQPage",
-      url: "https://zeitwide.com/calendars/GB-CHAPS/2026-12-28",
-      mainEntity: [
-        {
-          name: "Is Monday 28 December 2026 a CHAPS business day?",
-          acceptedAnswer: { text: "No: closed." },
-        },
-        { name: "When does CHAPS reopen?", acceptedAnswer: { text: "Tuesday." } },
-      ],
-    });
-    expect(crumbs).toMatchObject({ "@type": "BreadcrumbList" });
   });
 
   it("can never close the script element it is written into", () => {

@@ -38,54 +38,6 @@ export function absoluteUrl(siteUrl: string, path: string): string {
   return new URL(path, siteUrl).toString();
 }
 
-type JsonLd = Record<string, unknown>;
-
-/**
- * FAQPage and BreadcrumbList for an answer page. The first question is the page's own, answered by
- * the AnswerLead; the rest are the page's FAQ, word for word.
- */
-export function answerJsonLd(
-  siteUrl: string,
-  calendar: Pick<Calendar, "id" | "name">,
-  day: RangeDay,
-  lead: string,
-  faqs: { question: string; answer: string }[] = [],
-): JsonLd[] {
-  const url = absoluteUrl(siteUrl, answerPath(calendar.id, day.date));
-  const questions = [{ question: answerQuestion(calendar, day.date), answer: lead }, ...faqs];
-  return [
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      url,
-      mainEntity: questions.map(({ question, answer }) => ({
-        "@type": "Question",
-        name: question,
-        acceptedAnswer: { "@type": "Answer", text: answer },
-      })),
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        {
-          "@type": "ListItem",
-          position: 1,
-          name: "Calendars",
-          item: absoluteUrl(siteUrl, "/calendars"),
-        },
-        {
-          "@type": "ListItem",
-          position: 2,
-          name: calendar.name,
-          item: absoluteUrl(siteUrl, `/calendars/${encodeURIComponent(calendar.id)}`),
-        },
-        { "@type": "ListItem", position: 3, name: formatDate(day.date, "plain"), item: url },
-      ],
-    },
-  ];
-}
-
 /**
  * JSON for a `<script type="application/ld+json">`. Escaping `<`, `>`, `&` and the two line
  * separators means no API string can close the script element or start markup.

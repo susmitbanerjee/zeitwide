@@ -15,7 +15,7 @@ endif
 PY := uv run --no-sync python -m
 
 .PHONY: check check-hooks check-api check-pipeline check-lib-python check-web \
-        fmt generate-clients sync-docs setup up down
+        e2e-build e2e-web e2e-structured-data fmt generate-clients sync-docs setup up down
 
 check: check-hooks check-api check-pipeline check-lib-python check-web
 
@@ -34,15 +34,22 @@ check-lib-python:
 check-web:
 	cd web && npm ci --no-audit --no-fund && npm run check
 
-# Playwright (with axe) and Lighthouse against a production build, the fake API in
-# web/e2e/mock-api, signing in with the app's test-only sign-in.
-e2e-web:
+# A production build against the fake API in web/e2e/mock-api, with the pipeline's site files
+# (sitemaps, downloads) for its data.
+e2e-build:
 	cd web && npx playwright install chromium
 	cd web && node e2e/mock-api/write-release.mjs
 	cd pipeline && $(PY) zeitwide_pipeline site-files --release ../web/e2e/.site-files/release.json \
 		--out ../web/e2e/.site-files --site-url http://localhost:3000 --api-url http://127.0.0.1:8090
 	cd web && npm run e2e:build
+
+# Playwright (with axe) and Lighthouse, signing in with the app's test-only sign-in.
+e2e-web: e2e-build
 	cd web && npm run e2e && npm run lighthouse
+
+# Every sitemap page's JSON-LD against its HTML, and the schema.org validator per template.
+e2e-structured-data: e2e-build
+	cd web && npx playwright test e2e/structured-data.spec.ts
 
 fmt:
 	cd api && $(GRADLEW) --console=plain spotlessApply
