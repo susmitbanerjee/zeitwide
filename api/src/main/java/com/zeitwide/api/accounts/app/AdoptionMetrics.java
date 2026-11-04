@@ -1,6 +1,7 @@
 package com.zeitwide.api.accounts.app;
 
 import com.zeitwide.api.accounts.domain.AdoptionCounts;
+import com.zeitwide.api.accounts.domain.SignupSource;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
@@ -12,8 +13,9 @@ import org.springframework.stereotype.Component;
 
 /**
  * Account and API key totals as gauges, for the adoption dashboard; sign-ups per day are the
- * account gauge's daily increase. The counts are read at most every {@link #REFRESH_INTERVAL}, so
- * exporting every minute costs two small queries every few minutes.
+ * account gauge's daily increase. AI-referred accounts get one gauge per known vendor (a closed
+ * set, so the label can't grow), labelled with the vendor only. The counts are read at most every
+ * {@link #REFRESH_INTERVAL}, so exporting every minute costs three small queries every few minutes.
  */
 @Component
 public class AdoptionMetrics implements MeterBinder {
@@ -44,6 +46,15 @@ public class AdoptionMetrics implements MeterBinder {
         "zeitwide.adoption.keys_used_30d",
         "API keys that called the API in the last 30 days",
         AdoptionCounts::keysUsedLast30Days);
+    for (SignupSource source : SignupSource.values()) {
+      Gauge.builder(
+              "zeitwide.adoption.ai_referred_accounts",
+              this,
+              metrics -> metrics.current().accountsFrom(source))
+          .description("Accounts that signed up after a visit an AI assistant referred")
+          .tag("vendor", source.vendor())
+          .register(registry);
+    }
   }
 
   private void gauge(

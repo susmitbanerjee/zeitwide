@@ -25,6 +25,9 @@ import org.springframework.stereotype.Component;
 public class AccountJwtAuthenticationConverter
     implements Converter<Jwt, AbstractAuthenticationToken> {
 
+  /** The web app's claim for the AI referral it saw at sign-in, such as {@code ai:openai}. */
+  static final String SIGNUP_SOURCE_CLAIM = "signup_source";
+
   private static final Logger log =
       LoggerFactory.getLogger(AccountJwtAuthenticationConverter.class);
   private final AccountProvisioner accounts;
@@ -38,7 +41,8 @@ public class AccountJwtAuthenticationConverter
   @Override
   public AbstractAuthenticationToken convert(Jwt jwt) {
     String name = firstNonBlank(jwt.getClaimAsString("name"), jwt.getClaimAsString("email"));
-    AccountIdentity identity = accounts.resolve(jwt.getSubject(), name);
+    AccountIdentity identity =
+        accounts.resolve(jwt.getSubject(), name, jwt.getClaimAsString(SIGNUP_SOURCE_CLAIM));
     AccountPrincipal principal =
         new AccountPrincipal(identity.accountId(), identity.appUserId(), null);
     String fingerprint = HexFormat.of().formatHex(ApiKeyToken.sha256(jwt.getTokenValue()));

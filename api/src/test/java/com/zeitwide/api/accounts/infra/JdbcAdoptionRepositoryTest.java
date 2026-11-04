@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.zeitwide.api.PostgresJdbcTest;
 import com.zeitwide.api.accounts.domain.AdoptionCounts;
+import com.zeitwide.api.accounts.domain.SignupSource;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.UUID;
@@ -37,6 +38,34 @@ class JdbcAdoptionRepositoryTest {
     assertThat(after.accounts()).isEqualTo(before.accounts() + 1);
     assertThat(after.activeKeys()).isEqualTo(before.activeKeys() + 2);
     assertThat(after.keysUsedLast30Days()).isEqualTo(before.keysUsedLast30Days() + 1);
+  }
+
+  @Test
+  void shouldCountAccountsPerAiVendorAndLeaveOutTheRest() {
+    AdoptionCounts before = repository.counts(NOW);
+    jdbc.sql(
+            "INSERT INTO account (name, signup_source) VALUES "
+                + "('Referred 1', 'ai:perplexity'), ('Referred 2', 'ai:perplexity'), "
+                + "('Referred 3', 'ai:microsoft'), ('Not referred', NULL)")
+        .update();
+
+    AdoptionCounts after = repository.counts(NOW);
+
+    assertThat(after.accountsFrom(SignupSource.PERPLEXITY))
+        .isEqualTo(before.accountsFrom(SignupSource.PERPLEXITY) + 2);
+    assertThat(after.accountsFrom(SignupSource.MICROSOFT))
+        .isEqualTo(before.accountsFrom(SignupSource.MICROSOFT) + 1);
+    assertThat(after.accountsFrom(SignupSource.OPENAI))
+        .isEqualTo(before.accountsFrom(SignupSource.OPENAI));
+  }
+
+  @Test
+  void shouldRefuseToStoreASignupSourceOutsideTheKnownVendors() {
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                jdbc.sql("INSERT INTO account (name, signup_source) VALUES ('Forged', 'ai:evil')")
+                    .update())
+        .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
   }
 
   private void key(UUID account, String prefix, Instant lastUsed, Instant revoked) {

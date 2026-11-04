@@ -3,6 +3,7 @@ package com.zeitwide.api.accounts.app;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.zeitwide.api.accounts.domain.AdoptionCounts;
+import com.zeitwide.api.accounts.domain.SignupSource;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Clock;
@@ -12,6 +13,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class AdoptionMetricsTest {
@@ -33,6 +35,16 @@ class AdoptionMetricsTest {
   }
 
   @Test
+  void shouldReportAiReferredAccountsPerVendorIncludingThoseWithNone() {
+    new AdoptionMetrics(this::counts, clock).bindTo(meters);
+
+    assertThat(vendorGauge("anthropic")).isEqualTo(1);
+    assertThat(vendorGauge("openai")).isZero();
+    assertThat(meters.find("zeitwide.adoption.ai_referred_accounts").gauges())
+        .hasSize(SignupSource.values().length);
+  }
+
+  @Test
   void shouldQueryAtMostOncePerRefreshInterval() {
     new AdoptionMetrics(this::counts, clock).bindTo(meters);
 
@@ -46,11 +58,19 @@ class AdoptionMetricsTest {
 
   private AdoptionCounts counts(Instant usedSince) {
     queries.add(usedSince);
-    return new AdoptionCounts(3, 5, 2);
+    return new AdoptionCounts(3, 5, 2, Map.of(SignupSource.ANTHROPIC, 1L));
   }
 
   private double gauge(String name) {
     return meters.get(name).gauge().value();
+  }
+
+  private double vendorGauge(String vendor) {
+    return meters
+        .get("zeitwide.adoption.ai_referred_accounts")
+        .tag("vendor", vendor)
+        .gauge()
+        .value();
   }
 
   private static final class MutableClock extends Clock {

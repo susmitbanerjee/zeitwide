@@ -61,6 +61,29 @@ describe("/api/zw proxy", () => {
     expect(response.headers.getSetCookie()).toEqual([]);
   });
 
+  it("passes on the AI referral seen at sign-in, and nothing that isn't one", async () => {
+    upstream.mockResolvedValue(Response.json([]));
+    const signupSourceSent = async (signupSource: unknown) => {
+      getToken.mockResolvedValue({ ...signedIn, signupSource });
+      upstream.mockClear();
+      await GET(
+        new NextRequest("http://localhost:3000/api/zw/v1/account/api-keys"),
+        context("v1", "account", "api-keys"),
+      );
+      const headers = new Headers(upstream.mock.calls[0]![1]?.headers);
+      const { payload } = await jwtVerify(
+        headers.get("authorization")!.replace("Bearer ", ""),
+        new TextEncoder().encode(TOKEN_SECRET),
+        { issuer: "http://localhost:3000", audience: "zeitwide-api" },
+      );
+      return payload.signup_source;
+    };
+    expect(await signupSourceSent("ai:perplexity")).toBe("ai:perplexity");
+    expect(await signupSourceSent(undefined)).toBeUndefined();
+    expect(await signupSourceSent("ai:evil")).toBeUndefined();
+    expect(await signupSourceSent(["ai:openai"])).toBeUndefined();
+  });
+
   it("refuses callers without a session", async () => {
     getToken.mockResolvedValue(null);
     const anonymous = await GET(

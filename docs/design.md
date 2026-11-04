@@ -72,7 +72,7 @@ A GiST exclusion constraint on `(calendar_id, entry_date, recorded_during)` stop
 | `change_event` | Type, calendar, date, before/after JSON, notice days, published at | Publish step |
 | `outbox` | Events waiting for webhook delivery | Publish step |
 | `dataset_release` | Release ID, created at, calendar revisions, export checksum | Release builder |
-| `account`, `app_user` | Organization, members, sign-in subject (`google:1234`), `plan` = `free` | Java |
+| `account`, `app_user` | Organization, members, sign-in subject (`google:1234`), `plan` = `free`, `signup_source` (`ai:<vendor>` when an AI assistant referred the sign-up, else null) | Java |
 | `api_key` | Prefix, SHA-256 of the secret, scopes, last used, revoked at | Java |
 | `webhook_subscription`, `webhook_delivery` | Endpoint, secret, event filter; attempts and responses | Java |
 | `entitlement` | Plan to feature limits (empty checks in MVP) | Java |
@@ -99,7 +99,7 @@ There is no identity server. The web app signs people in with **Auth.js**, strai
 | --- | --- |
 | Google, Microsoft, GitHub login | Auth.js providers; a button shows only when its OAuth app is configured |
 | Web app sessions | An encrypted, httpOnly session cookie holding who the person is and their roles |
-| Calls to the API | The web app's server signs a one-minute HS256 token (issuer, audience, subject, roles) for each call; the API checks the signature, issuer, audience and lifetime, and the browser never holds one |
+| Calls to the API | The web app's server signs a one-minute HS256 token (issuer, audience, subject, roles, and `signup_source` when the edge Worker's `zw_ref` cookie named an AI vendor at sign-in) for each call; the API stores `signup_source` only on the account it creates, and only an exact `ai:<vendor>` value; the API checks the signature, issuer, audience and lifetime, and the browser never holds one |
 | Admin review screen | The `reviewer` role, given at sign-in to a verified Google address on the `reviewer_emails` list |
 | MCP clients | An API key as a bearer token on `/mcp` |
 | Enterprise SSO | A Microsoft work account signs in through the same Microsoft button; per-customer SAML is future work |

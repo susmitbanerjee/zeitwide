@@ -388,6 +388,65 @@ class AuthRoutesHttpTest {
         .isEqualTo(1);
   }
 
+  @Test
+  void firstSignInStoresTheAiReferralTheWebAppSaw() {
+    String subject = "referred-" + UUID.randomUUID();
+
+    AccountPrincipal principal = signIn(subject, "ai:anthropic");
+
+    assertThat(signupSource(principal)).isEqualTo("ai:anthropic");
+  }
+
+  @Test
+  void laterSignInsNeverChangeTheSignupSource() {
+    String subject = "referred-twice-" + UUID.randomUUID();
+
+    AccountPrincipal first = signIn(subject, "ai:perplexity");
+    AccountPrincipal second = signIn(subject, "ai:openai");
+
+    assertThat(second.accountId()).isEqualTo(first.accountId());
+    assertThat(signupSource(first)).isEqualTo("ai:perplexity");
+  }
+
+  @Test
+  void firstSignInWithoutAReferralStoresNoSignupSource() {
+    assertThat(signupSource(signIn("unreferred-" + UUID.randomUUID(), null))).isNull();
+  }
+
+  @Test
+  void firstSignInIgnoresAForgedSignupSource() {
+    for (Object forged :
+        List.of("ai:evil", "ai:OpenAI", "ai:openai ", "openai", "x'); DROP TABLE account;--", 7)) {
+      AccountPrincipal principal = signIn("forged-" + UUID.randomUUID(), forged);
+
+      assertThat(signupSource(principal)).as("signup source from %s", forged).isNull();
+    }
+  }
+
+  private AccountPrincipal signIn(String subject, Object signupSource) {
+    Instant now = Instant.now();
+    Jwt.Builder jwt =
+        Jwt.withTokenValue("header." + subject + ".signature")
+            .header("alg", "HS256")
+            .subject(subject)
+            .issuedAt(now)
+            .expiresAt(now.plusSeconds(60))
+            .audience(List.of("zeitwide-api"))
+            .claim("name", "Referred User");
+    if (signupSource != null) {
+      jwt.claim("signup_source", signupSource);
+    }
+    return (AccountPrincipal) jwtConverter.convert(jwt.build()).getPrincipal();
+  }
+
+  private String signupSource(AccountPrincipal principal) {
+    return jdbc.sql("SELECT signup_source FROM account WHERE id = :id")
+        .param("id", principal.accountId())
+        .query((rs, row) -> java.util.Optional.ofNullable(rs.getString("signup_source")))
+        .single()
+        .orElse(null);
+  }
+
   private org.springframework.test.web.servlet.request.RequestPostProcessor
       accountAuthentication() {
     return authentication(

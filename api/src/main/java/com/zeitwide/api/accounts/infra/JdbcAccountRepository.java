@@ -2,9 +2,11 @@ package com.zeitwide.api.accounts.infra;
 
 import com.zeitwide.api.accounts.app.AccountRepository;
 import com.zeitwide.api.accounts.domain.AccountIdentity;
+import com.zeitwide.api.accounts.domain.SignupSource;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -36,10 +38,14 @@ class JdbcAccountRepository implements AccountRepository {
   }
 
   @Override
-  public AccountIdentity createForSubject(String subject, String accountName) {
+  public AccountIdentity createForSubject(
+      String subject, String accountName, @Nullable SignupSource signupSource) {
     UUID accountId =
-        jdbc.sql("INSERT INTO account (name, plan) VALUES (:name, 'free') RETURNING id")
+        jdbc.sql(
+                "INSERT INTO account (name, plan, signup_source) "
+                    + "VALUES (:name, 'free', :signup_source) RETURNING id")
             .param("name", accountName)
+            .param("signup_source", signupSource == null ? null : signupSource.value())
             .query(UUID.class)
             .single();
     UUID appUserId =

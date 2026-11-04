@@ -4,6 +4,8 @@ import { SignJWT } from "jose";
 
 import { env } from "@/lib/env";
 
+import type { SignupSource } from "./signup-source";
+
 export const API_AUDIENCE = "zeitwide-api";
 /** One call's worth: the API refuses a token meant to last more than five minutes. */
 const LIFETIME_SECONDS = 60;
@@ -13,6 +15,8 @@ export interface SignedInUser {
   name: string | undefined;
   email: string | undefined;
   roles: string[];
+  /** The AI referral seen at sign-in; the API stores it only on the account it creates. */
+  signupSource?: SignupSource | undefined;
 }
 
 /**
@@ -30,6 +34,7 @@ export async function signApiToken(
     ...(user.name === undefined ? {} : { name: user.name }),
     ...(user.email === undefined ? {} : { email: user.email }),
     roles: user.roles,
+    ...(user.signupSource === undefined ? {} : { signup_source: user.signupSource }),
   })
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setIssuer(issuer)

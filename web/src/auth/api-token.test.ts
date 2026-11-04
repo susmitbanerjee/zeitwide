@@ -31,6 +31,18 @@ describe("signApiToken", () => {
     });
   });
 
+  it("carries the signup source only when there is one", async () => {
+    const claims = async (signupSource: "ai:google" | undefined) => {
+      const token = await signApiToken(
+        { subject: "google:123", name: undefined, email: undefined, roles: [], signupSource },
+        secret,
+      );
+      return (await jwtVerify(token, new TextEncoder().encode(secret))).payload;
+    };
+    expect((await claims("ai:google")).signup_source).toBe("ai:google");
+    expect(await claims(undefined)).not.toHaveProperty("signup_source");
+  });
+
   it("can't be verified with another secret", async () => {
     const token = await signApiToken(
       { subject: "x", name: undefined, email: undefined, roles: [] },

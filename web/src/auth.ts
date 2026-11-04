@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import type { OAuthConfig } from "next-auth/providers";
+import { cookies } from "next/headers";
 
 import {
   configuredProviders,
@@ -11,6 +12,7 @@ import {
   testUserFrom,
 } from "./auth/identity-providers";
 import { REVIEWER_ROLE, reviewerEmails, rolesFor } from "./auth/roles";
+import { signupSourceFromCookies } from "./auth/signup-source";
 
 /**
  * Microsoft sign-in for work, school and personal accounts at once. It is a plain OAuth provider
@@ -100,7 +102,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: { signIn: "/signin", error: "/signin" },
   trustHost: true,
   callbacks: {
-    jwt({ token, account, user, profile }) {
+    async jwt({ token, account, user, profile }) {
       // Only at sign-in does Auth.js hand over the provider's account; keep who they are after.
       if (account && user) {
         token.subject = `${account.provider}:${account.providerAccountId}`;
@@ -116,6 +118,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 (profile as { email_verified?: boolean } | undefined)?.email_verified === true,
                 reviewers,
               );
+        // The AI referral the edge Worker tagged, if any. The API keeps it only when this
+        // sign-in creates the account, so it does nothing for someone who already has one.
+        const signupSource = signupSourceFromCookies(await cookies());
+        if (signupSource === undefined) {
+          delete token.signupSource;
+        } else {
+          token.signupSource = signupSource;
+        }
       }
       return token;
     },

@@ -335,6 +335,94 @@
       }
     },
     {
+      "type": "bargauge",
+      "title": "AI-referred accounts",
+      "description": "Accounts whose sign-up followed a visit an AI assistant referred (the edge Worker's zw_ref cookie), by vendor. Vendor only, no identities.",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "max by (vendor) (last_over_time(zeitwide_adoption_ai_referred_accounts{job=\"zeitwide-$env/zeitwide-api\"}[1h]))",
+          "instant": true,
+          "legendFormat": "{{vendor}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "id": 12,
+      "gridPos": {
+        "x": 0,
+        "y": 14,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      }
+    },
+    {
+      "type": "bargauge",
+      "title": "AI-referred sign-ups, last 7 days",
+      "description": "The 7-day change in AI-referred accounts, by vendor.",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "max by (vendor) (last_over_time(zeitwide_adoption_ai_referred_accounts{job=\"zeitwide-$env/zeitwide-api\"}[1h])) - max by (vendor) (last_over_time(zeitwide_adoption_ai_referred_accounts{job=\"zeitwide-$env/zeitwide-api\"}[1h] offset 7d))",
+          "instant": true,
+          "legendFormat": "{{vendor}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "id": 13,
+      "gridPos": {
+        "x": 12,
+        "y": 14,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      }
+    },
+    {
       "id": 8,
       "type": "row",
       "title": "What people ask about",
@@ -342,7 +430,7 @@
       "panels": [],
       "gridPos": {
         "x": 0,
-        "y": 14,
+        "y": 21,
         "w": 24,
         "h": 1
       }
@@ -381,7 +469,7 @@
       "id": 9,
       "gridPos": {
         "x": 0,
-        "y": 15,
+        "y": 22,
         "w": 12,
         "h": 9
       },
@@ -424,7 +512,7 @@
       "id": 10,
       "gridPos": {
         "x": 12,
-        "y": 15,
+        "y": 22,
         "w": 6,
         "h": 9
       },
@@ -467,7 +555,7 @@
       "id": 11,
       "gridPos": {
         "x": 18,
-        "y": 15,
+        "y": 22,
         "w": 6,
         "h": 9
       },

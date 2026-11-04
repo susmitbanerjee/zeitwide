@@ -2,6 +2,7 @@ import { getToken } from "next-auth/jwt";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { type SignedInUser, signApiToken } from "@/auth/api-token";
+import { signupSourceFrom } from "@/auth/signup-source";
 import { env } from "@/lib/env";
 import {
   FORWARDED_REQUEST_HEADERS,
@@ -107,6 +108,7 @@ async function sessionUser(request: NextRequest): Promise<SignedInUser | undefin
     name: typeof token.name === "string" ? token.name : undefined,
     email: typeof token.email === "string" ? token.email : undefined,
     roles: token.roles ?? [],
+    signupSource: signupSourceFrom(token.signupSource),
   };
 }
 
