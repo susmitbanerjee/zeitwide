@@ -25,8 +25,9 @@ locals {
     ZEITWIDE_OUTBOX_DRAIN_INVOKER            = google_service_account.this["sched-drain"].email
     ZEITWIDE_RECEIPT_KEY_ID                  = var.receipt_key_id
     ZEITWIDE_RECEIPT_PUBLIC_KEYS_JSON        = var.receipt_public_keys_json
-    # Cloud Run's front end appends the client's address to X-Forwarded-For.
-    ZEITWIDE_RATE_LIMITS_TRUSTED_PROXIES = "1"
+    # Proxies that append to X-Forwarded-For: Cloud Run's front end, plus Cloudflare once
+    # api.<domain> is proxied there (deploy/cloudflare).
+    ZEITWIDE_RATE_LIMITS_TRUSTED_PROXIES = tostring(var.api_trusted_proxies)
   })
 
   api_secret_env = merge(local.otel_secret_env, {

@@ -14,10 +14,10 @@ endif
 # Run Python tools as modules: no console-script launchers, same behaviour on every OS.
 PY := uv run --no-sync python -m
 
-.PHONY: check check-hooks check-api check-pipeline check-lib-python check-web \
+.PHONY: check check-hooks check-api check-pipeline check-lib-python check-web check-edge \
         e2e-build e2e-web e2e-structured-data fmt generate-clients sync-docs setup up down
 
-check: check-hooks check-api check-pipeline check-lib-python check-web
+check: check-hooks check-api check-pipeline check-lib-python check-web check-edge
 
 check-hooks:
 	pre-commit run --all-files --show-diff-on-failure
@@ -33,6 +33,10 @@ check-lib-python:
 
 check-web:
 	cd web && npm ci --no-audit --no-fund && npm run check
+
+# The Cloudflare Worker in deploy/cloudflare/edge: ESLint, Prettier, tsc, Vitest (unit and Miniflare).
+check-edge:
+	cd deploy/cloudflare/edge && npm ci --no-audit --no-fund && npm run check
 
 # A production build against the fake API in web/e2e/mock-api, with the pipeline's site files
 # (sitemaps, downloads) for its data.
@@ -56,6 +60,7 @@ fmt:
 	cd pipeline && $(PY) ruff format . && $(PY) ruff check --fix .
 	cd lib-python && $(PY) ruff format . && $(PY) ruff check --fix .
 	cd web && npm run format && npm run lint -- --fix
+	cd deploy/cloudflare/edge && npm run format && npm run lint -- --fix
 
 # The typed clients, from api/openapi.yaml. Tests in web/ and lib-python/ fail when they are stale.
 generate-clients:

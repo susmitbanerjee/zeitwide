@@ -6,7 +6,7 @@ what lives in Grafana itself, as code:
 
 | File | Creates |
 | --- | --- |
-| `main.tf` | Folder `Zeitwide` and the three dashboards in `dashboards/` |
+| `main.tf` | Folder `Zeitwide` and the dashboards in `dashboards/` (Sources, API, Adoption, Edge) |
 | `alerts.tf` | The alert rules from the design doc: rule groups `sources-<env>` and `api-<env>` |
 | `contact.tf` | Email contact point (`alert_email`) and the stack's notification policy |
 
@@ -23,6 +23,11 @@ Grafana Cloud turns `service.namespace/service.name` into the `job` label, such 
 `zeitwide-prod/zeitwide-api`, so dev and prod share the one stack (cleverhare3418). The
 dashboards switch environment with a variable; `environments` (default `["dev"]`) says which
 ones get alert rules.
+
+The **Edge** dashboard reads Loki, not Prometheus: the Cloudflare Worker's nightly cron pushes
+yesterday's Analytics Engine counts there as one JSON line per label set
+(`{service_name="zeitwide-edge", kind="daily"}`, `../cloudflare/README.md`). Its *Edge bots* panel
+shows yesterday by default; pick the stack's Loki data source (`grafanacloud-<stack>-logs`).
 
 ## Alerts
 

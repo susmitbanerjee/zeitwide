@@ -298,6 +298,9 @@ sign-in callbacks point there.
   Create the CNAME records it prints (`ghs.googlehosted.com.`). Google issues the
   certificates, which can take up to an hour or so.
 - Set `api_base_url` in the tfvars, then plan and apply again.
+- **Cloudflare in front** (optional, `../cloudflare/README.md`): the records move to the
+  Cloudflare zone, proxied. Set `api_trusted_proxies = 2` here and apply **before** the API
+  record is proxied, so anonymous rate limits still key on the caller and not on Cloudflare.
 
 ### 12. Finish sign-in
 

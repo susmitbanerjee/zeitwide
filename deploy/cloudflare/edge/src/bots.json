@@ -1,0 +1,180 @@
+{
+  "version": "2026-11-04",
+  "comment": "First matching token wins (case-insensitive substring of User-Agent), so list specific tokens before the ones they contain. A bot is verified only when its vendor publishes IP ranges, the bot lists them in `ranges`, and the client IP falls inside one. Bump `version` with every change; it is stored with each telemetry point.",
+  "ranges": {
+    "openai-gptbot": "https://openai.com/gptbot.json",
+    "openai-searchbot": "https://openai.com/searchbot.json",
+    "openai-chatgpt-user": "https://openai.com/chatgpt-user.json",
+    "anthropic": "https://claude.com/crawling/bots.json",
+    "perplexity-bot": "https://www.perplexity.ai/perplexitybot.json",
+    "perplexity-user": "https://www.perplexity.ai/perplexity-user.json",
+    "google-common": "https://developers.google.com/static/search/apis/ipranges/googlebot.json",
+    "google-special": "https://developers.google.com/static/search/apis/ipranges/special-crawlers.json",
+    "google-user": "https://developers.google.com/static/search/apis/ipranges/user-triggered-fetchers.json",
+    "google-user-google": "https://developers.google.com/static/search/apis/ipranges/user-triggered-fetchers-google.json",
+    "apple": "https://search.developer.apple.com/applebot.json"
+  },
+  "bots": [
+    { "token": "GPTBot", "vendor": "openai", "family": "training", "ranges": ["openai-gptbot"] },
+    {
+      "token": "OAI-SearchBot",
+      "vendor": "openai",
+      "family": "search",
+      "ranges": ["openai-searchbot"]
+    },
+    {
+      "token": "ChatGPT-User",
+      "vendor": "openai",
+      "family": "user-fetch",
+      "ranges": ["openai-chatgpt-user"]
+    },
+    {
+      "token": "ChatGPT-Agent",
+      "vendor": "openai",
+      "family": "agent",
+      "ranges": ["openai-chatgpt-user"]
+    },
+
+    { "token": "ClaudeBot", "vendor": "anthropic", "family": "training", "ranges": ["anthropic"] },
+    {
+      "token": "Claude-SearchBot",
+      "vendor": "anthropic",
+      "family": "search",
+      "ranges": ["anthropic"]
+    },
+    {
+      "token": "Claude-User",
+      "vendor": "anthropic",
+      "family": "user-fetch",
+      "ranges": ["anthropic"]
+    },
+    { "token": "Claude-Web", "vendor": "anthropic", "family": "training", "ranges": ["anthropic"] },
+    {
+      "token": "anthropic-ai",
+      "vendor": "anthropic",
+      "family": "training",
+      "ranges": ["anthropic"]
+    },
+
+    {
+      "token": "PerplexityBot",
+      "vendor": "perplexity",
+      "family": "search",
+      "ranges": ["perplexity-bot"]
+    },
+    {
+      "token": "Perplexity-User",
+      "vendor": "perplexity",
+      "family": "user-fetch",
+      "ranges": ["perplexity-user"]
+    },
+
+    {
+      "token": "Google-Agent",
+      "vendor": "google",
+      "family": "agent",
+      "ranges": ["google-user", "google-user-google"]
+    },
+    {
+      "token": "Google-CloudVertexBot",
+      "vendor": "google",
+      "family": "training",
+      "ranges": ["google-special"]
+    },
+    {
+      "token": "Google-Site-Verification",
+      "vendor": "google",
+      "family": "monitor",
+      "ranges": ["google-user", "google-user-google"]
+    },
+    {
+      "token": "GoogleStackdriverMonitoring",
+      "vendor": "google",
+      "family": "monitor",
+      "ranges": []
+    },
+    {
+      "token": "Google-Read-Aloud",
+      "vendor": "google",
+      "family": "user-fetch",
+      "ranges": ["google-user", "google-user-google"]
+    },
+    {
+      "token": "FeedFetcher-Google",
+      "vendor": "google",
+      "family": "user-fetch",
+      "ranges": ["google-user", "google-user-google"]
+    },
+    {
+      "token": "Google-InspectionTool",
+      "vendor": "google",
+      "family": "search",
+      "ranges": ["google-common"]
+    },
+    { "token": "GoogleOther", "vendor": "google", "family": "search", "ranges": ["google-common"] },
+    {
+      "token": "AdsBot-Google",
+      "vendor": "google",
+      "family": "search",
+      "ranges": ["google-special"]
+    },
+    {
+      "token": "Mediapartners-Google",
+      "vendor": "google",
+      "family": "search",
+      "ranges": ["google-special"]
+    },
+    {
+      "token": "Storebot-Google",
+      "vendor": "google",
+      "family": "search",
+      "ranges": ["google-common"]
+    },
+    { "token": "Googlebot", "vendor": "google", "family": "search", "ranges": ["google-common"] },
+
+    { "token": "Applebot", "vendor": "apple", "family": "search", "ranges": ["apple"] },
+
+    { "token": "bingbot", "vendor": "microsoft", "family": "search", "ranges": [] },
+    { "token": "DuckAssistBot", "vendor": "duckduckgo", "family": "user-fetch", "ranges": [] },
+    { "token": "DuckDuckBot", "vendor": "duckduckgo", "family": "search", "ranges": [] },
+    { "token": "MistralAI-User", "vendor": "mistral", "family": "user-fetch", "ranges": [] },
+    { "token": "Meta-ExternalFetcher", "vendor": "meta", "family": "user-fetch", "ranges": [] },
+    { "token": "meta-externalagent", "vendor": "meta", "family": "training", "ranges": [] },
+    { "token": "facebookexternalhit", "vendor": "meta", "family": "user-fetch", "ranges": [] },
+    { "token": "FacebookBot", "vendor": "meta", "family": "training", "ranges": [] },
+    { "token": "Amazonbot", "vendor": "amazon", "family": "training", "ranges": [] },
+    { "token": "CCBot", "vendor": "commoncrawl", "family": "training", "ranges": [] },
+    { "token": "Bytespider", "vendor": "bytedance", "family": "training", "ranges": [] },
+    {
+      "token": "cohere-training-data-crawler",
+      "vendor": "cohere",
+      "family": "training",
+      "ranges": []
+    },
+    { "token": "cohere-ai", "vendor": "cohere", "family": "user-fetch", "ranges": [] },
+    { "token": "Diffbot", "vendor": "diffbot", "family": "training", "ranges": [] },
+    { "token": "AI2Bot", "vendor": "ai2", "family": "training", "ranges": [] },
+    { "token": "YouBot", "vendor": "you", "family": "search", "ranges": [] },
+    { "token": "YandexBot", "vendor": "yandex", "family": "search", "ranges": [] },
+    { "token": "Baiduspider", "vendor": "baidu", "family": "search", "ranges": [] },
+    { "token": "PetalBot", "vendor": "huawei", "family": "search", "ranges": [] },
+    { "token": "LinkedInBot", "vendor": "linkedin", "family": "user-fetch", "ranges": [] },
+    { "token": "Twitterbot", "vendor": "x", "family": "user-fetch", "ranges": [] },
+    { "token": "Slackbot", "vendor": "slack", "family": "user-fetch", "ranges": [] },
+    { "token": "Discordbot", "vendor": "discord", "family": "user-fetch", "ranges": [] },
+
+    { "token": "UptimeRobot", "vendor": "uptimerobot", "family": "monitor", "ranges": [] },
+    { "token": "Pingdom", "vendor": "pingdom", "family": "monitor", "ranges": [] },
+    { "token": "Better Stack", "vendor": "betterstack", "family": "monitor", "ranges": [] },
+    { "token": "StatusCake", "vendor": "statuscake", "family": "monitor", "ranges": [] },
+    { "token": "Checkly", "vendor": "checkly", "family": "monitor", "ranges": [] },
+    { "token": "Datadog/Synthetics", "vendor": "datadog", "family": "monitor", "ranges": [] },
+    {
+      "token": "synthetic-monitoring-agent",
+      "vendor": "grafana",
+      "family": "monitor",
+      "ranges": []
+    }
+  ],
+  "unknownPattern": "bot|crawl|spider|slurp|scrape|fetch|curl/|wget/|httpie|python-requests|python-httpx|python-urllib|aiohttp|go-http-client|node-fetch|undici|axios|okhttp|java/|libwww|headlesschrome|phantomjs"
+}

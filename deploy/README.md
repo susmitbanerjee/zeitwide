@@ -9,6 +9,8 @@ Local and deployment configuration.
 | `fake-gcs/` | Buckets pre-created in the fake GCS server (one folder per bucket) |
 | `gcp/` | OpenTofu for the dev and prod GCP environments; its README lists every manual step |
 | `firebase/` | Firebase Hosting config (kept for the `*.web.app` site; the apex domain goes straight to Cloud Run) |
+| `cloudflare/` | Cloudflare Free plan in front of the apex and `api.`: DNS, SSL strict, and the `edge` Worker (Markdown negotiation, bot labels, telemetry, AI referral tags); its README has the free-plan budget note |
+| `grafana/` | Grafana Cloud dashboards and alert rules |
 
 ## Sign-in apps
 
@@ -48,5 +50,3 @@ each console. The logos are in `branding/`:
   `zeitwide-logo-215.png` (215 x 215, under 100 KB), home page and terms and privacy
   links. Microsoft labels the app "unverified" until you complete publisher verification
   (a verified Microsoft AI Cloud Partner Program ID) and set a verified publisher domain.
-
-Alloy and Grafana configuration land here once observability is wired up.

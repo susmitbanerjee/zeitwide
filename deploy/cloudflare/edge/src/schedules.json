@@ -1,0 +1,5 @@
+{
+  "comment": "Cron Triggers, read by src/index.ts and deploy/cloudflare/worker.tf. The free plan allows 5 per account.",
+  "ranges": "17 3 * * *",
+  "report": "30 0 * * *"
+}

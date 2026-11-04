@@ -82,6 +82,28 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: make check-web
 
+  # The Cloudflare Worker (unit tests and Miniflare) and its OpenTofu. Applying deploy/cloudflare
+  # stays manual (its README): it needs a Cloudflare token that CI does not hold.
+  edge:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: deploy/cloudflare/edge/package-lock.json
+      - run: make check-edge
+      - uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+        with:
+          tofu_version: 1.13.1
+      - name: OpenTofu format and validate
+        working-directory: deploy/cloudflare
+        run: |
+          tofu fmt -check -recursive
+          tofu init -backend=false -input=false
+          tofu validate
+
   # The JSON-LD of every sitemap page against the built HTML, and the schema.org validator.
   structured-data:
     runs-on: ubuntu-24.04

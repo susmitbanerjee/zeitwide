@@ -1,0 +1,366 @@
+{
+  "uid": "zeitwide-edge",
+  "title": "Zeitwide: Edge",
+  "description": "Cloudflare edge Worker: bots, Markdown negotiation and AI fetchers, from the nightly Analytics Engine roll-up.",
+  "tags": [
+    "zeitwide"
+  ],
+  "timezone": "utc",
+  "schemaVersion": 39,
+  "editable": true,
+  "refresh": "1h",
+  "time": {
+    "from": "now-1d/d",
+    "to": "now-1d/d"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "label": "Data source",
+        "type": "datasource",
+        "query": "loki",
+        "current": {},
+        "hide": 0
+      },
+      {
+        "name": "env",
+        "label": "Environment",
+        "type": "custom",
+        "query": "dev,prod",
+        "current": {
+          "text": "dev",
+          "value": "dev"
+        },
+        "options": [
+          {
+            "text": "dev",
+            "value": "dev",
+            "selected": true
+          },
+          {
+            "text": "prod",
+            "value": "prod",
+            "selected": false
+          }
+        ],
+        "hide": 0
+      }
+    ]
+  },
+  "annotations": {
+    "list": []
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "bargauge",
+      "title": "Edge bots",
+      "description": "Yesterday's requests (UTC) by bot family, vendor and whether the client IP was in the vendor's published ranges. Written nightly by the edge Worker from Analytics Engine. Each bar sums hourly windows over the chosen day, so every nightly line is counted once.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 14
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "showUnfilled": true,
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "/^Total$/",
+          "values": true
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (family, vendor, verified) (sum_over_time({service_name=\"zeitwide-edge\", kind=\"daily\", env=\"$env\", family!=\"human\"} | json | unwrap requests [$__interval]))",
+          "legendFormat": "{{family}} · {{vendor}} · verified={{verified}}",
+          "queryType": "range"
+        }
+      ],
+      "interval": "1h",
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "mode": "seriesToRows",
+            "reducers": [
+              "sum"
+            ],
+            "includeTimeField": false
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Total",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Requests yesterday",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 8,
+        "h": 4
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "value_and_name"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "displayName": "${__field.labels.family}",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (family) (sum_over_time({service_name=\"zeitwide-edge\", kind=\"daily\", env=\"$env\"} | json | unwrap requests [$__interval]))",
+          "legendFormat": "{{family}}",
+          "queryType": "range"
+        }
+      ],
+      "interval": "1h"
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Markdown served yesterday",
+      "description": "Requests answered with the Markdown twin because Accept preferred text/markdown.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 4,
+        "w": 8,
+        "h": 5
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(sum_over_time({service_name=\"zeitwide-edge\", kind=\"daily\", env=\"$env\"} | json | markdown=\"true\" | unwrap requests [$__interval]))",
+          "legendFormat": "markdown",
+          "queryType": "range"
+        }
+      ],
+      "interval": "1h"
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Unverified AI claims yesterday",
+      "description": "Requests whose User-Agent names OpenAI, Anthropic, Perplexity, Google or Apple from an IP outside that vendor's published ranges. These are rate limited to 60 a minute per IP.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 9,
+        "w": 8,
+        "h": 5
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1000
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(sum_over_time({service_name=\"zeitwide-edge\", kind=\"daily\", env=\"$env\", family!=\"human\"} | json | vendor=~\"openai|anthropic|perplexity|google|apple\" | verified=\"false\" | unwrap requests [$__interval]))",
+          "legendFormat": "unverified",
+          "queryType": "range"
+        }
+      ],
+      "interval": "1h"
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Requests per day by family (30 days)",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 14,
+        "w": 24,
+        "h": 9
+      },
+      "timeFrom": "30d",
+      "interval": "1d",
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "custom": {
+            "drawStyle": "bars",
+            "stacking": {
+              "mode": "normal"
+            },
+            "fillOpacity": 80
+          },
+          "displayName": "${__field.labels.family}"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (family) (sum_over_time({service_name=\"zeitwide-edge\", kind=\"daily\", env=\"$env\"} | json | unwrap requests [1d]))",
+          "legendFormat": "{{family}}",
+          "queryType": "range",
+          "step": "1d"
+        }
+      ]
+    }
+  ]
+}

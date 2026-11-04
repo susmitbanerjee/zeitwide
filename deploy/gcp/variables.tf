@@ -104,6 +104,17 @@ variable "api_domain" {
   default     = null
 }
 
+variable "api_trusted_proxies" {
+  description = "Proxies in front of the API that append to X-Forwarded-For: 1 (Cloud Run's front end), or 2 when api_domain is proxied by Cloudflare. Too low and every caller shares Cloudflare's address for anonymous limits; too high and callers can pick their own."
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = contains([1, 2], var.api_trusted_proxies)
+    error_message = "api_trusted_proxies is 1 or 2."
+  }
+}
+
 variable "web_app_domain" {
   description = "Domain to map straight to the web service for signed-in pages, such as app.dev.example.com. Null maps nothing."
   type        = string

@@ -1,0 +1,28 @@
+# Local runs only (`npm run dev`, the curl matrix). Production bindings, routes and Cron Triggers
+# are in ../worker.tf; keep the two in step.
+name = "edge"
+main = "src/index.ts"
+compatibility_date = "2026-08-01"
+workers_dev = false
+
+[vars]
+ENVIRONMENT = "local"
+# Send requests to the live site (or http://localhost:3000 for `npm run dev` in web/).
+ORIGIN = "https://zeitwide.com"
+DEBUG_LABELS = "1"
+
+[[kv_namespaces]]
+binding = "RANGES"
+id = "local-ranges"
+
+[[analytics_engine_datasets]]
+binding = "EDGE_EVENTS"
+dataset = "zeitwide_edge"
+
+[[ratelimits]]
+name = "BOT_LIMIT"
+namespace_id = "1001"
+simple = { limit = 60, period = 60 }
+
+[triggers]
+crons = ["17 3 * * *", "30 0 * * *"]
