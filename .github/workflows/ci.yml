@@ -168,6 +168,8 @@ jobs:
         env:
           COMPONENTS: ${{ steps.changed.outputs.components }}
           SITE_URL: https://zeitwide.com
+          # Grafana Faro collector URL (public); empty builds the web app without Faro.
+          ZEITWIDE_FARO_URL: ${{ vars.ZEITWIDE_FARO_URL }}
         run: |
           gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
           # shellcheck disable=SC2086

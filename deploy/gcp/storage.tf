@@ -55,3 +55,30 @@ resource "google_storage_bucket" "site_files" {
 
   depends_on = [google_project_service.this]
 }
+
+# OpenTofu state for deploy/grafana (dashboards and alerts in Grafana Cloud), applied by CI.
+# Versioned, so a bad apply's state can be rolled back.
+resource "google_storage_bucket" "grafana_state" {
+  name     = "${var.project_id}-${local.prefix}-grafana-state"
+  location = var.region
+
+  storage_class               = "STANDARD"
+  uniform_bucket_level_access = true
+  public_access_prevention    = "enforced"
+  force_destroy               = false
+
+  versioning {
+    enabled = true
+  }
+
+  lifecycle_rule {
+    condition {
+      num_newer_versions = 20
+    }
+    action {
+      type = "Delete"
+    }
+  }
+
+  depends_on = [google_project_service.this]
+}

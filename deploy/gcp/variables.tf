@@ -166,10 +166,15 @@ variable "bot_contact_url" {
   }
 }
 
-variable "otlp_endpoint" {
-  description = "Grafana Cloud OTLP endpoint. The auth header is a secret, not a variable."
+variable "faro_url" {
+  description = "Grafana Faro collector URL for browser errors and Web Vitals (public: browsers post to it). Empty turns Faro off."
   type        = string
   default     = ""
+
+  validation {
+    condition     = var.faro_url == "" || can(regex("^https://", var.faro_url))
+    error_message = "faro_url must be an https URL."
+  }
 }
 
 variable "bootstrap_service_image" {

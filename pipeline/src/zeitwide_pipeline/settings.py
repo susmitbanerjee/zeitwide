@@ -35,6 +35,8 @@ class Settings(FetchSettings):
     # fake-gcs-server locally, such as http://localhost:4443; unset on GCP.
     gcs_endpoint: str | None = None
     otlp_endpoint: str | None = Field(default=None, validation_alias="OTEL_EXPORTER_OTLP_ENDPOINT")
+    # Traces kept besides those with an error; the API and web app keep the same ones.
+    traces_sample_ratio: float = Field(default=0.1, ge=0, le=1)
 
     # The daily job. Unset parts are skipped with a warning, for local runs.
     backup_bucket: str | None = None

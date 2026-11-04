@@ -39,7 +39,7 @@ build_and_push() {
       curl -fsS --max-time 120 --retry 6 --retry-delay 5 --retry-all-errors         "$api_url/actuator/health" >/dev/null || echo "The API didn't answer; building anyway." >&2
       key_file="$(mktemp)"
       "$GCLOUD" secrets versions access latest --secret "zeitwide-$ENVIRONMENT-web-api-key"         --project "$PROJECT" > "$key_file"
-      DOCKER_BUILDKIT=1 docker build --platform linux/amd64 -t "$image"         --build-arg ZEITWIDE_API_URL="$api_url"         --build-arg SITE_URL="${SITE_URL:?set SITE_URL to the public web origin}"         --secret id=zeitwide_api_key,src="$(cygpath -w "$key_file" 2>/dev/null || echo "$key_file")"         "$ROOT/web" || { rm -f "$key_file"; exit 1; }
+      DOCKER_BUILDKIT=1 docker build --platform linux/amd64 -t "$image"         --build-arg ZEITWIDE_API_URL="$api_url"         --build-arg SITE_URL="${SITE_URL:?set SITE_URL to the public web origin}"         --build-arg ZEITWIDE_FARO_URL="${ZEITWIDE_FARO_URL:-}"         --secret id=zeitwide_api_key,src="$(cygpath -w "$key_file" 2>/dev/null || echo "$key_file")"         "$ROOT/web" || { rm -f "$key_file"; exit 1; }
       rm -f "$key_file"
       ;;
     *) echo "Unknown component: $name (api, pipeline or web)" >&2; exit 1 ;;

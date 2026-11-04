@@ -13,4 +13,6 @@ github_deploy_refs = ["refs/heads/main"]
 # api_base_url  = "https://api.example.com"
 # auth_base_url = "https://auth.example.com"
 
-# otlp_endpoint = "https://otlp-gateway-prod-us-central-0.grafana.net/otlp"
+# Grafana Cloud > Frontend Observability > your app > Web SDK config. The OTLP endpoint and
+# token are secrets (otlp-endpoint, otlp-headers), not variables.
+# faro_url = "https://faro-collector-prod-us-central-0.grafana.net/collect/<app key>"

@@ -125,3 +125,17 @@ resource "google_project_iam_member" "deployer_hosting" {
   role    = "roles/firebasehosting.admin"
   member  = google_service_account.this["deployer"].member
 }
+
+# The Grafana workflow (.github/workflows/grafana.yml) applies deploy/grafana with this token,
+# and keeps that configuration's state in its own bucket, so it can't touch this one's.
+resource "google_secret_manager_secret_iam_member" "deployer_grafana_token" {
+  secret_id = google_secret_manager_secret.this["grafana-token"].id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = google_service_account.this["deployer"].member
+}
+
+resource "google_storage_bucket_iam_member" "deployer_grafana_state" {
+  bucket = google_storage_bucket.grafana_state.name
+  role   = "roles/storage.objectUser"
+  member = google_service_account.this["deployer"].member
+}

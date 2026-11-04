@@ -43,7 +43,27 @@ server:
     include-stacktrace: never
     include-message: never
 
+# JSON lines on Cloud Run, where LOGGING_STRUCTURED_FORMAT_CONSOLE=logstash; plain text locally.
+logging:
+  structured:
+    json:
+      exclude:
+        - "@version"
+        - level_value
+      customizer: com.zeitwide.api.observability.infra.CloudLoggingSeverity
+
 management:
+  otlp:
+    metrics:
+      export:
+        # On in Cloud Run only. Endpoint and credentials: see OtlpMetricsConfiguration.
+        enabled: ${ZEITWIDE_OTLP_METRICS_ENABLED:false}
+  metrics:
+    distribution:
+      # A few fixed buckets instead of a full histogram: enough for the 200 ms p95 alert, and
+      # cheap in active series.
+      slo:
+        http.server.requests: 50ms,100ms,200ms,500ms,1s,2s
   endpoints:
     web:
       exposure:

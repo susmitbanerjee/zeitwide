@@ -181,7 +181,9 @@ the others. Delete local copies afterwards.
 | `webhook-encryption-key` | `openssl rand -base64 32`; AES-256-GCM key used to encrypt signing secrets at rest |
 | `receipt-signing-key` | Ed25519 PKCS#8 private key PEM, loaded by the API at startup; never commit it or put it in tfvars |
 | `web-auth-secret` | `openssl rand -base64 32` (Auth.js cookie encryption) |
-| `otlp-headers` | `Authorization=Basic <base64 of instance-id:token>` from Grafana Cloud > OpenTelemetry |
+| `otlp-endpoint` | OTLP gateway URL from Grafana Cloud > OpenTelemetry, such as `https://otlp-gateway-prod-us-central-0.grafana.net/otlp` |
+| `otlp-headers` | `Authorization=Basic%20<base64 of instance-id:token>` from Grafana Cloud > OpenTelemetry (the space is URL-encoded, as the OTLP spec requires) |
+| `grafana-token` | Grafana Cloud service account token (Editor) for `deploy/grafana`; read only by the deployer in `.github/workflows/grafana.yml` |
 | `github-release-token` | Fine-grained token for the public dataset repository only, with `contents: write` and `pull_requests: write` (the daily job opens a pull request per release) |
 
 To rotate a secret, add a new version and deploy a new revision. Every service reads

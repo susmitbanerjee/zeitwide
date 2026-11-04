@@ -1,0 +1,79 @@
+# Publishes deploy/grafana (dashboards, alert rules, email contact point) to the Grafana Cloud
+# stack. Pull requests only check it; main applies it. The Grafana token stays in Secret
+# Manager: the workflow signs in to GCP as the deployer (Workload Identity Federation, no JSON
+# keys), reads it, and keeps OpenTofu state in the deployer's Grafana state bucket.
+name: grafana
+
+on:
+  push:
+    branches: [main]
+    paths: ["deploy/grafana/**", ".github/workflows/grafana.yml"]
+  pull_request:
+    paths: ["deploy/grafana/**", ".github/workflows/grafana.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  TOFU_VERSION: 1.13.1
+  # Dev is the deployed environment; its GCP resources hold the token and the state.
+  GCP_PROJECT: project-6eaae4e0-3164-4e31-bc4
+  GRAFANA_TOKEN_SECRET: zeitwide-dev-grafana-token
+  STATE_BUCKET: project-6eaae4e0-3164-4e31-bc4-zeitwide-dev-grafana-state
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: deploy/grafana
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+        with:
+          tofu_version: ${{ env.TOFU_VERSION }}
+      - run: tofu fmt -check -recursive
+      - run: tofu init -backend=false -input=false
+      - run: tofu validate
+      - name: Dashboards are valid JSON with a fixed uid
+        run: |
+          for f in dashboards/*.json; do
+            jq -e '.uid and .title and (.panels | length > 0)' "$f" >/dev/null || { echo "::error file=$f::bad dashboard"; exit 1; }
+          done
+
+  apply:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: check
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    concurrency:
+      group: grafana
+      cancel-in-progress: false
+    defaults:
+      run:
+        working-directory: deploy/grafana
+    env:
+      WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      DEPLOY_SERVICE_ACCOUNT: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.DEPLOY_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3
+      - uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+        with:
+          tofu_version: ${{ env.TOFU_VERSION }}
+          tofu_wrapper: false
+      - run: tofu init -input=false -backend-config="bucket=$STATE_BUCKET" -backend-config="prefix=grafana"
+      - name: Apply
+        run: |
+          # The token never leaves this step: no file, no GITHUB_ENV.
+          GRAFANA_AUTH="$(gcloud secrets versions access latest --secret "$GRAFANA_TOKEN_SECRET" --project "$GCP_PROJECT")"
+          echo "::add-mask::$GRAFANA_AUTH"
+          export GRAFANA_AUTH
+          tofu apply -input=false -auto-approve

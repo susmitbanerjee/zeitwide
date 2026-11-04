@@ -130,6 +130,7 @@ Every service exports OpenTelemetry (OTLP) straight to the **Grafana Cloud free 
 - **Java:** the OpenTelemetry Java agent plus Micrometer gives HTTP, JDBC and JVM metrics and traces with no code changes.
 - **Python:** OpenTelemetry SDK, with one trace per source check (fetch, parse, diff), so a broken parser shows up as a failed span.
 - **Logs:** JSON lines with `trace_id`, so Grafana jumps from a log line to its trace.
+- **Staying free:** keep 10% of traces plus every trace with an error, decided by trace ID so web, API and pipeline keep the same ones whole; label metrics by calendar, operation, tool and outcome, never by API key, IP or date. Dashboards and alerts are code in `deploy/grafana/`.
 
 For this product, **data freshness is the main health signal**, not uptime. A source that silently stopped updating is worse than a 500 error.
 

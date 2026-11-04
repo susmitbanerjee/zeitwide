@@ -32,7 +32,9 @@ github_deploy_refs = ["refs/heads/main"]
 api_base_url = "https://api.zeitwide.com"
 # auth_base_url = "https://auth.dev.example.com"
 
-# otlp_endpoint = "https://otlp-gateway-prod-us-central-0.grafana.net/otlp"
+# Grafana Cloud > Frontend Observability > your app > Web SDK config. The OTLP endpoint and
+# token are secrets (otlp-endpoint, otlp-headers), not variables.
+faro_url = "https://faro-collector-prod-ap-south-1.grafana.net/collect/db5e15102c1142e1ca7fc9fb27465781"
 
 # OAuth client IDs for sign-in (public; the secrets are in Secret Manager). Callback URLs:
 # https://zeitwide.com/api/auth/callback/google and /microsoft. A provider with no client ID

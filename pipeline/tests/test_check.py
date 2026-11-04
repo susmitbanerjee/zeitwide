@@ -14,7 +14,13 @@ from support.doubles import FakeClock, MemorySnapshotStore, RecordingTelemetry
 from support.fixture_source import HolidayTableParser, HolidayTableSource, holiday_page
 from zeitwide_pipeline.calendars import CalendarDefinition
 from zeitwide_pipeline.check import MAX_CONSECUTIVE_FAILURES, CheckResult, SourceChecker
-from zeitwide_pipeline.db import DiffOutcome, RegisteredSource, SourceState
+from zeitwide_pipeline.db import (
+    DiffOutcome,
+    RegisteredSource,
+    ReviewQueue,
+    SourceHealth,
+    SourceState,
+)
 from zeitwide_pipeline.fetch import Fetched, Fetcher, HostThrottle, Validators, new_client
 from zeitwide_pipeline.models import Corroboration, Observation
 from zeitwide_pipeline.sources import Source
@@ -109,6 +115,12 @@ class FakeStore:
 
     def resume(self, slug: str) -> bool:
         return True
+
+    def load_health(self) -> dict[str, SourceHealth]:
+        return {}
+
+    def review_queue(self) -> ReviewQueue:
+        return ReviewQueue(0, None, None)
 
 
 class BrokenDiffStore(FakeStore):

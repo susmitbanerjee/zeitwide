@@ -9,7 +9,10 @@ import com.zeitwide.api.answers.domain.Combine;
 import com.zeitwide.api.answers.domain.Dataset;
 import com.zeitwide.api.answers.domain.DayAnswer;
 import com.zeitwide.api.answers.domain.ReleaseStamp;
+import com.zeitwide.api.answers.domain.UnknownCalendarException;
 import com.zeitwide.api.calendars.domain.CalendarId;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -27,7 +30,61 @@ class AnswerServiceTest {
   private static final Instant NOW = Instant.parse("2026-11-01T00:00:00Z");
 
   private final CountingSource source = new CountingSource();
-  private final AnswerService answers = service(source);
+  private final MeterRegistry meters = new SimpleMeterRegistry();
+  private final AnswerService answers = service(source, meters);
+
+  @Test
+  void shouldCountEveryAnswerByOperationAndCalendarIncludingCachedOnes() {
+    List<CalendarId> both = List.of(new CalendarId("US-FEDWIRE"), new CalendarId("US-FEDACH"));
+
+    answers.check(FEDWIRE, Combine.ALL_OPEN, THANKSGIVING, AsOf.now());
+    answers.check(FEDWIRE, Combine.ALL_OPEN, THANKSGIVING, AsOf.now());
+    answers.next(both, Combine.ALL_OPEN, THANKSGIVING, AsOf.now());
+    answers.calendars(AsOf.now());
+
+    assertThat(answerCount("check", "US-FEDWIRE")).isEqualTo(2);
+    assertThat(answerCount("next", "US-FEDWIRE")).isEqualTo(1);
+    assertThat(answerCount("next", "US-FEDACH")).isEqualTo(1);
+    assertThat(answerCount("calendars", AnswerService.ALL_CALENDARS)).isEqualTo(1);
+  }
+
+  @Test
+  void shouldNotCountAnUnknownCalendar() {
+    List<CalendarId> unknown = List.of(new CalendarId("XX-NOPE"));
+
+    assertThatThrownBy(() -> answers.check(unknown, Combine.ALL_OPEN, THANKSGIVING, AsOf.now()))
+        .isInstanceOf(UnknownCalendarException.class);
+
+    assertThat(meters.find(AnswerService.ANSWERS_METRIC).tag("calendar", "XX-NOPE").counter())
+        .isNull();
+  }
+
+  @Test
+  void shouldReportCacheHitsAndMisses() {
+    answers.check(FEDWIRE, Combine.ALL_OPEN, THANKSGIVING, AsOf.now());
+    answers.check(FEDWIRE, Combine.ALL_OPEN, THANKSGIVING, AsOf.now());
+
+    assertThat(cacheGets("hit")).isEqualTo(1);
+    assertThat(cacheGets("miss")).isEqualTo(1);
+  }
+
+  private double answerCount(String operation, String calendar) {
+    return meters
+        .get(AnswerService.ANSWERS_METRIC)
+        .tag("operation", operation)
+        .tag("calendar", calendar)
+        .counter()
+        .count();
+  }
+
+  private double cacheGets(String result) {
+    return meters
+        .get("cache.gets")
+        .tag("cache", AnswerService.CACHE_NAME)
+        .tag("result", result)
+        .functionCounter()
+        .count();
+  }
 
   @Test
   void shouldCacheAnAnswerByRequestAndRelease() {
@@ -78,11 +135,11 @@ class AnswerServiceTest {
         .isInstanceOf(DatasetUnavailableException.class);
   }
 
-  private static AnswerService service(DatasetSource source) {
+  private static AnswerService service(DatasetSource source, MeterRegistry meters) {
     AnswerProperties properties = new AnswerProperties(100, Duration.ofMinutes(1));
     CurrentDataset current = new CurrentDataset(source, new DatasetLoader(source), properties);
     return new AnswerService(
-        new AnswerEngine(), current, Clock.fixed(NOW, ZoneOffset.UTC), properties);
+        new AnswerEngine(), current, Clock.fixed(NOW, ZoneOffset.UTC), properties, meters);
   }
 
   private static final class CountingSource implements DatasetSource {

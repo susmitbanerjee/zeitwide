@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 
 import com.zeitwide.api.webhooks.domain.ResolvedWebhookTarget;
 import com.zeitwide.api.webhooks.domain.WebhookEnvelope;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.net.InetAddress;
 import java.net.URI;
 import java.time.Clock;
@@ -23,6 +25,8 @@ import org.mockito.ArgumentMatchers;
 class OutboxDrainServiceTest {
 
   private static final Instant NOW = Instant.parse("2026-10-29T10:00:00Z");
+
+  private final MeterRegistry meters = new SimpleMeterRegistry();
 
   @Test
   void continuesToOtherEndpointsAfterOneDeliveryFailsAndSchedulesRetry() throws Exception {
@@ -47,7 +51,7 @@ class OutboxDrainServiceTest {
 
     var drain =
         new OutboxDrainService(
-            outbox, queue, cipher, guard, client, Clock.fixed(NOW, ZoneOffset.UTC));
+            outbox, queue, cipher, guard, client, Clock.fixed(NOW, ZoneOffset.UTC), meters);
     var result = drain.drain();
 
     assertThat(result.claimed()).isEqualTo(2);
@@ -57,6 +61,8 @@ class OutboxDrainServiceTest {
         .retryOrFail(1L, first.claimToken(), NOW.plusSeconds(10), false, null, "network_error");
     verify(queue).succeeded(2L, second.claimToken(), 204, NOW);
     verify(client).send(eq(target), eq(second.envelope()), eq("whsec_test"));
+    assertThat(attempts("succeeded", "succeeded")).isEqualTo(1);
+    assertThat(attempts("retrying", "network_error")).isEqualTo(1);
   }
 
   @Test
@@ -78,11 +84,21 @@ class OutboxDrainServiceTest {
 
     var drain =
         new OutboxDrainService(
-            outbox, queue, cipher, guard, client, Clock.fixed(NOW, ZoneOffset.UTC));
+            outbox, queue, cipher, guard, client, Clock.fixed(NOW, ZoneOffset.UTC), meters);
 
     assertThat(drain.drain().failed()).isEqualTo(1);
     verify(queue).retryOrFail(3L, expired.claimToken(), NOW, true, 500, "http_status");
     verify(queue, never()).succeeded(eq(3L), eq(expired.claimToken()), eq(500), eq(NOW));
+    assertThat(attempts("failed", "http_status")).isEqualTo(1);
+  }
+
+  private double attempts(String outcome, String reason) {
+    return meters
+        .get(OutboxDrainService.DELIVERIES_METRIC)
+        .tag("outcome", outcome)
+        .tag("reason", reason)
+        .counter()
+        .count();
   }
 
   private static WebhookDeliveryQueue.ClaimedDelivery delivery(

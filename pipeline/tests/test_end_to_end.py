@@ -116,7 +116,7 @@ class World:
                 also={"bundesbank-holidays": [BUNDESBANK_2026_URL]},
             )
 
-    def run_due(self) -> None:
+    def run_due(self) -> RecordingTelemetry:
         recorder = RecordingTelemetry()
         with new_client() as client:
             context = PipelineContext(
@@ -130,12 +130,14 @@ class World:
                     self.clock,
                     self.calendars,
                 ),
+                telemetry=recorder.telemetry,
                 clock=self.clock,
             )
             connector = procrastinate.PsycopgConnector(
                 conninfo=self.database.pipeline, min_size=1, max_size=1
             )
             run_due_blocking(create_app(connector, context), context, install_signal_handlers=False)
+        return recorder
 
     def daily(self) -> DailyResult:
         with httpx.Client() as client:
@@ -306,7 +308,15 @@ def test_change_becomes_corroborated_candidates(world: World) -> None:
     world.seed()
     change_fed_pages(world)
 
-    world.run_due()
+    recorder = world.run_due()
+
+    [(pending,)] = world.rows("SELECT count(*) FROM candidate_change WHERE status = 'pending'")
+    assert recorder.metric("zeitwide.review.candidates_pending") == pending
+    assert recorder.metric("zeitwide.review.oldest_candidate_age") is not None
+    assert (
+        recorder.metric("zeitwide.source.consecutive_failures", "frbservices-holiday-schedules")
+        == 0
+    )
 
     assert world.rows(
         """

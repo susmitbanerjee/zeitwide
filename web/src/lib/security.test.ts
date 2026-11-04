@@ -31,6 +31,15 @@ describe("contentSecurityPolicy", () => {
     expect(contentSecurityPolicy({ https: false })).not.toContain("upgrade-insecure-requests");
   });
 
+  it("lets the browser report to the Faro collector and nowhere else", () => {
+    expect(contentSecurityPolicy({})).toContain("connect-src 'self';");
+    expect(
+      contentSecurityPolicy({
+        connectOrigins: ["https://faro-collector-prod-us-central-0.grafana.net"],
+      }),
+    ).toContain("connect-src 'self' https://faro-collector-prod-us-central-0.grafana.net;");
+  });
+
   it("ships the other security headers", () => {
     expect(SECURITY_HEADERS.map((h) => h.key)).toEqual(
       expect.arrayContaining([

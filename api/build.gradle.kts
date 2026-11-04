@@ -14,6 +14,11 @@ plugins {
 group = "com.zeitwide"
 version = "0.1.0-SNAPSHOT"
 
+// Spring Boot's BOM pins an older OpenTelemetry; the extension must match the agent's SDK.
+extra["opentelemetry.version"] =
+    libs.versions.opentelemetry.sdk
+        .get()
+
 dependencyManagement {
     imports {
         mavenBom("org.springframework.ai:spring-ai-bom:${libs.versions.spring.ai.get()}")
@@ -30,6 +35,11 @@ repositories {
     mavenCentral()
 }
 
+// The OpenTelemetry agent's trace sampling extension. The agent loads it in its own class
+// loader, so it is a separate jar compiled against the agent's SDK, not part of the app.
+val otelExtension: SourceSet = sourceSets.create("otelExtension")
+val otelAgent: Configuration by configurations.creating
+
 dependencies {
     implementation(libs.spring.boot.starter.web)
     implementation(libs.spring.boot.starter.actuator)
@@ -45,10 +55,15 @@ dependencies {
     implementation(libs.java.json.canonicalization)
     implementation(libs.apache.httpclient5)
     implementation(libs.spring.ai.starter.mcp.server.webmvc)
+    implementation(libs.micrometer.registry.otlp)
     runtimeOnly(libs.postgresql)
     developmentOnly(libs.spring.boot.docker.compose)
 
     errorprone(libs.errorprone.core)
+
+    otelAgent(libs.opentelemetry.javaagent)
+    "otelExtensionCompileOnly"(libs.opentelemetry.sdk.trace)
+    "otelExtensionCompileOnly"(libs.opentelemetry.sdk.extension.autoconfigure.spi)
 
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.spring.security.test)
@@ -57,6 +72,10 @@ dependencies {
     testImplementation(libs.testcontainers.junit.jupiter)
     testImplementation(libs.archunit.junit5)
     testImplementation(libs.jqwik)
+    testImplementation(otelExtension.output)
+    testImplementation(libs.opentelemetry.sdk.trace)
+    testImplementation(libs.opentelemetry.sdk.testing)
+    testImplementation(libs.opentelemetry.sdk.extension.autoconfigure.spi)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 
@@ -134,6 +153,19 @@ spotless {
     }
 }
 
+val otelExtensionJar by tasks.registering(Jar::class) {
+    archiveBaseName = "zeitwide-otel-extension"
+    archiveVersion = ""
+    from(otelExtension.output)
+}
+
+// The agent and its extension, at fixed names, for the image's /otel directory.
+val otelFiles by tasks.registering(Sync::class) {
+    from(otelAgent) { rename { "opentelemetry-javaagent.jar" } }
+    from(otelExtensionJar)
+    into(layout.buildDirectory.dir("otel"))
+}
+
 // Distroless Java 21, non-root, pinned by digest. deploy/gcp/deploy-images.sh sets the
 // target image and tag.
 jib {
@@ -142,7 +174,27 @@ jib {
     from {
         image = "gcr.io/distroless/java21-debian12:nonroot@sha256:7e37784d94dccbf5ccb195c73b295f5ad00cd266512dfbac12eb9c3c28f8077d"
     }
+    extraDirectories {
+        paths {
+            path {
+                setFrom(
+                    layout.buildDirectory
+                        .dir("otel")
+                        .get()
+                        .asFile
+                        .toPath(),
+                )
+                into = "/otel"
+            }
+        }
+    }
     container {
+        // The agent reads its OTEL_* settings from the Cloud Run environment (deploy/gcp).
+        jvmFlags =
+            listOf(
+                "-javaagent:/otel/opentelemetry-javaagent.jar",
+                "-Dotel.javaagent.extensions=/otel/zeitwide-otel-extension.jar",
+            )
         ports = listOf("8080")
         user = "nonroot"
         creationTime = "USE_CURRENT_TIMESTAMP"
@@ -152,4 +204,5 @@ jib {
 // Jib 3.5 still reads Task.project while it runs.
 tasks.matching { it.name.startsWith("jib") }.configureEach {
     notCompatibleWithConfigurationCache("Jib reads Task.project at execution time")
+    dependsOn(otelFiles)
 }

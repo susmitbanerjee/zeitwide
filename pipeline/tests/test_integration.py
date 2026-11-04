@@ -103,6 +103,7 @@ def pipeline(database: Database, gcs_endpoint: str, bucket: storage.Bucket) -> I
                 recorder.telemetry,
                 clock,
             ),
+            telemetry=recorder.telemetry,
             clock=clock,
         )
         connector = procrastinate.PsycopgConnector(

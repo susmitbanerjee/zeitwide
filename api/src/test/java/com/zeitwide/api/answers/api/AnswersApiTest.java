@@ -39,6 +39,8 @@ import com.zeitwide.api.receipts.ReceiptTestConfiguration;
 import com.zeitwide.api.review.app.ReviewService;
 import com.zeitwide.api.webhooks.app.OutboxDrainService;
 import com.zeitwide.api.webhooks.app.WebhookSubscriptionService;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -108,6 +110,12 @@ class AnswersApiTest {
                 ApiKeyService.class
               }))
   static class UseCases {
+    // A web slice has no metrics auto-configuration; the answer service and MCP tools count.
+    @Bean
+    MeterRegistry meterRegistry() {
+      return new SimpleMeterRegistry();
+    }
+
     @Bean
     AuthProperties mcpAuthProperties() {
       return new AuthProperties(

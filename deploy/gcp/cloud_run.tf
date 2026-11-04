@@ -4,8 +4,13 @@ locals {
   # Spring resolves ${DB_HOST} and ${DB_PORT} from the secret-backed env vars, so the
   # JDBC URL can be plain config. $$ stops OpenTofu interpolating them.
   api_env = merge(local.otel_env, {
-    OTEL_SERVICE_NAME                          = "zeitwide-api"
-    JAVA_TOOL_OPTIONS                          = "-XX:MaxRAMPercentage=75"
+    OTEL_SERVICE_NAME = "zeitwide-api"
+    # 60% of 512Mi for the heap leaves room for the OpenTelemetry agent's classes and buffers.
+    JAVA_TOOL_OPTIONS = "-XX:MaxRAMPercentage=60"
+    # The agent sends traces and logs; Micrometer sends the metrics (OtlpMetricsConfiguration).
+    OTEL_METRICS_EXPORTER                      = "none"
+    ZEITWIDE_OTLP_METRICS_ENABLED              = "true"
+    LOGGING_STRUCTURED_FORMAT_CONSOLE          = "logstash"
     SPRING_DATASOURCE_URL                      = "jdbc:postgresql://$${DB_HOST}:$${DB_PORT}/${local.db.zeitwide_database}?${local.db_jdbc_params}"
     SPRING_DATASOURCE_USERNAME                 = local.db.api_user
     SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE = tostring(local.db.api_pool_max)
@@ -24,15 +29,14 @@ locals {
     ZEITWIDE_RATE_LIMITS_TRUSTED_PROXIES = "1"
   })
 
-  api_secret_env = {
+  api_secret_env = merge(local.otel_secret_env, {
     DB_HOST                         = "db-host"
     DB_PORT                         = "db-port"
     SPRING_DATASOURCE_PASSWORD      = "db-api-password" # gitleaks:allow - a Secret Manager secret name, not a value
     ZEITWIDE_RECEIPT_SIGNING_KEY    = "receipt-signing-key"
     ZEITWIDE_WEBHOOK_ENCRYPTION_KEY = "webhook-encryption-key"
-    OTEL_EXPORTER_OTLP_HEADERS      = "otlp-headers"
     ZEITWIDE_AUTH_TOKEN_SECRET      = "api-token-secret"
-  }
+  })
 
   web_env = merge(local.otel_env, {
     OTEL_SERVICE_NAME = "zeitwide-web"
@@ -52,17 +56,18 @@ locals {
     AUTH_MICROSOFT_ID        = var.microsoft_client_id
     AUTH_GITHUB_ID           = var.github_client_id
     ZEITWIDE_REVIEWER_EMAILS = join(",", var.reviewer_emails)
+    # The page is built with this too (deploy-images.sh); here it lets the CSP allow it.
+    ZEITWIDE_FARO_URL = var.faro_url
   })
 
-  web_secret_env = {
-    AUTH_SECRET                = "web-auth-secret"
-    ZEITWIDE_API_KEY           = "web-api-key"
-    ZEITWIDE_API_TOKEN_SECRET  = "api-token-secret"
-    AUTH_GOOGLE_SECRET         = "google-oauth-client-secret"
-    AUTH_MICROSOFT_SECRET      = "microsoft-oauth-client-secret"
-    AUTH_GITHUB_SECRET         = "github-oauth-client-secret"
-    OTEL_EXPORTER_OTLP_HEADERS = "otlp-headers"
-  }
+  web_secret_env = merge(local.otel_secret_env, {
+    AUTH_SECRET               = "web-auth-secret"
+    ZEITWIDE_API_KEY          = "web-api-key"
+    ZEITWIDE_API_TOKEN_SECRET = "api-token-secret"
+    AUTH_GOOGLE_SECRET        = "google-oauth-client-secret"
+    AUTH_MICROSOFT_SECRET     = "microsoft-oauth-client-secret"
+    AUTH_GITHUB_SECRET        = "github-oauth-client-secret"
+  })
 
   # libpq variables, so psycopg and pg_dump both pick them up with no extra config.
   pipeline_env = merge(local.otel_env, {
@@ -83,14 +88,13 @@ locals {
     ZEITWIDE_API_PUBLIC_URL     = local.api_public_url
   })
 
-  pipeline_secret_env = {
+  pipeline_secret_env = merge(local.otel_secret_env, {
     PGHOST                      = "db-host"
     PGPORT                      = "db-port"
     PGPASSWORD                  = "db-pipeline-password" # gitleaks:allow - a Secret Manager secret name, not a value
     ZEITWIDE_BACKUP_DB_PASSWORD = "db-backup-password"   # gitleaks:allow - a Secret Manager secret name, not a value
     GITHUB_TOKEN                = "github-release-token"
-    OTEL_EXPORTER_OTLP_HEADERS  = "otlp-headers"
-  }
+  })
 }
 
 resource "google_cloud_run_v2_service" "api" {

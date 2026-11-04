@@ -37,7 +37,7 @@ folder trust prompt once). After editing a skill, run `/reload-plugins`.
 | `web/` | Answer pages, app, admin, docs | Next.js, React, TypeScript strict |
 | `conformance/` | Golden cases both languages must pass | JSON |
 | `dataset/` | Exported dataset releases | JSON |
-| `deploy/` | GCP and Firebase config, OAuth app logos, fake GCS buckets | OpenTofu, shell |
+| `deploy/` | GCP and Firebase config, Grafana dashboards and alerts, OAuth app logos, fake GCS buckets | OpenTofu, shell |
 | `plugins/` | Claude Code plugins (coding-standard skills), listed in `.claude-plugin/marketplace.json` | Markdown, JSON |
 
 ## Running locally

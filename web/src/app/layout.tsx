@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Fragment_Mono, Schibsted_Grotesk } from "next/font/google";
 
+import { Faro } from "@/components/faro";
+
 import "./globals.css";
 
 const grotesk = Schibsted_Grotesk({
@@ -18,6 +20,8 @@ const fragmentMono = Fragment_Mono({
 });
 
 const siteUrl = process.env.SITE_URL ?? "http://localhost:3000";
+// A build argument, like SITE_URL: pages are prerendered with it.
+const faroUrl = process.env.ZEITWIDE_FARO_URL;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -36,7 +40,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en-GB"
       className={`${grotesk.variable} ${fragmentMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        {children}
+        {faroUrl ? <Faro url={faroUrl} environment={new URL(siteUrl).hostname} /> : null}
+      </body>
     </html>
   );
 }

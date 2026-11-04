@@ -19,6 +19,8 @@ export interface CspOptions {
   development?: boolean;
   /** Only an HTTPS site can upgrade requests; on plain-http localhost it would break forms. */
   https?: boolean;
+  /** Other origins the browser may send data to, such as the Grafana Faro collector. */
+  connectOrigins?: string[];
 }
 
 /**
@@ -30,6 +32,7 @@ export function contentSecurityPolicy({
   nonce,
   development = false,
   https = true,
+  connectOrigins = [],
 }: CspOptions): string {
   const scripts =
     nonce === undefined
@@ -45,7 +48,7 @@ export function contentSecurityPolicy({
     "style-src": ["'self'", "'unsafe-inline'"],
     "img-src": ["'self'", "data:"],
     "font-src": ["'self'"],
-    "connect-src": ["'self'"],
+    "connect-src": ["'self'", ...connectOrigins],
     "object-src": ["'none'"],
     "base-uri": ["'none'"],
     "form-action": ["'self'"],
