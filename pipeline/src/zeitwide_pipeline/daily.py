@@ -94,11 +94,22 @@ class DailyJob:
     def _distribute(self, export: ReleaseExport, result: "DailyResult") -> None:
         self.releases.put(export.object_key, export.content, "application/json")
         self._publish_site_files(export)
+        # Independent places: one that fails must not stop the others, and the job still fails.
+        errors: list[Exception] = []
+        for publish in (self._propose_pull_request, self._publish_open_data):
+            try:
+                publish(export, result)
+            except Exception as error:
+                log.exception("distribution_failed", step=publish.__name__, error=str(error))
+                errors.append(error)
+        if errors:
+            raise ExceptionGroup(f"Distributing release {export.id} failed", errors)
+
+    def _propose_pull_request(self, export: ReleaseExport, result: "DailyResult") -> None:
         if self.dataset_repository is None:
             log.warning("release_pull_request_skipped", release=export.id, reason="not configured")
-        else:
-            result.pull_request = self.dataset_repository.propose_release(export.id, export.content)
-        self._publish_open_data(export, result)
+            return
+        result.pull_request = self.dataset_repository.propose_release(export.id, export.content)
 
     def _publish_open_data(self, export: ReleaseExport, result: "DailyResult") -> None:
         """The GitHub data repository and the Hugging Face dataset, when the data changed."""

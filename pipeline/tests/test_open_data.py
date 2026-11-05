@@ -6,7 +6,7 @@ import io
 import json
 from collections.abc import Mapping, Sequence
 from copy import deepcopy
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -759,3 +759,20 @@ def test_bundles_build_from_a_release_with_no_closures() -> None:
     empty["calendars"] = [_calendar("US-FEDNOW", "FedNow", [], closes_on_holidays=False)]
     bundles = build_bundles(empty, LINKS, DEST, release_sha256=CHECKSUM)
     assert all(verify(bundle) == [] for bundle in bundles)
+
+
+class _BrokenRepository:
+    def propose_release(self, release_id: str, content: bytes) -> str:
+        raise GitHubError("GitHub returned 409: Git Repository is empty.")
+
+
+def test_a_failing_pull_request_does_not_stop_the_open_data() -> None:
+    target = _Target(Outcome.PUBLISHED)
+    export = ReleaseExport("2026.11.02.1", datetime(2026, 11, 2, 6, tzinfo=UTC), {}, CONTENT)
+    job = _daily(OpenData(LINKS, DEST, {GITHUB: target}))
+    job = replace(job, dataset_repository=_BrokenRepository())  # type: ignore[arg-type]
+    result = DailyResult()
+    with pytest.raises(ExceptionGroup) as raised:
+        job._distribute(export, result)
+    assert isinstance(raised.value.exceptions[0], GitHubError)
+    assert result.open_data == {GITHUB: Outcome.PUBLISHED}
