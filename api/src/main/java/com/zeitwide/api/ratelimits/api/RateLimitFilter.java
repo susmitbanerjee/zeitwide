@@ -48,7 +48,7 @@ public final class RateLimitFilter extends OncePerRequestFilter {
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
     String path = request.getRequestURI().substring(request.getContextPath().length());
-    return !(path.startsWith("/v1/") || path.equals("/mcp"));
+    return !(path.startsWith("/v1/") || path.equals("/mcp") || path.equals("/a2a"));
   }
 
   @Override
@@ -60,6 +60,7 @@ public final class RateLimitFilter extends OncePerRequestFilter {
       write(response, Problems.of(ProblemCode.INVALID_API_KEY, "The API key is not valid"));
       return;
     }
+    RequestCaller.set(request, caller.get());
     Allowance allowance = rateLimits.consume(caller.get());
     response.setHeader(LIMIT, Long.toString(allowance.limit()));
     switch (allowance) {

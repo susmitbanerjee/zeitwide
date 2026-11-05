@@ -194,6 +194,68 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/server-card": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The hosted MCP server's Server Card (SEP-2127)
+         * @description Name, version, links, icons and the streamable HTTP endpoint with its supported
+         *     protocol versions, per modelcontextprotocol/ext-server-card. Also served at
+         *     `/mcp/server-card`, the location the extension reserves. Any origin may fetch it;
+         *     it supports `If-None-Match`.
+         */
+        get: operations["getServerCard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/.well-known/agent-card.json": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The A2A 1.0 Agent Card
+         * @description One skill, `settlement-date-answers`, served over JSON-RPC at `/a2a`: send one
+         *     message (text or JSON) and get one message back with the answer, its sources and the
+         *     full answer as JSON. No credentials are needed; an API key adds a receipt.
+         */
+        get: operations["getAgentCard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/.well-known/ai-catalog.json": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The AI Catalog linking the server card, agent card, OpenAPI and llms.txt */
+        get: operations["getAiCatalog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/account/api-keys": {
         parameters: {
             query?: never;
@@ -517,12 +579,26 @@ export interface components {
         };
         ReceiptPublicKey: {
             key_id: string;
+            /** @description The same as key_id, under its JOSE name. */
+            kid: string;
+            /**
+             * @description RFC 9864's name for the algorithm.
+             * @enum {string}
+             */
+            alg: "Ed25519";
             /** @description PEM-encoded Ed25519 SubjectPublicKeyInfo. */
             public_key: string;
             /** Format: date-time */
             valid_from: string;
             /** Format: date-time */
             valid_to: string | null;
+        };
+        /**
+         * @description A document whose shape another specification owns (MCP Server Card, A2A Agent Card,
+         *     AI Catalog); CI validates each against that specification's schema.
+         */
+        DiscoveryDocument: {
+            [key: string]: unknown;
         };
         /** @enum {string} */
         ChangeType: "closure_added" | "closure_removed" | "closure_changed" | "basis_changed";
@@ -1370,6 +1446,90 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ReceiptKeySet"];
                 };
+            };
+        };
+    };
+    getServerCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The server card. */
+            200: {
+                headers: {
+                    ETag?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/mcp-server-card+json": components["schemas"]["DiscoveryDocument"];
+                };
+            };
+            /** @description Unchanged since the ETag sent in If-None-Match. */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getAgentCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The agent card. */
+            200: {
+                headers: {
+                    ETag?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiscoveryDocument"];
+                };
+            };
+            /** @description Unchanged since the ETag sent in If-None-Match. */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getAiCatalog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The catalog (Agent-Card/ai-catalog, spec version 1.0). */
+            200: {
+                headers: {
+                    ETag?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ai-catalog+json": components["schemas"]["DiscoveryDocument"];
+                };
+            };
+            /** @description Unchanged since the ETag sent in If-None-Match. */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

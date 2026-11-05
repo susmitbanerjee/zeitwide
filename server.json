@@ -1,0 +1,63 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.susmitbanerjee/zeitwide",
+  "title": "Zeitwide",
+  "description": "Business-day answers for payment rails and holiday calendars, with sources.",
+  "version": "0.1.0",
+  "websiteUrl": "https://zeitwide.com/",
+  "repository": {
+    "url": "https://github.com/susmitbanerjee/zeitwide",
+    "source": "github",
+    "id": "1436841628"
+  },
+  "icons": [
+    {
+      "src": "https://zeitwide.com/logo.png",
+      "mimeType": "image/png",
+      "sizes": [
+        "215x215"
+      ]
+    },
+    {
+      "src": "https://zeitwide.com/icon.svg",
+      "mimeType": "image/svg+xml",
+      "sizes": [
+        "any"
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://api.zeitwide.com/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Optional. Without it, the six read tools answer at the anonymous limit (100 calls a day per IPv4 /24 or IPv6 /48) with no receipt. With a Zeitwide API key (Bearer zw_live_…) calls get the key's limits and a signed receipt.",
+          "isRequired": false,
+          "isSecret": true,
+          "placeholder": "Bearer zw_live_…"
+        }
+      ]
+    }
+  ],
+  "packages": [
+    {
+      "registryType": "pypi",
+      "registryBaseUrl": "https://pypi.org",
+      "identifier": "zeitwide-mcp",
+      "version": "0.1.0",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      },
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "--offline",
+          "description": "Answer from the dataset release bundled with the package: no network and no key needed."
+        }
+      ]
+    }
+  ]
+}

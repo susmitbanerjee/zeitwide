@@ -29,7 +29,7 @@ public final class ChangeMcpTools {
     return List.of(
         tools.tool(
             "get_changes",
-            "Use before acting on an old date or when an agent needs updates since an instant. Keep the returned keyset cursor and pass it back with the same filters to read the next page. Returns the REST change page with stable event IDs and before/after states.",
+            "Given a since instant and optional calendar IDs, change types, cursor and limit (1 to 100), returns the changes published since then with each date's before and after state and basis (published by an official source or projected), plus a keyset cursor for the next page; call explain_date for a date's sources.",
             Map.of(
                 "calendars",
                     McpToolSupport.array(
@@ -68,11 +68,12 @@ public final class ChangeMcpTools {
             this::getChanges));
   }
 
-  private McpSchema.CallToolResult getChanges(Map<String, Object> supplied) {
+  private McpSchema.CallToolResult getChanges(McpToolSupport.McpCall call) {
     return tools.invoke(
         () -> {
           Map<String, Object> values =
-              McpToolSupport.arguments(supplied, "calendars", "since", "types", "cursor", "limit");
+              McpToolSupport.arguments(
+                  call.arguments(), "calendars", "since", "types", "cursor", "limit");
           List<String> calendars =
               McpToolSupport.optionalStrings(values, "calendars", 10, 64, CALENDAR_ID);
           List<String> types = McpToolSupport.optionalStrings(values, "types", 4, 32, CHANGE_TYPE);

@@ -28,6 +28,9 @@ locals {
     # Proxies that append to X-Forwarded-For: Cloud Run's front end, plus Cloudflare once
     # api.<domain> is proxied there (deploy/cloudflare).
     ZEITWIDE_RATE_LIMITS_TRUSTED_PROXIES = tostring(var.api_trusted_proxies)
+    # Where the MCP server card, A2A agent card and AI catalog say Zeitwide lives.
+    ZEITWIDE_SITE_URL       = var.web_origin
+    ZEITWIDE_API_PUBLIC_URL = local.api_public_url
   })
 
   api_secret_env = merge(local.otel_secret_env, {

@@ -2,14 +2,17 @@ spring:
   ai:
     mcp:
       server:
-        name: zeitwide-api
+        # The MCP Registry name, so serverInfo matches the server card and server.json.
+        name: io.github.susmitbanerjee/zeitwide
         version: 0.1.0
         protocol: STREAMABLE
         type: SYNC
         instructions: >-
           Never guess whether a date is a holiday; use a Zeitwide tool. Cite the returned
-          source when explaining an answer. Store the receipt for later verification. Before
-          acting on an old date, call get_changes to check for updates since the relevant time.
+          source when explaining an answer. Store the receipt for later verification (answers
+          carry one when called with an API key; anonymous answers carry the dataset release).
+          Before acting on an old date, call get_changes to check for updates since the
+          relevant time.
         streamable-http:
           mcp-endpoint: /mcp
   application:
@@ -93,6 +96,15 @@ zeitwide:
     public-keys-json: ${ZEITWIDE_RECEIPT_PUBLIC_KEYS_JSON:[]}
   webhooks:
     encryption-key: ${ZEITWIDE_WEBHOOK_ENCRYPTION_KEY:}
+  # The discovery documents (MCP server card, A2A agent card, AI catalog) are built from this.
+  discovery:
+    site-url: ${ZEITWIDE_SITE_URL:http://localhost:3000}
+    api-url: ${ZEITWIDE_API_PUBLIC_URL:http://localhost:8080}
+    title: Zeitwide
+    description: Business-day answers for payment rails and holiday calendars, with sources.
+    organization: Zeitwide
+    repository-url: https://github.com/susmitbanerjee/zeitwide
+    repository-id: "1436841628"
   answers:
     cache-max-entries: 10000
     release-check-interval: PT30S
@@ -100,6 +112,10 @@ zeitwide:
     anonymous:
       capacity: 60
       period: PT1H
+    # MCP tool calls and A2A messages without an API key, per IPv4 /24 or IPv6 /48.
+    anonymous-calls:
+      capacity: 100
+      period: P1D
     keyed:
       capacity: 10000
       period: P1D

@@ -23,11 +23,14 @@ info:
     last year its sources published. A date outside that is `out_of_range`, never an answer
     from the weekend rule. Calendars that close on no holiday (FedNow) have no limit.
 
-    **Access.** Every route needs an API key (`Authorization: Bearer zw_live_…`, free from
-    the Zeitwide app). Only the public receipt keys are open.
+    **Access.** Every REST answer route needs an API key (`Authorization: Bearer zw_live_…`,
+    free from the Zeitwide app). The receipt keys and the discovery documents are open. The
+    hosted MCP server (`/mcp`) and the A2A endpoint (`/a2a`) also answer with no credentials:
+    those answers carry the dataset release but no receipt.
 
     **Limits.** 10,000 calls a day per key. Requests without a valid identity are also
-    limited per address before they are refused.
+    limited per address before they are refused; anonymous MCP tool calls and A2A messages
+    share 100 a day per IPv4 /24 (IPv6 /48).
 
     **Errors** are RFC 9457 problem details with a stable `code`.
   license:
@@ -41,6 +44,8 @@ security:
   - apiKey: []
   - bearerAuth: []
 tags:
+  - name: discovery
+    description: Documents that let agents find and connect to Zeitwide with no setup.
   - name: calendars
   - name: business-days
   - name: changes
@@ -360,6 +365,66 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ReceiptKeySet" }
+
+  /v1/server-card:
+    get:
+      operationId: getServerCard
+      security: []
+      tags: [discovery]
+      summary: The hosted MCP server's Server Card (SEP-2127)
+      description: |
+        Name, version, links, icons and the streamable HTTP endpoint with its supported
+        protocol versions, per modelcontextprotocol/ext-server-card. Also served at
+        `/mcp/server-card`, the location the extension reserves. Any origin may fetch it;
+        it supports `If-None-Match`.
+      responses:
+        "200":
+          description: The server card.
+          headers:
+            ETag: { schema: { type: string } }
+          content:
+            application/mcp-server-card+json:
+              schema: { $ref: "#/components/schemas/DiscoveryDocument" }
+        "304":
+          description: Unchanged since the ETag sent in If-None-Match.
+
+  /.well-known/agent-card.json:
+    get:
+      operationId: getAgentCard
+      security: []
+      tags: [discovery]
+      summary: The A2A 1.0 Agent Card
+      description: |
+        One skill, `settlement-date-answers`, served over JSON-RPC at `/a2a`: send one
+        message (text or JSON) and get one message back with the answer, its sources and the
+        full answer as JSON. No credentials are needed; an API key adds a receipt.
+      responses:
+        "200":
+          description: The agent card.
+          headers:
+            ETag: { schema: { type: string } }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DiscoveryDocument" }
+        "304":
+          description: Unchanged since the ETag sent in If-None-Match.
+
+  /.well-known/ai-catalog.json:
+    get:
+      operationId: getAiCatalog
+      security: []
+      tags: [discovery]
+      summary: The AI Catalog linking the server card, agent card, OpenAPI and llms.txt
+      responses:
+        "200":
+          description: The catalog (Agent-Card/ai-catalog, spec version 1.0).
+          headers:
+            ETag: { schema: { type: string } }
+          content:
+            application/ai-catalog+json:
+              schema: { $ref: "#/components/schemas/DiscoveryDocument" }
+        "304":
+          description: Unchanged since the ETag sent in If-None-Match.
 
   /v1/account/api-keys:
     get:
@@ -961,12 +1026,20 @@ components:
           items: { $ref: "#/components/schemas/ReceiptPublicKey" }
     ReceiptPublicKey:
       type: object
-      required: [key_id, public_key, valid_from, valid_to]
+      required: [key_id, kid, alg, public_key, valid_from, valid_to]
       properties:
         key_id: { type: string }
+        kid: { type: string, description: "The same as key_id, under its JOSE name." }
+        alg: { type: string, enum: [Ed25519], description: "RFC 9864's name for the algorithm." }
         public_key: { type: string, description: PEM-encoded Ed25519 SubjectPublicKeyInfo. }
         valid_from: { type: string, format: date-time }
         valid_to: { type: [string, "null"], format: date-time }
+    DiscoveryDocument:
+      type: object
+      description: |
+        A document whose shape another specification owns (MCP Server Card, A2A Agent Card,
+        AI Catalog); CI validates each against that specification's schema.
+      additionalProperties: true
     ChangeType:
       type: string
       enum: [closure_added, closure_removed, closure_changed, basis_changed]

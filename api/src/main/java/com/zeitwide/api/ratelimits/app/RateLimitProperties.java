@@ -14,6 +14,8 @@ import org.springframework.validation.annotation.Validated;
  * Request limits.
  *
  * @param anonymous per client address, for requests without an API key
+ * @param anonymousCalls per client network (IPv4 /24, IPv6 /48), for MCP tool calls and A2A
+ *     messages without an API key, on top of {@code anonymous}
  * @param keyed per API key
  * @param firstParty per API key for Zeitwide's own services (the web app prerendering answer
  *     pages), listed by key ID in {@code firstPartyKeyIds}
@@ -24,6 +26,7 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties("zeitwide.rate-limits")
 public record RateLimitProperties(
     @NotNull Limit anonymous,
+    @NotNull Limit anonymousCalls,
     @NotNull Limit keyed,
     @NotNull Limit firstParty,
     @NotNull @Size(max = 10) List<UUID> firstPartyKeyIds,

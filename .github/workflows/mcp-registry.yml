@@ -1,0 +1,108 @@
+name: MCP Registry
+
+# Publishes server.json (the hosted server at api.zeitwide.com/mcp plus the zeitwide-mcp PyPI
+# package) to the official MCP Registry as io.github.susmitbanerjee/zeitwide.
+#
+# - Pull requests: a dry run. `mcp-publisher validate` checks server.json against the
+#   registry's own validation, with no login and nothing published.
+# - Tags `lib-python-v<version>` (the same tags that publish to PyPI): waits until PyPI serves
+#   zeitwide-mcp at that version, since the registry checks the package exists and that its
+#   README carries `mcp-name: io.github.susmitbanerjee/zeitwide`, then publishes.
+#
+# Auth is GitHub OIDC: the registry grants the io.github.<owner>/* namespace to workflows in the
+# owner's repositories, so no secret is stored. To move to the com.zeitwide/* namespace later,
+# set up DNS auth (a TXT record on zeitwide.com) and switch the login step to `login dns`.
+on:
+  pull_request:
+    paths:
+      - server.json
+      - lib-python/zeitwide-mcp/**
+      - lib-python/pyproject.toml
+      - .github/workflows/mcp-registry.yml
+  push:
+    tags: ["lib-python-v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mcp-registry-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # Pinned and verified with its Sigstore bundle; bump deliberately.
+  MCP_PUBLISHER_VERSION: v1.8.6
+
+jobs:
+  registry:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check server.json matches the package versions
+        run: |
+          set -euo pipefail
+          library=$(python3 -c "import tomllib; print(tomllib.load(open('lib-python/pyproject.toml', 'rb'))['project']['version'])")
+          launcher=$(python3 -c "import tomllib; print(tomllib.load(open('lib-python/zeitwide-mcp/pyproject.toml', 'rb'))['project']['version'])")
+          server=$(jq -r .version server.json)
+          package=$(jq -r '.packages[] | select(.identifier == "zeitwide-mcp") | .version' server.json)
+          for version in "$launcher" "$server" "$package"; do
+            if [ "$version" != "$library" ]; then
+              echo "::error::server.json ($server, package $package) and zeitwide-mcp ($launcher) must match lib-python ($library)"
+              exit 1
+            fi
+          done
+          if [ "$GITHUB_REF_TYPE" = "tag" ] && [ "${GITHUB_REF_NAME#lib-python-v}" != "$library" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match version $library"
+            exit 1
+          fi
+          grep -q "mcp-name: $(jq -r .name server.json)" lib-python/zeitwide-mcp/README.md \
+            || { echo "::error::lib-python/zeitwide-mcp/README.md lacks the mcp-name marker"; exit 1; }
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Download and verify mcp-publisher
+        run: |
+          set -euo pipefail
+          archive="mcp-publisher_linux_amd64.tar.gz"
+          base_url="https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}"
+          curl --fail --location --silent --show-error --output "$archive" "$base_url/$archive"
+          curl --fail --location --silent --show-error --output "$archive.sigstore.json" "$base_url/$archive.sigstore.json"
+          cosign verify-blob \
+            --bundle "$archive.sigstore.json" \
+            --certificate-identity "https://github.com/modelcontextprotocol/registry/.github/workflows/release.yml@refs/tags/${MCP_PUBLISHER_VERSION}" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            "$archive"
+          tar xzf "$archive" mcp-publisher
+          rm -f "$archive" "$archive.sigstore.json"
+
+      - name: Dry run (validate only)
+        run: ./mcp-publisher validate server.json
+
+      - name: Wait for zeitwide-mcp on PyPI
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          version=$(jq -r .version server.json)
+          for attempt in $(seq 1 40); do
+            if curl --fail --silent --output /dev/null "https://pypi.org/pypi/zeitwide-mcp/${version}/json"; then
+              echo "zeitwide-mcp ${version} is on PyPI"
+              exit 0
+            fi
+            echo "Waiting for zeitwide-mcp ${version} on PyPI (attempt ${attempt})"
+            sleep 30
+          done
+          echo "::error::zeitwide-mcp ${version} did not appear on PyPI within 20 minutes"
+          exit 1
+
+      - name: Authenticate to the MCP Registry
+        if: github.event_name == 'push'
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish
+        if: github.event_name == 'push'
+        run: ./mcp-publisher publish

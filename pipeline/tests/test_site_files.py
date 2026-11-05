@@ -508,8 +508,17 @@ def test_validator_passes_a_good_site_and_names_each_problem() -> None:
         )
     links = llms_links(files["llms.txt"])
     assert "https://zeitwide.example/pricing.md" in links
-    # The API and MCP lines are endpoints, not pages: not checked.
-    assert not any(link.startswith("https://api.") for link in links)
+    # The API, MCP and A2A lines are endpoints, not pages: not checked. The server card is a
+    # document that answers a GET, so it is a link like any other.
+    assert [link for link in links if link.startswith("https://api.")] == [
+        "https://api.zeitwide.example/v1/server-card"
+    ]
+    assert {
+        "https://zeitwide.example/.well-known/ai-catalog.json",
+        "https://zeitwide.example/.well-known/agent-card.json",
+        "https://zeitwide.example/.well-known/zeitwide-keys.json",
+        "https://zeitwide.example/openapi.json",
+    } <= set(links)
     broken = frozenset({"https://zeitwide.example/pricing.md"})
     with httpx.Client(transport=_site(files, {"GB-CHAPS": 4, "EU-T2": 2}, broken)) as client:
         problems = validate_site(client, "https://zeitwide.example", "https://api.zeitwide.example")

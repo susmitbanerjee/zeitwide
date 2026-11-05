@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeitwide.com/schemas/zeitwide-keys.schema.json",
+  "title": "Zeitwide receipt keys",
+  "description": "/.well-known/zeitwide-keys.json: the Ed25519 public keys that verify answer receipts, each with the interval it signs for. Matches ReceiptKeySet in api/openapi.yaml.",
+  "type": "object",
+  "required": ["keys"],
+  "properties": {
+    "keys": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key_id", "kid", "alg", "public_key", "valid_from", "valid_to"],
+        "properties": {
+          "key_id": { "type": "string", "minLength": 1 },
+          "kid": { "type": "string", "minLength": 1 },
+          "alg": { "const": "Ed25519" },
+          "public_key": { "type": "string", "pattern": "^-----BEGIN PUBLIC KEY-----" },
+          "valid_from": { "type": "string", "format": "date-time" },
+          "valid_to": { "type": ["string", "null"], "format": "date-time" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

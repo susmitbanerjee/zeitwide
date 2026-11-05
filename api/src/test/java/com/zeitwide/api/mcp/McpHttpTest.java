@@ -35,7 +35,10 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = "zeitwide.rate-limits.anonymous.capacity=1000000")
+    properties = {
+      "zeitwide.rate-limits.anonymous.capacity=1000000",
+      "zeitwide.rate-limits.anonymous-calls.capacity=1000000"
+    })
 @Import({PostgresTestcontainer.class, McpHttpTest.FixedClockConfiguration.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class McpHttpTest {
@@ -45,6 +48,8 @@ class McpHttpTest {
   private static final String API_KEY_SECRET = "A".repeat(43); // gitleaks:allow
   private static final String API_KEY = API_KEY_PREFIX + "_" + API_KEY_SECRET;
   private static final String AS_OF = "2022-09-10T00:00:00Z";
+  // After the golden release recorded 2026, which the fixed clock below predates.
+  private static final String RECENT = "2026-10-29T00:00:00Z";
 
   @LocalServerPort private int port;
   @Autowired private JdbcClient jdbc;
@@ -131,6 +136,103 @@ class McpHttpTest {
   }
 
   @Test
+  void shouldAnswerEveryToolWithNoCredentialsAndNoReceipt() {
+    try (McpSyncClient client = anonymousClient()) {
+      client.initialize();
+      assertThat(client.getServerInfo().name()).isEqualTo("io.github.susmitbanerjee/zeitwide");
+      assertThat(client.listTools().tools())
+          .allSatisfy(
+              tool ->
+                  // One sentence that states the inputs, the output and the sources.
+                  assertThat(tool.description())
+                      .startsWith("Given ")
+                      .contains("returns", "source")
+                      .endsWith(".")
+                      .doesNotContainPattern("\\.\\s+[A-Z]"));
+
+      Map<String, Map<String, Object>> calls =
+          Map.of(
+              "is_business_day",
+              Map.of("calendars", List.of("GB-CHAPS"), "date", "2026-12-28", "as_of", RECENT),
+              "next_business_day",
+              Map.of("calendars", List.of("GB-CHAPS"), "date", "2026-12-24", "as_of", RECENT),
+              "add_business_days",
+              Map.of(
+                  "calendars",
+                  List.of("US-FEDWIRE", "GB-CHAPS"),
+                  "date",
+                  "2026-12-24",
+                  "days",
+                  2,
+                  "as_of",
+                  RECENT),
+              "explain_date",
+              Map.of("calendar_id", "GB-CHAPS", "date", "2026-12-28", "as_of", RECENT),
+              "list_closures",
+              Map.of(
+                  "calendar_id",
+                  "GB-CHAPS",
+                  "from",
+                  "2026-12-01",
+                  "to",
+                  "2026-12-31",
+                  "as_of",
+                  RECENT));
+      calls.forEach(
+          (tool, arguments) -> {
+            McpSchema.CallToolResult result =
+                client.callTool(new McpSchema.CallToolRequest(tool, arguments));
+            assertThat(result.isError()).as(tool).isNotEqualTo(true);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> answer = (Map<String, Object>) result.structuredContent();
+            assertThat(answer).as(tool).containsKey("dataset_release").doesNotContainKey("receipt");
+            assertThat(((McpSchema.TextContent) result.content().getFirst()).text())
+                .as(tool)
+                .contains("\"sources\"");
+          });
+
+      McpSchema.CallToolResult changes =
+          client.callTool(
+              new McpSchema.CallToolRequest("get_changes", Map.of("since", AS_OF, "limit", 5)));
+      assertThat(changes.isError()).isNotEqualTo(true);
+      assertThat(changes.structuredContent()).isNotNull();
+    }
+  }
+
+  @Test
+  void shouldSignAnswersForKeyedCallers() {
+    try (McpSyncClient client = client()) {
+      client.initialize();
+      McpSchema.CallToolResult result =
+          client.callTool(
+              new McpSchema.CallToolRequest(
+                  "is_business_day",
+                  Map.of("calendars", List.of("GB-CHAPS"), "date", "2026-12-28", "as_of", RECENT)));
+      @SuppressWarnings("unchecked")
+      Map<String, Object> answer = (Map<String, Object>) result.structuredContent();
+      assertThat(answer).containsKeys("receipt", "dataset_release");
+    }
+  }
+
+  @Test
+  void shouldRefuseABadKeyRatherThanAnswerAnonymously() throws Exception {
+    HttpRequest initialize =
+        HttpRequest.newBuilder(uri("/mcp"))
+            .header("Authorization", "Bearer zw_live_Nope0000_" + "B".repeat(43))
+            .header("Content-Type", "application/json")
+            .header("Accept", "application/json, text/event-stream")
+            .POST(
+                HttpRequest.BodyPublishers.ofString(
+                    "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":"
+                        + "{\"protocolVersion\":\"2025-06-18\",\"capabilities\":{},"
+                        + "\"clientInfo\":{\"name\":\"t\",\"version\":\"1\"}}}"))
+            .build();
+    HttpResponse<String> response =
+        HttpClient.newHttpClient().send(initialize, HttpResponse.BodyHandlers.ofString());
+    assertThat(response.statusCode()).isEqualTo(401);
+  }
+
+  @Test
   void invalidToolArgumentsReturnAnMcpToolError() {
     try (McpSyncClient client = client()) {
       client.initialize();
@@ -196,6 +298,12 @@ class McpHttpTest {
             .build();
     return McpClient.sync(transport)
         .clientInfo(new McpSchema.Implementation("zeitwide-test", "1.0"))
+        .build();
+  }
+
+  private McpSyncClient anonymousClient() {
+    return McpClient.sync(HttpClientStreamableHttpTransport.builder(uri("/mcp").toString()).build())
+        .clientInfo(new McpSchema.Implementation("zeitwide-anonymous-test", "1.0"))
         .build();
   }
 

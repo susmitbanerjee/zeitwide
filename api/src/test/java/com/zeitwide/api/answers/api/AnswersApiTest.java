@@ -41,6 +41,7 @@ import com.zeitwide.api.webhooks.app.OutboxDrainService;
 import com.zeitwide.api.webhooks.app.WebhookSubscriptionService;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import io.modelcontextprotocol.server.transport.WebMvcStreamableServerTransportProvider;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,6 +55,7 @@ import java.util.TreeSet;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.ai.mcp.server.common.autoconfigure.properties.McpServerProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -116,6 +118,12 @@ class AnswersApiTest {
       return new SimpleMeterRegistry();
     }
 
+    // The discovery documents read the MCP server's name and version; the slice has no MCP.
+    @Bean
+    McpServerProperties mcpServerProperties() {
+      return new McpServerProperties();
+    }
+
     @Bean
     AuthProperties mcpAuthProperties() {
       return new AuthProperties(
@@ -144,6 +152,8 @@ class AnswersApiTest {
   @MockitoBean private AlertRuleService alertRuleService;
   @MockitoBean private ReviewService reviewService;
   @MockitoBean private OperationsService operationsService;
+  @MockitoBean private SettlementAnswers settlementAnswers;
+  @MockitoBean private WebMvcStreamableServerTransportProvider mcpTransport;
 
   @BeforeEach
   void stubPorts() {

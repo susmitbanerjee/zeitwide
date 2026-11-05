@@ -28,3 +28,9 @@ and `verify_webhook`.
 
 This package only launches the server: the code is in `zeitwide` (MIT) and the bundled
 dataset is under CC BY-NC 4.0.
+
+Also listed in the [MCP Registry](https://registry.modelcontextprotocol.io) as
+`io.github.susmitbanerjee/zeitwide`, with the hosted server at `https://api.zeitwide.com/mcp`,
+which needs no key.
+
+<!-- mcp-name: io.github.susmitbanerjee/zeitwide -->

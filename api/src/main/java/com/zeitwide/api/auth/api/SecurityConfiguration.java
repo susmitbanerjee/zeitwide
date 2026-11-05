@@ -61,6 +61,18 @@ public class SecurityConfiguration {
 
   private static final Duration MAX_TOKEN_LIFETIME = Duration.ofMinutes(5);
 
+  /**
+   * Discovery documents and receipt keys: public, read-only metadata that any site's browser client
+   * may fetch, so they allow every origin (with no credentials).
+   */
+  static final String[] PUBLIC_DOCUMENTS = {
+    "/.well-known/zeitwide-keys.json",
+    "/.well-known/agent-card.json",
+    "/.well-known/ai-catalog.json",
+    "/v1/server-card",
+    "/mcp/server-card"
+  };
+
   @Bean
   org.springframework.boot.web.servlet.FilterRegistrationBean<
           com.zeitwide.api.ratelimits.api.RateLimitFilter>
@@ -166,9 +178,10 @@ public class SecurityConfiguration {
                     .authenticated()
                     .requestMatchers("/v1/changes", "/v1/receipts/verify")
                     .authenticated()
+                    .requestMatchers(HttpMethod.GET, PUBLIC_DOCUMENTS)
+                    .permitAll()
                     .requestMatchers(
                         HttpMethod.GET,
-                        "/.well-known/zeitwide-keys.json",
                         "/docs",
                         "/docs/**",
                         "/openapi.yaml",
@@ -181,8 +194,11 @@ public class SecurityConfiguration {
                     .hasRole("reviewer")
                     .requestMatchers("/v1/account/**")
                     .authenticated()
-                    .requestMatchers("/mcp")
-                    .authenticated()
+                    // Agents may call MCP and A2A with no credentials: the rate limit filter
+                    // gives them the anonymous per-network limit, and the answers carry no
+                    // receipt. A bad credential is still refused, never treated as anonymous.
+                    .requestMatchers("/mcp", "/a2a")
+                    .permitAll()
                     .requestMatchers("/admin/**")
                     .hasRole("reviewer")
                     .requestMatchers("/internal/**")
@@ -231,7 +247,9 @@ public class SecurityConfiguration {
             "Idempotency-Key",
             "MCP-Protocol-Version",
             "MCP-Session-Id",
-            "Last-Event-ID"));
+            "Last-Event-ID",
+            "A2A-Version",
+            "A2A-Extensions"));
     configuration.setExposedHeaders(
         List.of(
             "RateLimit-Limit",
@@ -241,6 +259,16 @@ public class SecurityConfiguration {
             "MCP-Session-Id"));
     configuration.setAllowCredentials(false);
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    // Registered first: the first matching pattern wins.
+    CorsConfiguration publicDocuments = new CorsConfiguration();
+    publicDocuments.addAllowedOrigin("*");
+    publicDocuments.setAllowedMethods(List.of("GET", "HEAD", "OPTIONS"));
+    publicDocuments.setAllowedHeaders(List.of("Content-Type", "If-None-Match"));
+    publicDocuments.setExposedHeaders(List.of("ETag"));
+    publicDocuments.setAllowCredentials(false);
+    for (String path : PUBLIC_DOCUMENTS) {
+      source.registerCorsConfiguration(path, publicDocuments);
+    }
     source.registerCorsConfiguration("/**", configuration);
     return source;
   }

@@ -63,9 +63,23 @@ public final class ReceiptDtos {
   @JsonInclude(JsonInclude.Include.NON_NULL)
   public record KeySet(List<Key> keys) {}
 
-  public record Key(String keyId, String publicKey, Instant validFrom, Instant validTo) {
+  /**
+   * One verification key. {@code kid} and {@code alg} (RFC 9864's fully specified "Ed25519") repeat
+   * the key ID and name the algorithm in JOSE terms, for verifiers that look there first.
+   */
+  public record Key(
+      String keyId,
+      String kid,
+      String alg,
+      String publicKey,
+      Instant validFrom,
+      @JsonInclude(JsonInclude.Include.ALWAYS) Instant validTo) {
+
+    static final String ALGORITHM = "Ed25519";
+
     static Key fromDomain(PublicReceiptKey key) {
-      return new Key(key.keyId(), key.publicKey(), key.validFrom(), key.validTo());
+      return new Key(
+          key.keyId(), key.keyId(), ALGORITHM, key.publicKey(), key.validFrom(), key.validTo());
     }
   }
 

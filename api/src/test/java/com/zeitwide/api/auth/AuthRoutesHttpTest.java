@@ -119,10 +119,15 @@ class AuthRoutesHttpTest {
   }
 
   @Test
-  void mcpChallengesAnonymousClientsAndRefusesUnknownKeys() throws Exception {
+  void mcpLetsAnonymousClientsInButRefusesUnknownKeys() throws Exception {
+    // Anonymous agents reach the MCP transport (which rejects this empty body itself); they are
+    // limited and unsigned, not refused.
     mvc.perform(post("/mcp").contentType(MediaType.APPLICATION_JSON).content("{}"))
-        .andExpect(status().isUnauthorized())
-        .andExpect(header().string("WWW-Authenticate", "Bearer realm=\"zeitwide\""));
+        .andExpect(
+            result ->
+                org.assertj.core.api.Assertions.assertThat(result.getResponse().getStatus())
+                    .isNotEqualTo(401)
+                    .isNotEqualTo(403));
 
     mvc.perform(
             post("/mcp")

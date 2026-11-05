@@ -64,8 +64,8 @@ def llms_txt(
         f"{plural(closures, 'closure')}{span}.",
         "",
         "Every page is also Markdown: add `.md` to its URL, or send `Accept: text/markdown`.",
-        f"API: {links.api_url.rstrip('/')}/v1 (OpenAPI: {links.openapi_url}); "
-        f"MCP server: {links.mcp_url}.",
+        f"API: {links.api('/v1')} (OpenAPI: {links.openapi_url}); "
+        f"MCP server: {links.mcp_url} (no key needed); A2A agent: {links.a2a_url}.",
         "",
         "## Answers",
         "",
@@ -90,6 +90,17 @@ def llms_txt(
         "",
         "## Discovery",
         "",
+        f"- [AI catalog]({links.page('/.well-known/ai-catalog.json')}): links the MCP server "
+        "card, the A2A agent card, the OpenAPI document, this file and the receipt keys.",
+        f"- [MCP server card]({links.server_card_url}): the hosted MCP server at "
+        f"{links.mcp_url}. Its six read tools need no key: 100 calls a day per network, "
+        "answers without a receipt; an API key adds its limits and signed receipts.",
+        f"- [A2A agent card]({links.page('/.well-known/agent-card.json')}): one skill, "
+        f"settlement-date-answers, over JSON-RPC at {links.a2a_url}. Send one message, get one "
+        "answer with its sources.",
+        f"- [OpenAPI]({links.openapi_url}): the REST API, as OpenAPI 3.1 JSON.",
+        f"- [Receipt keys]({links.page('/.well-known/zeitwide-keys.json')}): the Ed25519 public "
+        "keys, with kid, alg, valid_from and valid_to, for checking receipts offline.",
         f"- [Sitemap]({links.page('/sitemap.xml')}): an index of "
         f"{plural(discovery.sitemap_files, 'sitemap')} listing {discovery.sitemap_urls} URLs, "
         "dated by each calendar's last change.",

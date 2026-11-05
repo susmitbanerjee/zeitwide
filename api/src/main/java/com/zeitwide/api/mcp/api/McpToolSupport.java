@@ -6,6 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zeitwide.api.answers.app.DatasetUnavailableException;
 import com.zeitwide.api.answers.domain.OutOfRangeException;
 import com.zeitwide.api.answers.domain.UnknownCalendarException;
+import com.zeitwide.api.auth.domain.Caller;
+import com.zeitwide.api.ratelimits.app.RateLimits;
+import com.zeitwide.api.ratelimits.domain.Allowance;
 import com.zeitwide.api.web.RequestValidationException;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -16,27 +19,39 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
 
 @Component
 public final class McpToolSupport {
 
+  /** Where the transport puts the request's {@link Caller} in the MCP transport context. */
+  public static final String CALLER_CONTEXT_KEY = "zeitwide.caller";
+
   static final String TOOL_CALLS_METRIC = "zeitwide.mcp.tool.calls";
   private static final TypeReference<Map<String, Object>> OBJECT_MAP = new TypeReference<>() {};
   private final ObjectMapper json;
   private final MeterRegistry meters;
+  private final RateLimits rateLimits;
 
-  public McpToolSupport(ObjectMapper json, MeterRegistry meters) {
+  public McpToolSupport(ObjectMapper json, MeterRegistry meters, RateLimits rateLimits) {
     this.json = json;
     this.meters = meters;
+    this.rateLimits = rateLimits;
   }
+
+  /**
+   * One tool call's arguments, and whether its answer is signed: only calls made with an API key or
+   * a signed-in user's token get a receipt; anonymous answers carry the dataset release only.
+   */
+  public record McpCall(Map<String, Object> arguments, boolean signed) {}
 
   public McpServerFeatures.SyncToolSpecification tool(
       String name,
       String description,
       Map<String, Object> properties,
       List<String> required,
-      Function<Map<String, Object>, McpSchema.CallToolResult> handler) {
+      Function<McpCall, McpSchema.CallToolResult> handler) {
     McpSchema.JsonSchema schema =
         new McpSchema.JsonSchema("object", properties, required, false, null, null);
     McpSchema.Tool tool =
@@ -45,11 +60,34 @@ public final class McpToolSupport {
         .tool(tool)
         .callHandler(
             (exchange, request) -> {
-              McpSchema.CallToolResult result = handler.apply(request.arguments());
+              McpSchema.CallToolResult result =
+                  call(exchange.transportContext().get(CALLER_CONTEXT_KEY), request, handler);
               countCall(name, Boolean.TRUE.equals(result.isError()) ? "error" : "ok");
               return result;
             })
         .build();
+  }
+
+  private McpSchema.CallToolResult call(
+      Object caller,
+      McpSchema.CallToolRequest request,
+      Function<McpCall, McpSchema.CallToolResult> handler) {
+    // The rate limit filter runs before every /mcp request; without its caller, refuse rather
+    // than answer unmetered.
+    if (!(caller instanceof Caller known)) {
+      return error("unauthorized", "The caller could not be identified");
+    }
+    if (known instanceof Caller.Anonymous anonymous
+        && rateLimits.consumeAnonymousCall(anonymous) instanceof Allowance.Denied denied) {
+      return error(
+          "rate_limited",
+          "The anonymous limit of "
+              + denied.limit()
+              + " calls a day for this network is used up. Try again in "
+              + Math.max(1, denied.retryAfter().toSeconds())
+              + " seconds, or send an API key for a higher limit.");
+    }
+    return handler.apply(new McpCall(request.arguments(), !(known instanceof Caller.Anonymous)));
   }
 
   // Tool names are fixed in code, so they are safe labels.
@@ -62,7 +100,7 @@ public final class McpToolSupport {
         .increment();
   }
 
-  public McpSchema.CallToolResult invoke(java.util.function.Supplier<?> action) {
+  public McpSchema.CallToolResult invoke(Supplier<?> action) {
     try {
       Object output = action.get();
       String serialized = json.writeValueAsString(output);

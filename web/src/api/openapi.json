@@ -4,7 +4,7 @@
     "title": "Zeitwide API",
     "version": "1.0.0",
     "summary": "Is this a business day, and what is the next one? Every answer with its evidence.",
-    "description": "Business-day answers for payment rails (Fedwire, FedACH, FedNow, T2, CHAPS) and public\nholiday calendars. The rules are in `dataset/README.md`; this API, the hosted MCP server\nand the open Python library all answer through the same engine and pass the same\nconformance suite.\n\n**Determinism.** Answers come from the latest dataset release. Every response names it\n(`dataset_release`, and the `Zeitwide-Dataset-Release` header) with the revision of each\ncalendar it used, so the same request against the same release always gives the same\nanswer.\n\n**As of.** `as_of` answers with what Zeitwide had recorded at that instant (the\ndefault is now). A release holds everything recorded up to its own `as_of`, so a later\n`as_of` is answered as of the release; the response's `as_of` says which instant was\nused.\n\n**Never a guess.** A calendar covers 1 January of the first year to 31 December of the\nlast year its sources published. A date outside that is `out_of_range`, never an answer\nfrom the weekend rule. Calendars that close on no holiday (FedNow) have no limit.\n\n**Access.** Every route needs an API key (`Authorization: Bearer zw_live_…`, free from\nthe Zeitwide app). Only the public receipt keys are open.\n\n**Limits.** 10,000 calls a day per key. Requests without a valid identity are also\nlimited per address before they are refused.\n\n**Errors** are RFC 9457 problem details with a stable `code`.\n",
+    "description": "Business-day answers for payment rails (Fedwire, FedACH, FedNow, T2, CHAPS) and public\nholiday calendars. The rules are in `dataset/README.md`; this API, the hosted MCP server\nand the open Python library all answer through the same engine and pass the same\nconformance suite.\n\n**Determinism.** Answers come from the latest dataset release. Every response names it\n(`dataset_release`, and the `Zeitwide-Dataset-Release` header) with the revision of each\ncalendar it used, so the same request against the same release always gives the same\nanswer.\n\n**As of.** `as_of` answers with what Zeitwide had recorded at that instant (the\ndefault is now). A release holds everything recorded up to its own `as_of`, so a later\n`as_of` is answered as of the release; the response's `as_of` says which instant was\nused.\n\n**Never a guess.** A calendar covers 1 January of the first year to 31 December of the\nlast year its sources published. A date outside that is `out_of_range`, never an answer\nfrom the weekend rule. Calendars that close on no holiday (FedNow) have no limit.\n\n**Access.** Every REST answer route needs an API key (`Authorization: Bearer zw_live_…`,\nfree from the Zeitwide app). The receipt keys and the discovery documents are open. The\nhosted MCP server (`/mcp`) and the A2A endpoint (`/a2a`) also answer with no credentials:\nthose answers carry the dataset release but no receipt.\n\n**Limits.** 10,000 calls a day per key. Requests without a valid identity are also\nlimited per address before they are refused; anonymous MCP tool calls and A2A messages\nshare 100 a day per IPv4 /24 (IPv6 /48).\n\n**Errors** are RFC 9457 problem details with a stable `code`.\n",
     "license": {
       "name": "API terms of service; dataset under CC BY-NC 4.0",
       "identifier": "CC-BY-NC-4.0"
@@ -28,6 +28,10 @@
     }
   ],
   "tags": [
+    {
+      "name": "discovery",
+      "description": "Documents that let agents find and connect to Zeitwide with no setup."
+    },
     {
       "name": "calendars"
     },
@@ -694,6 +698,104 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v1/server-card": {
+      "get": {
+        "operationId": "getServerCard",
+        "security": [],
+        "tags": [
+          "discovery"
+        ],
+        "summary": "The hosted MCP server's Server Card (SEP-2127)",
+        "description": "Name, version, links, icons and the streamable HTTP endpoint with its supported\nprotocol versions, per modelcontextprotocol/ext-server-card. Also served at\n`/mcp/server-card`, the location the extension reserves. Any origin may fetch it;\nit supports `If-None-Match`.\n",
+        "responses": {
+          "200": {
+            "description": "The server card.",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/mcp-server-card+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoveryDocument"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Unchanged since the ETag sent in If-None-Match."
+          }
+        }
+      }
+    },
+    "/.well-known/agent-card.json": {
+      "get": {
+        "operationId": "getAgentCard",
+        "security": [],
+        "tags": [
+          "discovery"
+        ],
+        "summary": "The A2A 1.0 Agent Card",
+        "description": "One skill, `settlement-date-answers`, served over JSON-RPC at `/a2a`: send one\nmessage (text or JSON) and get one message back with the answer, its sources and the\nfull answer as JSON. No credentials are needed; an API key adds a receipt.\n",
+        "responses": {
+          "200": {
+            "description": "The agent card.",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoveryDocument"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Unchanged since the ETag sent in If-None-Match."
+          }
+        }
+      }
+    },
+    "/.well-known/ai-catalog.json": {
+      "get": {
+        "operationId": "getAiCatalog",
+        "security": [],
+        "tags": [
+          "discovery"
+        ],
+        "summary": "The AI Catalog linking the server card, agent card, OpenAPI and llms.txt",
+        "responses": {
+          "200": {
+            "description": "The catalog (Agent-Card/ai-catalog, spec version 1.0).",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/ai-catalog+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoveryDocument"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Unchanged since the ETag sent in If-None-Match."
           }
         }
       }
@@ -2008,6 +2110,8 @@
         "type": "object",
         "required": [
           "key_id",
+          "kid",
+          "alg",
           "public_key",
           "valid_from",
           "valid_to"
@@ -2015,6 +2119,17 @@
         "properties": {
           "key_id": {
             "type": "string"
+          },
+          "kid": {
+            "type": "string",
+            "description": "The same as key_id, under its JOSE name."
+          },
+          "alg": {
+            "type": "string",
+            "enum": [
+              "Ed25519"
+            ],
+            "description": "RFC 9864's name for the algorithm."
           },
           "public_key": {
             "type": "string",
@@ -2032,6 +2147,11 @@
             "format": "date-time"
           }
         }
+      },
+      "DiscoveryDocument": {
+        "type": "object",
+        "description": "A document whose shape another specification owns (MCP Server Card, A2A Agent Card,\nAI Catalog); CI validates each against that specification's schema.\n",
+        "additionalProperties": true
       },
       "ChangeType": {
         "type": "string",

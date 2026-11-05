@@ -15,10 +15,22 @@ class SiteLinks:
         """The Markdown twin of a page: its path plus ``.md``."""
         return self.page(f"{path}.md")
 
+    def api(self, path: str) -> str:
+        return f"{self.api_url.rstrip('/')}{path}"
+
     @property
     def openapi_url(self) -> str:
-        return f"{self.api_url.rstrip('/')}/openapi.yaml"
+        """The website serves the OpenAPI document as JSON; the API serves no copy."""
+        return self.page("/openapi.json")
 
     @property
     def mcp_url(self) -> str:
-        return f"{self.api_url.rstrip('/')}/mcp"
+        return self.api("/mcp")
+
+    @property
+    def a2a_url(self) -> str:
+        return self.api("/a2a")
+
+    @property
+    def server_card_url(self) -> str:
+        return self.api("/v1/server-card")

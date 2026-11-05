@@ -1,7 +1,7 @@
 ---
 title: Developer quickstart
 description: Stop hard-coding holiday lists. Call the Zeitwide API, connect an agent over MCP, or get webhooks when a date changes.
-updated: 2026-11-02
+updated: 2026-11-05
 ---
 
 # Developer quickstart
@@ -32,7 +32,9 @@ curl -X POST https://api.zeitwide.com/v1/business-days/add \
 
 ## Connect an agent
 
-The hosted MCP server has six tools with the same answers as the API:
+The hosted MCP server has six tools with the same answers as the API. It needs no key:
+anonymous calls get 100 a day per network and answers without a receipt; send your key
+for its limits and signed receipts.
 
 ```json
 { "mcpServers": { "zeitwide": { "url": "https://api.zeitwide.com/mcp" } } }
@@ -43,6 +45,10 @@ Or run it locally, with no network, from the open Python library:
 ```bash
 uvx zeitwide-mcp --offline
 ```
+
+Agents can also find Zeitwide on their own: the AI catalog at
+<https://zeitwide.com/.well-known/ai-catalog.json> links the MCP server card, the A2A agent
+card, the OpenAPI document and llms.txt. See [Zeitwide for agents](/docs/agents).
 
 ## Get told when a date changes
 

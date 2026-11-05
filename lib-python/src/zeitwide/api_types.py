@@ -42,12 +42,28 @@ class ReceiptVerification(TypedDict):
 
 class ReceiptPublicKey(TypedDict):
     key_id: str
+    kid: str
+    """
+    The same as key_id, under its JOSE name.
+    """
+    alg: Literal['Ed25519']
+    """
+    RFC 9864's name for the algorithm.
+    """
     public_key: str
     """
     PEM-encoded Ed25519 SubjectPublicKeyInfo.
     """
     valid_from: str
     valid_to: str | None
+
+
+class DiscoveryDocument(TypedDict):
+    """
+    A document whose shape another specification owns (MCP Server Card, A2A Agent Card,
+    AI Catalog); CI validates each against that specification's schema.
+
+    """
 
 
 type ChangeType = Literal['closure_added', 'closure_removed', 'closure_changed', 'basis_changed']
