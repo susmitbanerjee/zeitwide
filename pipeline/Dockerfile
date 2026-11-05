@@ -29,8 +29,12 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --system --uid 10001 --no-create-home pipeline
 COPY --from=build /app/.venv /app/.venv
+# The user has no home directory; huggingface_hub (and its xet uploader) cache under HF_HOME,
+# which must be writable or a push to the Hub fails with "Permission denied".
 ENV PATH=/app/.venv/bin:$PATH \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    HF_HOME=/tmp/huggingface \
+    HF_HUB_DISABLE_TELEMETRY=1
 USER 10001
 ENTRYPOINT ["zeitwide-pipeline"]
 CMD ["run-due"]
