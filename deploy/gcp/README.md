@@ -185,6 +185,8 @@ the others. Delete local copies afterwards.
 | `otlp-headers` | `Authorization=Basic%20<base64 of instance-id:token>` from Grafana Cloud > OpenTelemetry (the space is URL-encoded, as the OTLP spec requires) |
 | `grafana-token` | Grafana Cloud service account token (Editor) for `deploy/grafana`; read only by the deployer in `.github/workflows/grafana.yml` |
 | `github-release-token` | Fine-grained token for the public dataset repository only, with `contents: write` and `pull_requests: write` (the daily job opens a pull request per release) |
+| `github-data-token` | Fine-grained token for the `zeitwide-data` repository only, with `contents: write` (the daily job commits each release to its default branch and tags it; create the repository with a first commit, since the Git Data API refuses an empty one) |
+| `huggingface-token` | Hugging Face write token for the `zeitwide` organization, scoped to the `zeitwide/payment-rail-calendars` dataset (the job creates it on the first release) |
 
 To rotate a secret, add a new version and deploy a new revision. Every service reads
 `latest` when an instance starts.

@@ -13,6 +13,7 @@ import structlog
 
 from zeitwide_pipeline.backup import DatabaseBackup
 from zeitwide_pipeline.clock import Clock
+from zeitwide_pipeline.distribution import OpenData, Outcome
 from zeitwide_pipeline.github import DatasetRepository
 from zeitwide_pipeline.release import (
     PostgresReleaseStore,
@@ -44,6 +45,7 @@ class DailyJob:
     clock: Clock
     site_files: SiteFileStore | None = None
     site_links: SiteLinks | None = None
+    open_data: OpenData | None = None
 
     def run(self) -> "DailyResult":
         result = DailyResult()
@@ -94,8 +96,16 @@ class DailyJob:
         self._publish_site_files(export)
         if self.dataset_repository is None:
             log.warning("release_pull_request_skipped", release=export.id, reason="not configured")
+        else:
+            result.pull_request = self.dataset_repository.propose_release(export.id, export.content)
+        self._publish_open_data(export, result)
+
+    def _publish_open_data(self, export: ReleaseExport, result: "DailyResult") -> None:
+        """The GitHub data repository and the Hugging Face dataset, when the data changed."""
+        if self.open_data is None:
+            log.warning("open_data_skipped", release=export.id, reason="not configured")
             return
-        result.pull_request = self.dataset_repository.propose_release(export.id, export.content)
+        result.open_data = self.open_data.publish(export.content)
 
     def _publish_site_files(self, export: ReleaseExport) -> None:
         """llms.txt, llms-full.txt, sitemaps and robots.txt for this release."""
@@ -121,6 +131,7 @@ class DailyResult:
     published: list[int] = field(default_factory=list)
     release: str | None = None
     pull_request: str | None = None
+    open_data: dict[str, Outcome] = field(default_factory=dict)
     backups: list[str] = field(default_factory=list)
     failed: list[str] = field(default_factory=list)
 

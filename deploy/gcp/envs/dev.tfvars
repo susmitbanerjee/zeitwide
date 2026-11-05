@@ -21,8 +21,9 @@ api_trusted_proxies = 2
 # The web app's own key (create-web-api-key.sh prints the ID), on the first-party limit.
 first_party_api_key_ids = ["a324246f-affc-4c94-a7d1-5adcb20456e8"]
 
-dataset_repository = "susmitbanerjee/zeit-dataset"
-bot_contact_url    = "https://github.com/susmitbanerjee/zeit-dataset#crawler"
+dataset_repository   = "susmitbanerjee/zeit-dataset"
+open_data_repository = "susmitbanerjee/zeitwide-data"
+bot_contact_url      = "https://github.com/susmitbanerjee/zeit-dataset#crawler"
 
 # The billing account is in INR: about USD 10 a month.
 budget_currency = "INR"

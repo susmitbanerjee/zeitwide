@@ -46,6 +46,8 @@ class DayEntry:
     reason: str
     basis: str
     source_urls: tuple[str, ...]
+    # The entry's version number, as recorded: how often this date has been revised.
+    revision: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -149,6 +151,7 @@ def _calendar(raw: object) -> CalendarView:
                         if isinstance(source, dict)
                     )
                 ),
+                revision=int(entry.get("revision", 0)),
             )
             for entry in current
         ),

@@ -1,3 +1,4 @@
+import json
 import tomllib
 from importlib.metadata import entry_points, requires, version
 from pathlib import Path
@@ -39,3 +40,31 @@ def test_the_public_api_is_what_all_exports() -> None:
     methods = {"is_business_day", "next_business_day", "add_business_days", "list_closures"}
     assert methods | {"explain_date"} <= set(dir(zeitwide.ZeitWide))
     assert callable(zeitwide.webhooks.verify)
+
+
+def _readme() -> str:
+    return (LIB_PYTHON / "README.md").read_text("utf-8")
+
+
+def test_the_readme_leads_with_a_three_line_example_that_answers_a_chaps_date() -> None:
+    # The first thing on the PyPI page is code that runs offline and prints its own answer.
+    block = _readme().split("```python\n", 1)[1].split("```", 1)[0]
+    lines = [line for line in block.splitlines() if line.strip()]
+    assert len(lines) == 3
+    assert "GB-CHAPS" in lines[2]
+    expected = lines[2].rsplit("# ", 1)[1]
+    printed: list[str] = []
+    exec(  # noqa: S102 - the README's own example
+        compile(block, "README.md", "exec"), {"print": lambda value: printed.append(str(value))}
+    )
+    assert printed == [expected]
+    # Then the MCP configuration, before anything else.
+    assert _readme().index('"zeitwide-mcp"') < _readme().index("## Offline")
+
+
+def test_the_readme_links_every_bundled_calendar_to_its_page() -> None:
+    releases = sorted((LIB_PYTHON / "src" / "zeitwide" / "data" / "releases").glob("*.json"))
+    calendars = json.loads(releases[-1].read_text("utf-8"))["calendars"]
+    for calendar in calendars:
+        page = f"https://zeitwide.com/calendars/{calendar['id']}"
+        assert f"]({page})" in _readme(), calendar["id"]

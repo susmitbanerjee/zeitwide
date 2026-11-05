@@ -75,21 +75,23 @@ locals {
 
   # libpq variables, so psycopg and pg_dump both pick them up with no extra config.
   pipeline_env = merge(local.otel_env, {
-    OTEL_SERVICE_NAME           = "zeitwide-pipeline"
-    PGUSER                      = local.db.pipeline_user
-    PGDATABASE                  = local.db.zeitwide_database
-    PGSSLMODE                   = "verify-full"
-    PGSSLROOTCERT               = local.db_ca_file
-    ZEITWIDE_DB_POOL_MAX_SIZE   = tostring(local.db.pipeline_pool_max)
-    ZEITWIDE_BOT_CONTACT_URL    = var.bot_contact_url
-    ZEITWIDE_SNAPSHOT_BUCKET    = google_storage_bucket.snapshots.name
-    ZEITWIDE_BACKUP_BUCKET      = google_storage_bucket.backups.name
-    ZEITWIDE_BACKUP_DB_USER     = local.db.backup_user
-    ZEITWIDE_BACKUP_DATABASES   = local.db.zeitwide_database
-    ZEITWIDE_DATASET_REPOSITORY = var.dataset_repository
-    ZEITWIDE_SITE_FILES_BUCKET  = google_storage_bucket.site_files.name
-    ZEITWIDE_SITE_URL           = var.web_origin
-    ZEITWIDE_API_PUBLIC_URL     = local.api_public_url
+    OTEL_SERVICE_NAME             = "zeitwide-pipeline"
+    PGUSER                        = local.db.pipeline_user
+    PGDATABASE                    = local.db.zeitwide_database
+    PGSSLMODE                     = "verify-full"
+    PGSSLROOTCERT                 = local.db_ca_file
+    ZEITWIDE_DB_POOL_MAX_SIZE     = tostring(local.db.pipeline_pool_max)
+    ZEITWIDE_BOT_CONTACT_URL      = var.bot_contact_url
+    ZEITWIDE_SNAPSHOT_BUCKET      = google_storage_bucket.snapshots.name
+    ZEITWIDE_BACKUP_BUCKET        = google_storage_bucket.backups.name
+    ZEITWIDE_BACKUP_DB_USER       = local.db.backup_user
+    ZEITWIDE_BACKUP_DATABASES     = local.db.zeitwide_database
+    ZEITWIDE_DATASET_REPOSITORY   = var.dataset_repository
+    ZEITWIDE_OPEN_DATA_REPOSITORY = var.open_data_repository
+    ZEITWIDE_HUB_DATASET          = var.hub_dataset
+    ZEITWIDE_SITE_FILES_BUCKET    = google_storage_bucket.site_files.name
+    ZEITWIDE_SITE_URL             = var.web_origin
+    ZEITWIDE_API_PUBLIC_URL       = local.api_public_url
   })
 
   pipeline_secret_env = merge(local.otel_secret_env, {
@@ -98,6 +100,8 @@ locals {
     PGPASSWORD                  = "db-pipeline-password" # gitleaks:allow - a Secret Manager secret name, not a value
     ZEITWIDE_BACKUP_DB_PASSWORD = "db-backup-password"   # gitleaks:allow - a Secret Manager secret name, not a value
     GITHUB_TOKEN                = "github-release-token"
+    GITHUB_DATA_TOKEN           = "github-data-token"
+    HF_TOKEN                    = "huggingface-token"
   })
 }
 

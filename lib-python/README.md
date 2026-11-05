@@ -2,12 +2,44 @@
 
 Is this a business day, and what is the next one? Answers for payment rails (Fedwire,
 FedACH, FedNow, T2, CHAPS) and public holiday calendars, each with the entry that decided
-it and the official sources behind it.
+it and the official sources behind it. Here is a CHAPS date, answered offline:
+
+```python
+from datetime import date
+from zeitwide import ZeitWide
+
+print(ZeitWide().next_business_day("GB-CHAPS", date(2026, 12, 24)).date)  # 2026-12-29
+```
 
 ```bash
 pip install zeitwide            # needs only httpx
 pip install "zeitwide[mcp]"     # adds the local MCP server
 ```
+
+To give an AI agent the same answers, add the local MCP server to its configuration. It
+runs offline from the bundled dataset:
+
+```json
+{ "mcpServers": { "zeitwide": { "command": "uvx", "args": ["zeitwide-mcp", "--offline"] } } }
+```
+
+## Calendars
+
+Each calendar has a page on Zeitwide with its dates and their evidence:
+
+| ID | Calendar |
+| --- | --- |
+| [`US-FEDWIRE`](https://zeitwide.com/calendars/US-FEDWIRE) | Fedwire Funds Service |
+| [`US-FEDACH`](https://zeitwide.com/calendars/US-FEDACH) | FedACH Services |
+| [`US-FEDNOW`](https://zeitwide.com/calendars/US-FEDNOW) | FedNow Service |
+| [`US-FEDERAL`](https://zeitwide.com/calendars/US-FEDERAL) | US federal holidays |
+| [`EU-T2`](https://zeitwide.com/calendars/EU-T2) | T2 (TARGET RTGS) |
+| [`GB-CHAPS`](https://zeitwide.com/calendars/GB-CHAPS) | CHAPS |
+| [`GB-EAW`](https://zeitwide.com/calendars/GB-EAW) | England and Wales bank holidays |
+| [`DE`](https://zeitwide.com/calendars/DE) | Germany: nationwide public holidays |
+
+The same dataset is on GitHub as CSV and JSON (`zeitwide-data`) and on Hugging Face as
+Parquet (`zeitwide/payment-rail-calendars`), both under CC BY-NC 4.0.
 
 ## Offline
 

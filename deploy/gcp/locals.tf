@@ -64,6 +64,10 @@ locals {
     # deploy/grafana. No runtime service gets it.
     "grafana-token"        = []
     "github-release-token" = ["pipeline"]
+    # The daily job pushes each release to the open data: the GitHub data repository and the
+    # Hugging Face dataset (pipeline/src/zeitwide_pipeline/distribution).
+    "github-data-token" = ["pipeline"]
+    "huggingface-token" = ["pipeline"]
   }
 
   secret_access = merge([

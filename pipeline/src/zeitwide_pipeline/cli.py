@@ -18,6 +18,7 @@ import procrastinate
 import psycopg
 import structlog
 import typer
+from huggingface_hub import HfApi
 from psycopg.rows import TupleRow, tuple_row
 
 from zeitwide_pipeline.backup import DatabaseBackup
@@ -26,6 +27,18 @@ from zeitwide_pipeline.check import SourceChecker
 from zeitwide_pipeline.clock import utc_now
 from zeitwide_pipeline.daily import DailyJob
 from zeitwide_pipeline.db import open_store, run_cleanup
+from zeitwide_pipeline.distribution import (
+    GITHUB,
+    HUGGING_FACE,
+    CardError,
+    DataRepository,
+    Destinations,
+    HfHubStore,
+    HubDataset,
+    OpenData,
+    OpenDataError,
+)
+from zeitwide_pipeline.distribution import dry_run as open_data_dry_run
 from zeitwide_pipeline.dryrun import dry_run, save_fixture
 from zeitwide_pipeline.fetch import Fetcher, new_client, user_agent
 from zeitwide_pipeline.github import DatasetRepository
@@ -55,12 +68,18 @@ EXIT_NOT_FOUND = 3
 EXIT_REVIEW_ERROR = 4
 SEED_YEARS = (2026, 2027)
 MAX_LIST_LIMIT = 500
+DEFAULT_GITHUB_DATA_REPOSITORY = "zeitwide/zeitwide-data"
+DEFAULT_HUB_DATASET = "zeitwide/payment-rail-calendars"
 
 log = structlog.get_logger(__name__)
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 review_app = typer.Typer(no_args_is_help=True, help="Review candidate changes.")
 app.add_typer(review_app, name="review")
+open_data_app = typer.Typer(
+    no_args_is_help=True, help="The open dataset on GitHub and Hugging Face, built from a release."
+)
+app.add_typer(open_data_app, name="open-data")
 
 ReviewerOption = Annotated[
     str,
@@ -140,6 +159,7 @@ def daily(
                 clock=utc_now,
                 site_files=_site_file_store(settings),
                 site_links=_site_links(settings),
+                open_data=_open_data(settings, client),
             )
             result = job.run()
     finally:
@@ -149,6 +169,7 @@ def daily(
         published=result.published,
         release=result.release,
         pull_request=result.pull_request,
+        open_data={target: str(outcome) for target, outcome in result.open_data.items()},
         backups=result.backups,
         failed=result.failed,
     )
@@ -208,6 +229,64 @@ def site_files_command(
     files = build_site_files(document, SiteLinks(site_url, api_url))
     DirectorySiteFileStore(out).publish(str(document["release"]), files)
     log.info("site_files_written", out=str(out), files=len(files))
+
+
+@open_data_app.command("dry-run")
+def open_data_dry_run_command(  # noqa: PLR0913, PLR0917
+    release: Annotated[Path, typer.Option(help="A release JSON file, as the daily job exports.")],
+    out: Annotated[Path, typer.Option(help="Folder to write into: github/ and huggingface/.")],
+    site_url: Annotated[str, typer.Option(envvar="ZEITWIDE_SITE_URL", help="The site's origin.")],
+    api_url: Annotated[
+        str, typer.Option(envvar="ZEITWIDE_API_PUBLIC_URL", help="The API's origin.")
+    ],
+    github_repository: Annotated[
+        str, typer.Option(help="owner/name of the GitHub data repository.")
+    ] = DEFAULT_GITHUB_DATA_REPOSITORY,
+    hub_dataset: Annotated[
+        str, typer.Option(help="owner/name of the Hugging Face dataset.")
+    ] = DEFAULT_HUB_DATASET,
+    expect_sha256: Annotated[
+        str | None, typer.Option(help="The checksum recorded for the release; must match.")
+    ] = None,
+    validate_online: Annotated[
+        bool, typer.Option(help="Also run the Hub's own validator on the dataset card.")
+    ] = False,
+) -> None:
+    """Build every artefact into a folder and check the files, the checksums and the card."""
+    try:
+        bundles = open_data_dry_run(
+            release.read_bytes(),
+            out,
+            SiteLinks(site_url.rstrip("/"), api_url.rstrip("/")),
+            Destinations(github_repository, hub_dataset),
+            expect_sha256=expect_sha256,
+            validate_online=validate_online,
+        )
+    except (OpenDataError, CardError) as error:
+        typer.echo(f"FAIL {error}")
+        raise typer.Exit(EXIT_FAILED) from error
+    for bundle in bundles:
+        typer.echo(f"ok: {bundle.target}: {len(bundle.files)} files in {out / bundle.target}")
+
+
+@open_data_app.command("publish")
+def open_data_publish_command(
+    release: Annotated[Path, typer.Option(help="A release JSON file, as the daily job exports.")],
+) -> None:
+    """Push a release's artefacts, as the daily job does; skipped where the data is unchanged."""
+    settings = _settings()
+    with httpx.Client() as client:
+        open_data = _open_data(settings, client)
+        if open_data is None:
+            typer.echo("FAIL the open data is not configured (site URLs and a token)")
+            raise typer.Exit(EXIT_FAILED)
+        try:
+            outcomes = open_data.publish(release.read_bytes())
+        except OpenDataError as error:
+            typer.echo(f"FAIL {error}")
+            raise typer.Exit(EXIT_FAILED) from error
+    for target, outcome in outcomes.items():
+        typer.echo(f"{target}: {outcome}")
 
 
 @app.command("validate-site")
@@ -330,6 +409,22 @@ def _site_links(settings: Settings) -> SiteLinks | None:
     if settings.site_url is None or settings.api_public_url is None:
         return None
     return SiteLinks(str(settings.site_url).rstrip("/"), str(settings.api_public_url).rstrip("/"))
+
+
+def _open_data(settings: Settings, client: httpx.Client) -> OpenData | None:
+    links = _site_links(settings)
+    repository = settings.open_data_repository
+    if links is None or (repository is None and settings.hub_token is None):
+        return None
+    targets: dict[str, DataRepository | HubDataset] = {}
+    if repository is not None and settings.open_data_github_token is not None:
+        token = settings.open_data_github_token.get_secret_value()
+        targets[GITHUB] = DataRepository(client, repository, token)
+    if settings.hub_token is not None:
+        api = HfApi(token=settings.hub_token.get_secret_value())
+        targets[HUGGING_FACE] = HubDataset(HfHubStore(api, settings.hub_dataset))
+    destinations = Destinations(repository or DEFAULT_GITHUB_DATA_REPOSITORY, settings.hub_dataset)
+    return OpenData(links, destinations, targets)
 
 
 def _object_store(settings: Settings, bucket: str) -> GcsSnapshotStore:

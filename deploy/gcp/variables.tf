@@ -167,6 +167,22 @@ variable "dataset_repository" {
   }
 }
 
+variable "open_data_repository" {
+  description = "Public GitHub repository, as owner/name (zeitwide-data), that each dataset release is committed to and tagged in."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$", var.open_data_repository))
+    error_message = "open_data_repository must be owner/name."
+  }
+}
+
+variable "hub_dataset" {
+  description = "Hugging Face dataset, as owner/name, that receives each release as Parquet."
+  type        = string
+  default     = "zeitwide/payment-rail-calendars"
+}
+
 variable "bot_contact_url" {
   description = "Page that explains Zeitwide's crawler and how to reach us; sent in the pipeline's User-Agent."
   type        = string

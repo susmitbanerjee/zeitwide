@@ -47,6 +47,14 @@ class Settings(FetchSettings):
     dataset_repository: str | None = None
     github_token: SecretStr | None = Field(default=None, validation_alias="GITHUB_TOKEN")
     # Site files (llms.txt, sitemaps, robots.txt) for each release; skipped when unset.
+    # The open data: a GitHub repository (owner/name) pushed to on its default branch, and a
+    # Hugging Face dataset. Each is skipped, with a warning, without its token.
+    open_data_repository: str | None = None
+    open_data_github_token: SecretStr | None = Field(
+        default=None, validation_alias="GITHUB_DATA_TOKEN"
+    )
+    hub_dataset: str = "zeitwide/payment-rail-calendars"
+    hub_token: SecretStr | None = Field(default=None, validation_alias="HF_TOKEN")
     site_files_bucket: str | None = None
     site_url: HttpUrl | None = None
     api_public_url: HttpUrl | None = None

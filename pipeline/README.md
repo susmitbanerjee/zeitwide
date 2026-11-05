@@ -67,6 +67,42 @@ rendered with sorted keys, so the same `as_of` always gives the same bytes.
 The end-to-end test runs every release through the conformance suite with the open
 library.
 
+### The open dataset
+
+`daily` also publishes the release where models, agents and developers already look. All of
+it is generated from the release export (`src/zeitwide_pipeline/distribution/`); nothing is
+edited by hand.
+
+- **GitHub `zeitwide-data`** (`ZEITWIDE_OPEN_DATA_REPOSITORY`, `GITHUB_DATA_TOKEN`): one commit
+  per release on the default branch, tagged with the release ID. It holds `data/<ID>.csv` and
+  `data/<ID>.json` per calendar (`date`, `weekday`, `open`, `reason`, `basis`, `sources`,
+  `revision`), `calendars.csv`, a README that opens with a one-paragraph summary and a table
+  of calendars with closure counts, `CITATION.cff`, `LICENSE` (CC BY-NC 4.0) and
+  `CHANGELOG.md` (the change events, derived from the release's entry history).
+- **Hugging Face `zeitwide/payment-rail-calendars`** (`ZEITWIDE_HUB_DATASET`, `HF_TOKEN`): the
+  same tables as Parquet, one configuration per calendar, with a dataset card (YAML metadata,
+  summary, sourcing, known limits, how to cite). The card is validated with
+  `huggingface_hub` before every push.
+- **PyPI** `zeitwide` ships its own README and bundled release; tag `lib-python-v<version>`
+  (`.github/workflows/publish-lib-python.yml`).
+
+Every file links each calendar to its canonical page on the site. Each bundle carries
+`MANIFEST.json` and `SHA256SUMS`; the manifest holds the release export's SHA-256, so every
+file traces to the release the database recorded. It also holds a `data_digest` over the CSV
+tables, which say nothing about the release itself. A target whose repository already holds
+that digest is skipped (`unchanged`), a release that is already tagged is left alone, and a
+commit that landed without its tag only gets the tag, so the daily retry is safe.
+
+```bash
+# Build everything into ./out/github and ./out/huggingface, re-read it, check the checksums
+# and the dataset card. Needs no database, token or network.
+uv run zeitwide-pipeline open-data dry-run --release ../dataset/releases/2026.10.29.1.json   --out out --site-url https://zeitwide.com --api-url https://api.zeitwide.com   --expect-sha256 <checksum recorded for the release>
+# Add --validate-online to also ask the Hub's own validator about the card.
+
+# Push a release by hand (what daily does); needs the tokens and ZEITWIDE_SITE_URL.
+uv run zeitwide-pipeline open-data publish --release ../dataset/releases/2026.10.29.1.json
+```
+
 ## Seed
 
 `seed` fetches every source once, stores the snapshots and observations, and publishes
@@ -132,6 +168,7 @@ the registry finds the module.
 | `ZEITWIDE_GCS_ENDPOINT` | fake-gcs-server URL locally; unset on GCP |
 | `ZEITWIDE_BACKUP_BUCKET`, `ZEITWIDE_BACKUP_DB_USER`, `ZEITWIDE_BACKUP_DB_PASSWORD`, `ZEITWIDE_BACKUP_DATABASES` | `daily`'s `pg_dump` (skipped with a warning when unset) |
 | `ZEITWIDE_DATASET_REPOSITORY`, `GITHUB_TOKEN` | `daily`'s release pull request (skipped with a warning when unset) |
+| `ZEITWIDE_OPEN_DATA_REPOSITORY`, `GITHUB_DATA_TOKEN`, `ZEITWIDE_HUB_DATASET`, `HF_TOKEN`, `ZEITWIDE_SITE_URL`, `ZEITWIDE_API_PUBLIC_URL` | `daily`'s open data: the GitHub data repository and the Hugging Face dataset (each skipped with a warning without its token; the site URLs are needed for the links) |
 | `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS`, `OTEL_SERVICE_NAME` | OTLP export; nothing is exported when unset |
 
 Locally, against `docker compose up` (start the API once first so Flyway creates the

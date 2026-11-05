@@ -8,13 +8,16 @@ license = "LicenseRef-Proprietary"
 dependencies = [
     "google-cloud-storage>=3.17.1",
     "httpx>=0.28.1",
+    "huggingface-hub>=1.0",
     "opentelemetry-api>=1.45.1",
     "opentelemetry-exporter-otlp-proto-http>=1.45.1",
     "opentelemetry-sdk>=1.45.1",
     "pdfplumber>=0.11.10",
     "procrastinate==3.10.0",
     "psycopg[binary]>=3.3.6",
+    "pyarrow>=24",
     "pydantic-settings>=2.16.1",
+    "pyyaml>=6",
     "structlog>=26.1.0",
     "tenacity>=9.2.1",
     "typer>=0.27.3",
@@ -45,6 +48,7 @@ dev = [
   "zeitwide",
   "testcontainers[postgres]>=4.15.0",
   "types-jsonschema>=4.26.0.20261006",
+  "types-pyyaml>=6.0.12.20261103",
 ]
 
 [tool.ruff]
@@ -73,6 +77,11 @@ mypy_path = ["src", "tests"]
 files = ["src", "tests"]
 warn_unreachable = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
+
+# pyarrow ships without type information.
+[[tool.mypy.overrides]]
+module = ["pyarrow", "pyarrow.*"]
+ignore_missing_imports = true
 
 # google-cloud-storage ships without type information.
 [[tool.mypy.overrides]]

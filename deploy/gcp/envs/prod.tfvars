@@ -5,6 +5,7 @@ github_repository    = "OWNER/zeitwide"
 github_repository_id = "0"
 web_origin           = "https://zeitwide.web.app"
 dataset_repository   = "OWNER/zeitwide-dataset"
+open_data_repository = "susmitbanerjee/zeitwide-data"
 bot_contact_url      = "https://github.com/OWNER/zeitwide#crawler"
 
 github_deploy_refs = ["refs/heads/main"]
